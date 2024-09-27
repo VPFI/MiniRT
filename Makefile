@@ -6,17 +6,15 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/09/27 13:55:11 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/09/27 14:57:25 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-END=\033[0m
-
-NAME = rt
+NAME = miniRT
 
 CFILES = main.c
 
-HEADERS = includes/minirt.h
+HEADERS = includes/miniRT.h
 
 OFILES = $(CFILES:%.c=%.o)
 
@@ -34,9 +32,9 @@ DIR_PTF = printf/
 
 PATH_PTF = printf/libftprintf.a
 
-DIR_MLX = minilibx_linux/
+DIR_MLX	 = ./mlx/MLX42/build
 
-PATH_MLX = minilibx_linux/libmlx.a
+PATH_MLX = $(DIR_MLX)/libmlx42.a
 
 CFLAGS = -Wall -Wextra -Werror -O3 #-fsanitize=address -fsanitize=leak
 
@@ -48,28 +46,31 @@ ARLIB = ar rc
 
 RM = rm -f
 
-all: extra_make $(NAME)
+all: $(NAME)
 
-extra_make:
-	@printf "LIBFT: COMPILING...\n$(END)"
-	@$(MAKE) -C libft/ --no-print-directory
-	@printf "PRINTF: COMPILING...\n$(END)"
-	@$(MAKE) -C printf/ --no-print-directory
-	@printf "MINILIBX: COMPILING...\n$(END)"
-	@$(MAKE) -C minilibx_linux/ --no-print-directory
-
-$(NAME): $(OBJ) $(PATH_LFT) $(PATH_MLX)
+$(NAME): extra_make $(OBJ) $(PATH_LFT) $(PATH_MLX)
 	@$(CC) $(CFLAGS) $(OBJ) $(PATH_LFT) $(PATH_PTF) $(PATH_MLX) $(MLXFLAGS) -o $(NAME)
-	@printf "\n$(NAME) COMPILED!\n$(END)"
+	@printf "\n$(NAME) COMPILED!\n"
 
-$(OBJ_DIR)%.o: src/%.c $(DIR_LFT) $(DIR_PTF) $(DIR_MLX) fdf.h Makefile
+extra_make: create_mlx
+	@printf "LIBFT: COMPILING...\n"
+	@$(MAKE) -C $(DIR_LIBFT) --no-print-directory
+	@printf "PRINTF: COMPILING...\n"
+	@$(MAKE) -C $(DIR_PTF) --no-print-directory
+	@printf "MINILIBX: COMPILING...\n"
+	@$(MAKE) -C $(DIR_MLX) --no-print-directory
+
+$(OBJ_DIR)%.o: src/%.c $(DIR_LFT) $(DIR_PTF) $(DIR_MLX) $(HEADERS) Makefile
 	@mkdir -p $(OBJ_PATH)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+create_mlx: 
+	@echo "Creating MLX"
+	@cd mlx/MLX42 && cmake -B build && cmake --build build --parallel --config Release
 
 clean:
 	@$(MAKE) -C libft/ clean --no-print-directory
 	@$(MAKE) -C printf/ clean --no-print-directory
-	@$(MAKE) -C minilibx_linux/ clean --no-print-directory
 	@$(RM) $(OBJ)
 
 fclean:	clean
@@ -77,6 +78,7 @@ fclean:	clean
 	@$(MAKE) -C printf/ fclean --no-print-directory
 	@$(RM) $(NAME)
 	@rm -rf $(OBJ_PATH)
+	@rm -rf mlx/MLX42/build
 
 re:	fclean all
 

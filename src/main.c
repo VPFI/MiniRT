@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/09/27 13:50:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/09/27 15:29:38 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,8 @@
 
 int main(int argc, char **argv)
 {
-
+    (void)argc;
+    (void)argv;
+    printf("holaaaaa\n");
+    return (0);
 }
