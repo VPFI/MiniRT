@@ -1,0 +1,8 @@
+prueba.c
+*.swp
+*/*.swp
+*.o
+*/*.o
+*.a
+*/*.a
+rt
