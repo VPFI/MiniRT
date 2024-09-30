@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/09/30 20:12:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/09/30 21:36:41 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,15 @@
 # include <stdlib.h>
 # include <signal.h>
 # include <unistd.h>
+# include <dirent.h>
 # include <math.h>
 # include <limits.h>
 # include "../libft/libft.h"
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
+
+# define WINW 1500
+# define WINH 1000
 
 # define ESC_KEY 9 //0xff1b
 # define PLUS_KEY 0x45
@@ -90,6 +94,7 @@ typedef struct s_scene
 	mlx_image_t		*image;
 	uint32_t		height;
 	uint32_t		width;
+	int				choose_file;
 }			t_scene;
 
 typedef struct s_camera
@@ -115,6 +120,27 @@ typedef struct s_object
 	struct s_object	*next;
 }					t_object;
 
+typedef struct s_coords{
+	float   x;
+	float   y;
+	float   z;
+	int 	color;
+}       	t_coords;
+
+typedef struct s_bresenham{
+	t_coords	i_pt;
+	t_coords	f_pt;
+	int			d;
+	int			d2;
+	int			dx;
+	int			dy;
+	int			i_one;
+	int			i_two;
+	int			n;
+	int			max;
+	int			color;
+	float		fade_comp[4];
+}           	t_bresenham;
 
 int get_rgba(int r, int g, int b, int a);
 
@@ -122,5 +148,10 @@ int get_r(int rgba);
 int get_g(int rgba);
 int get_b(int rgba);
 int get_a(int rgba);
+
+void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color);
+void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
+void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
+void	write_str(t_scene *scene, char *msg, int *xy, int size);
 
 #endif

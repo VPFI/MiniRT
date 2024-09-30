@@ -6,13 +6,13 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/09/30 18:14:36 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/09/30 21:37:04 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = miniRT
 
-CFILES = main.c mlx_utils.c
+CFILES = main.c mlx_utils.c bresenham_font.c font.c
 
 HEADERS = includes/miniRT.h
 
