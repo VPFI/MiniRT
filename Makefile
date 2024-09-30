@@ -6,13 +6,13 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/09/27 14:57:25 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/09/30 18:14:36 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = miniRT
 
-CFILES = main.c
+CFILES = main.c mlx_utils.c
 
 HEADERS = includes/miniRT.h
 
@@ -36,9 +36,9 @@ DIR_MLX	 = ./mlx/MLX42/build
 
 PATH_MLX = $(DIR_MLX)/libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -O3 #-fsanitize=address -fsanitize=leak
+CFLAGS = -Wall -Wextra -Werror -O2 -fsanitize=address -fsanitize=leak
 
-MLXFLAGS = -L -lmlx -lXext -lX11 -lm
+MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
 
 CC = cc
 
