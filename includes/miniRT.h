@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/01 17:52:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/01 20:26:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 1500
-# define WINH 1000
+# define WINW 2000
+# define WINH 1500
 
 # define DEF_COLOR 0xFF6720FF
+# define CYAN_GULF 0xC9DFECC8
 
 # define ESC_KEY 9 //0xff1b
 # define PLUS_KEY 0x45
@@ -90,13 +91,29 @@ typedef struct s_vect
 	float	z;
 }			t_vect;
 
+typedef struct s_coords{
+	float   x;
+	float   y;
+	float   z;
+	int 	color;
+}       	t_coords;
+
+typedef struct s_button{
+	t_coords	i_pt;
+	t_coords	f_pt;
+	char	*text;
+	int 	color;
+}       	t_button;
+
 typedef struct s_scene
 {
 	mlx_t			*mlx;
 	mlx_image_t		*image;
 	uint32_t		height;
 	uint32_t		width;
+	t_button		buttons[20];
 	int				choose_file;
+	int				current_file;
 }			t_scene;
 
 typedef struct s_camera
@@ -121,20 +138,6 @@ typedef struct s_object
 	union s_figure 	object;
 	struct s_object	*next;
 }					t_object;
-
-typedef struct s_coords{
-	float   x;
-	float   y;
-	float   z;
-	int 	color;
-}       	t_coords;
-
-typedef struct s_button{
-	t_coords	i_pt;
-	t_coords	f_pt;
-	char	*text;
-	int 	color;
-}       	t_button;
 
 typedef struct s_bresenham{
 	t_coords	i_pt;
@@ -162,5 +165,10 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color);
 void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
 void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
 void	write_str(t_scene *scene, char *msg, int *xy, int size);
+
+void	draw_file_menu(t_scene *scene);
+void	draw_buttons(t_button *buttons, t_scene *scene);
+
+void	set_new_image(t_scene *scene);
 
 #endif
