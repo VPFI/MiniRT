@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/09/30 21:36:41 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/01 17:52:58 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 
 # define WINW 1500
 # define WINH 1000
+
+# define DEF_COLOR 0xFF6720FF
 
 # define ESC_KEY 9 //0xff1b
 # define PLUS_KEY 0x45
@@ -106,7 +108,7 @@ typedef struct s_sphere
 {
 	t_vect		center;
 	double		radius;
-	void		*hit_func;
+	int		(*hit_func)(double vec, void *sp);
 }				t_sphere;
 
 typedef union s_figure
@@ -126,6 +128,13 @@ typedef struct s_coords{
 	float   z;
 	int 	color;
 }       	t_coords;
+
+typedef struct s_button{
+	t_coords	i_pt;
+	t_coords	f_pt;
+	char	*text;
+	int 	color;
+}       	t_button;
 
 typedef struct s_bresenham{
 	t_coords	i_pt;
