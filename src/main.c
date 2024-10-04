@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 19:28:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/04 20:22:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,10 @@ void	main_loop(void *sc)
 			pixel_center = set_pixel_center(scene->camera, x,y);
 			ray.dir = vect_subtract(pixel_center, scene->camera.origin);
 			ray.origin = scene->camera.origin;
-			safe_pixel_put(scene, x, y, get_rgba(0, 0, 250, (int)round((y / (float)scene->height) * 255)));
+			if (hit_sphere(ray, scene->sphere_test))
+				safe_pixel_put(scene, x, y, get_rgba(200, 50, 50, 200));
+			else
+				safe_pixel_put(scene, x, y, get_rgba(0, 0, 250, (int)round((y / (float)scene->height) * 255)));
 			x++;
 		}
 		y++;
@@ -313,6 +316,25 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 		scene->choose_file = 1;
 }
 
+bool	hit_sphere(t_ray ray, t_sphere sp)
+{
+	t_vect	oc;
+	float	a;
+	float 	b;
+	float 	c;
+	float 	discr;
+
+	oc = vect_subtract(sp.center, ray.origin);
+	a = vect_dot(ray.dir, ray.dir);
+	b = -2.0 * vect_dot(ray.dir, oc);
+	c = vect_dot(oc, oc) - (sp.radius * sp.radius);
+	discr = (b * b) - 4 * a * c;
+	if (discr >= 0)
+		return (1);
+	else
+		return (0);
+}
+
 void	init_camera(t_scene *scene)
 {
 	t_vect temp;
@@ -320,11 +342,11 @@ void	init_camera(t_scene *scene)
 	scene->camera.origin = new_vect(0, 0, 0);
 	scene->camera.view_distance = 1;
 	scene->camera.viewport_height = 2;
-	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / scene->height);
+	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
 	scene->camera.vp_edge_horizntl = new_vect(scene->camera.viewport_width, 0, 0);
 	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
 	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);
-	scene->camera.pixel_delta_v = vect_simple_div(scene->camera.vp_edge_vert, scene->width);
+	scene->camera.pixel_delta_v = vect_simple_div(scene->camera.vp_edge_vert, scene->height);
 	scene->camera.viewport_origin.x = 0 - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
 	scene->camera.viewport_origin.y = 0 - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
 	scene->camera.viewport_origin.z = 0 - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2) - scene->camera.view_distance;
@@ -334,15 +356,23 @@ void	init_camera(t_scene *scene)
 	scene->camera.viewport_pixel0.z = scene->camera.viewport_origin.z + (0.5 * temp.z);
 }
 
+void	init_objects(t_scene *scene)
+{
+	scene->sphere_test.center = new_vect(0, 0, -1);
+	scene->sphere_test.radius = 0.5;
+}
+
 void	init_scene(t_scene *scene)
 {
 	scene->width = WINW;
 	scene->height = WINH;
-	scene->aspect_ratio = scene->width / scene->height;
+	scene->aspect_ratio = scene->width / (float)scene->height;
+	printf("adasdqweqweqe%f\n", scene->aspect_ratio);
 	scene->choose_file = 1;
 	scene->current_file = 0;
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
+	init_objects(scene);
 	init_camera(scene);
 }
 

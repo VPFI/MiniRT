@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 18:39:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/04 19:57:12 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,5 +89,25 @@ t_vect	vect_subtract(t_vect vec, t_vect vec2)
 	res.x = vec.x + vec2.x;
 	res.y = vec.y + vec2.y;
 	res.z = vec.z + vec2.z;
+	return (res);
+}
+
+float	vect_dot(t_vect vec, t_vect vec2)
+{
+	t_vect res;
+
+	res.x = vec.x * vec2.x;
+	res.y = vec.y * vec2.y;
+	res.z = vec.z * vec2.z;
+	return ((vec.x * vec2.x) + (vec.y * vec2.y) + (vec.z * vec2.z));
+}
+
+t_vect	vect_cross(t_vect vec, t_vect vec2)
+{
+	t_vect res;
+
+	res.x = (vec.y * vec2.z) - (vec.z * vec2.y);
+	res.y = (vec.z * vec2.x) - (vec.x * vec2.z);
+	res.z = (vec.x * vec2.y) - (vec.y * vec2.x);
 	return (res);
 }

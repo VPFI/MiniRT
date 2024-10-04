@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 19:08:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/04 20:18:07 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,23 +125,10 @@ typedef struct s_camera
 	t_vect		viewport_pixel0;
 }				t_camera;
 
-typedef struct s_scene
-{
-	mlx_t			*mlx;
-	mlx_image_t		*image;
-	t_camera		camera;
-	uint32_t		height;
-	uint32_t		width;
-	float			aspect_ratio;
-	t_button		buttons[20];
-	int				choose_file;
-	int				current_file;
-}					t_scene;
-
 typedef struct s_sphere
 {
 	t_vect		center;
-	double		radius;
+	float		radius;
 }				t_sphere;
 
 typedef union s_figure
@@ -155,6 +142,21 @@ typedef struct s_object
 	struct s_object	*next;
 	int				(*hit_func)(t_ray ray, void *sp);
 }					t_object;
+
+typedef struct s_scene
+{
+	mlx_t			*mlx;
+	mlx_image_t		*image;
+	t_camera		camera;
+	t_sphere		sphere_test;
+	t_object		objects;
+	uint32_t		height;
+	uint32_t		width;
+	float			aspect_ratio;
+	t_button		buttons[20];
+	int				choose_file;
+	int				current_file;
+}					t_scene;
 
 typedef struct s_bresenham{
 	t_coords	i_pt;
@@ -188,6 +190,8 @@ void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
 
+bool	hit_sphere(t_ray ray, t_sphere sp);
+
 t_vect		new_vect(float v1, float v2, float v3);
 t_coords	new_coords(float v1, float v2, float v3);
 t_vect		vect_simple_mult(t_vect vec, float num);
@@ -196,5 +200,7 @@ t_vect		vect_simple_subtract(t_vect vec, float num);
 t_vect		vect_simple_add(t_vect vec, float num);
 t_vect		vect_add(t_vect vec, t_vect vec2);
 t_vect		vect_subtract(t_vect vec, t_vect vec2);
+t_vect		vect_cross(t_vect vec, t_vect vec2);
+float		vect_dot(t_vect vec, t_vect vec2);
 
 #endif
