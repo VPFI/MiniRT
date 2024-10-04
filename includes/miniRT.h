@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/01 20:26:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/04 19:08:56 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 2000
-# define WINH 1500
+# define WINW 1600
+# define WINH 900
 
 # define DEF_COLOR 0xFF6720FF
 # define CYAN_GULF 0xC9DFECC8
@@ -98,34 +98,50 @@ typedef struct s_coords{
 	int 	color;
 }       	t_coords;
 
+typedef struct s_ray
+{
+	t_vect		origin;
+	t_vect		dir;
+}				t_ray;
+
 typedef struct s_button{
 	t_coords	i_pt;
 	t_coords	f_pt;
-	char	*text;
-	int 	color;
-}       	t_button;
+	char		*text;
+	int 		color;
+}       		t_button;
+
+typedef struct s_camera
+{
+	t_vect		origin;
+	float		viewport_width;
+	float		viewport_height;
+	float		view_distance;
+	t_vect		vp_edge_vert;
+	t_vect		vp_edge_horizntl;
+	t_vect		pixel_delta_v;
+	t_vect		pixel_delta_h;
+	t_vect		viewport_origin;
+	t_vect		viewport_pixel0;
+}				t_camera;
 
 typedef struct s_scene
 {
 	mlx_t			*mlx;
 	mlx_image_t		*image;
+	t_camera		camera;
 	uint32_t		height;
 	uint32_t		width;
+	float			aspect_ratio;
 	t_button		buttons[20];
 	int				choose_file;
 	int				current_file;
-}			t_scene;
-
-typedef struct s_camera
-{
-	
-}			t_camera;
+}					t_scene;
 
 typedef struct s_sphere
 {
 	t_vect		center;
 	double		radius;
-	int		(*hit_func)(double vec, void *sp);
 }				t_sphere;
 
 typedef union s_figure
@@ -137,6 +153,7 @@ typedef struct s_object
 {
 	union s_figure 	object;
 	struct s_object	*next;
+	int				(*hit_func)(t_ray ray, void *sp);
 }					t_object;
 
 typedef struct s_bresenham{
@@ -170,5 +187,14 @@ void	draw_file_menu(t_scene *scene);
 void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
+
+t_vect		new_vect(float v1, float v2, float v3);
+t_coords	new_coords(float v1, float v2, float v3);
+t_vect		vect_simple_mult(t_vect vec, float num);
+t_vect		vect_simple_div(t_vect vec, float num);
+t_vect		vect_simple_subtract(t_vect vec, float num);
+t_vect		vect_simple_add(t_vect vec, float num);
+t_vect		vect_add(t_vect vec, t_vect vec2);
+t_vect		vect_subtract(t_vect vec, t_vect vec2);
 
 #endif

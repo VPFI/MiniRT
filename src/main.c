@@ -6,11 +6,18 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/01 20:39:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/04 19:28:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
+
+void	print_vec(t_vect vect)
+{
+	printf("VECT X: %f\n", vect.x);
+	printf("VECT Y: %f\n", vect.y);
+	printf("VECT Z: %f\n", vect.z);
+}
 
 void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color)
 {
@@ -87,33 +94,50 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 	else if (!scene->choose_file && key_data.key == MLX_KEY_ENTER)
 	{
 		scene->choose_file = 1;
+		set_new_image(scene);
+		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
 	}
 		
 }
 
+t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
+{
+	t_vect	res;
+	t_vect	temp1;
+	t_vect	temp2;
+
+	temp1 = vect_simple_mult(camera.pixel_delta_h, x);
+	temp2 = vect_simple_mult(camera.pixel_delta_v, y);
+	res = vect_add(temp1, temp2);
+	res = vect_add(res, camera.viewport_pixel0);
+	return (res);
+}
+
 void	main_loop(void *sc)
 {
-	static int	adv = 0;
-	uint32_t	x;
-	uint32_t	y;
+	t_vect		pixel_center;
+	t_ray		ray;
 	t_scene		*scene;
 	char		*fps;
-	int			color;
+	uint32_t	x;
+	uint32_t	y;
 
+	x = 0;
+	y = 0;
 	scene = sc;
 	if (!scene->choose_file)
 		return ;
-	x = 0;
-	y = 0;
-	color = get_rgba(0, (adv) % 255 ,0 ,255);
 	set_new_image(scene);
-	while (y < scene->height / 2)
+	while (y < scene->height)
 	{
 		x = 0;
-		while (x < scene->width / 2)
+		while (x < scene->width)
 		{
-			safe_pixel_put(scene, x, y, color);
+			pixel_center = set_pixel_center(scene->camera, x,y);
+			ray.dir = vect_subtract(pixel_center, scene->camera.origin);
+			ray.origin = scene->camera.origin;
+			safe_pixel_put(scene, x, y, get_rgba(0, 0, 250, (int)round((y / (float)scene->height) * 255)));
 			x++;
 		}
 		y++;
@@ -121,8 +145,7 @@ void	main_loop(void *sc)
 	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
 	mlx_set_window_title(scene->mlx, fps);
 	free(fps);
-	mlx_image_to_window(scene->mlx, scene->image, adv % scene->width, 0);
-	adv++;
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 }
 
 void	resize_minirt(int32_t width, int32_t height, void *sc)
@@ -154,14 +177,14 @@ void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 		while (x < f_pt.x)
 		{
 			safe_pixel_put(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y)), DEF_COLOR);
+			safe_pixel_put(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y - 3)), DEF_COLOR);
 			x++;
 		}
 		y++;
 	}
 	x = i_pt.x - 3;
 	y = i_pt.y;
-	while (y <= f_pt.y)
+	while (y < f_pt.y)
 	{
 		x = i_pt.x - 3;
 		while (x < i_pt.x)
@@ -242,11 +265,11 @@ void	free_buttons(t_button *buttons)
 
 void	draw_file_menu(t_scene *scene)
 {
-	int	xy[2];
-	int	i;
-	size_t	aux;
-	DIR *d;
-	struct dirent *dir;
+	int				xy[2];
+	int				i;
+	size_t			aux;
+	DIR 			*d;
+	struct dirent	*dir;
 
 	i = 0;
 	aux = 0;
@@ -286,8 +309,41 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 
 	scene = sc;
 	(void)mods;
-	if (button == MLX_MOUSE_BUTTON_LEFT && action == MLX_PRESS)
+	if (button == MLX_MOUSE_BUTTON_RIGHT && action == MLX_PRESS)
 		scene->choose_file = 1;
+}
+
+void	init_camera(t_scene *scene)
+{
+	t_vect temp;
+
+	scene->camera.origin = new_vect(0, 0, 0);
+	scene->camera.view_distance = 1;
+	scene->camera.viewport_height = 2;
+	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / scene->height);
+	scene->camera.vp_edge_horizntl = new_vect(scene->camera.viewport_width, 0, 0);
+	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
+	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);
+	scene->camera.pixel_delta_v = vect_simple_div(scene->camera.vp_edge_vert, scene->width);
+	scene->camera.viewport_origin.x = 0 - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
+	scene->camera.viewport_origin.y = 0 - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
+	scene->camera.viewport_origin.z = 0 - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2) - scene->camera.view_distance;
+	temp = vect_add(scene->camera.pixel_delta_h, scene->camera.pixel_delta_v);
+	scene->camera.viewport_pixel0.x = scene->camera.viewport_origin.x + (0.5 * temp.x);
+	scene->camera.viewport_pixel0.y = scene->camera.viewport_origin.y + (0.5 * temp.y);
+	scene->camera.viewport_pixel0.z = scene->camera.viewport_origin.z + (0.5 * temp.z);
+}
+
+void	init_scene(t_scene *scene)
+{
+	scene->width = WINW;
+	scene->height = WINH;
+	scene->aspect_ratio = scene->width / scene->height;
+	scene->choose_file = 1;
+	scene->current_file = 0;
+	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
+	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
+	init_camera(scene);
 }
 
 int	main(int argc, char **argv)
@@ -295,24 +351,17 @@ int	main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 	t_scene	scene;
-	uint32_t x = 0;
-	uint32_t y = 0;
 
-	x = y;
-	scene.width = WINW;
-	scene.height = WINH;
-	scene.choose_file = 0;
-	scene.current_file = 0;
-	scene.mlx = mlx_init(scene.width, scene.height, "miniRT", true);
-	scene.image = mlx_new_image(scene.mlx, scene.width, scene.height);
-	draw_file_menu(&scene);
+	init_scene(&scene);
+	//draw_file_menu(&scene);
+	main_loop(&scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
 	mlx_resize_hook(scene.mlx, resize_minirt, &scene);
-	mlx_loop_hook(scene.mlx, main_loop, &scene);
+	//mlx_loop_hook(scene.mlx, main_loop, &scene);
 	mlx_loop(scene.mlx);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
-	free_buttons(scene.buttons);
+	//free_buttons(scene.buttons);
 	return (0);
 }
