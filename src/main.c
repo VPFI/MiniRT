@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 20:22:51 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/06 21:53:00 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	print_vec(t_vect vect)
 
 void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color)
 {
-	if ((x >= scene->width) || (x < 0) || (y < 0) || y >= scene->height)
+	if ((x >= scene->width) || y >= scene->height)
 		return ;
 	mlx_put_pixel(scene->image, x, y, color);
 }
@@ -40,35 +40,24 @@ void	move_menu(t_scene *scene, keys_t key)
 	if (key == MLX_KEY_UP)
 	{
 		if (scene->current_file > 0 && scene->buttons[scene->current_file - 1].text)
-		{
 			scene->current_file--;
-			draw_buttons(scene->buttons, scene);
-		}
 	}
 	else if (key == MLX_KEY_DOWN)
 	{
 		if (scene->current_file < 20 && scene->buttons[scene->current_file + 1].text) 
-		{
 			scene->current_file++;
-			draw_buttons(scene->buttons, scene);
-		}
 	}
 	else if (key == MLX_KEY_LEFT)
 	{
 		if (scene->current_file >= 10 && scene->buttons[scene->current_file - 10].text)
-		{
 			scene->current_file -= 10;
-			draw_buttons(scene->buttons, scene);
-		}
 	}
 	else if (key == MLX_KEY_RIGHT)
 	{
 		if (scene->current_file < 10 && scene->buttons[scene->current_file + 10].text)
-		{
 			scene->current_file += 10;
-			draw_buttons(scene->buttons, scene);
-		}		
 	}
+	draw_buttons(scene->buttons, scene);
 }
 
 int		is_arrow_key_down(mlx_key_data_t key_data)
@@ -114,6 +103,27 @@ t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
 	return (res);
 }
 
+int		get_normal_color()
+{
+	return (0);
+}
+
+bool	ray_hit(t_scene *scene, t_ray ray)
+{
+	t_object	*temp;
+
+	temp = scene->objects;
+	while (temp)
+	{
+		if (temp->hit_func(ray, temp->figure) != -1)
+		{
+			return (true);
+		}
+		temp = temp->next;
+	}
+	return (false);
+}
+
 void	main_loop(void *sc)
 {
 	t_vect		pixel_center;
@@ -129,6 +139,7 @@ void	main_loop(void *sc)
 	if (!scene->choose_file)
 		return ;
 	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	while (y < scene->height)
 	{
 		x = 0;
@@ -137,8 +148,11 @@ void	main_loop(void *sc)
 			pixel_center = set_pixel_center(scene->camera, x,y);
 			ray.dir = vect_subtract(pixel_center, scene->camera.origin);
 			ray.origin = scene->camera.origin;
-			if (hit_sphere(ray, scene->sphere_test))
-				safe_pixel_put(scene, x, y, get_rgba(200, 50, 50, 200));
+			if (ray_hit(scene, ray))
+			{
+				safe_pixel_put(scene, x, y, get_rgba(0, 225, 0, 200));
+
+			}
 			else
 				safe_pixel_put(scene, x, y, get_rgba(0, 0, 250, (int)round((y / (float)scene->height) * 255)));
 			x++;
@@ -148,7 +162,6 @@ void	main_loop(void *sc)
 	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
 	mlx_set_window_title(scene->mlx, fps);
 	free(fps);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 }
 
 void	resize_minirt(int32_t width, int32_t height, void *sc)
@@ -167,143 +180,12 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 		mlx_resize_image(scene->image, scene->width, scene->height);
 }
 
-void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
-{
-	float	x;
-	float	y;
-
-	x = i_pt.x;
-	y = i_pt.y;
-	while (y < i_pt.y + 3)
-	{
-		x = i_pt.x;
-		while (x < f_pt.x)
-		{
-			safe_pixel_put(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y - 3)), DEF_COLOR);
-			x++;
-		}
-		y++;
-	}
-	x = i_pt.x - 3;
-	y = i_pt.y;
-	while (y < f_pt.y)
-	{
-		x = i_pt.x - 3;
-		while (x < i_pt.x)
-		{
-			safe_pixel_put(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put(scene, (int)round(x + (f_pt.x - i_pt.x)), (int)round(y), DEF_COLOR);
-			x++;
-		}
-		y++;
-	}
-}
-
-void	draw_center_line(t_scene *scene)
-{
-	int	x;
-	int	aux;
-	int	y;
-
-	aux = scene->width * 0.498;
-	x = aux;
-	y = scene->height * 0.05;
-	while (y < scene->height * 0.95)
-	{
-		x = aux;
-		while (x < scene->width * 0.502)
-		{
-			safe_pixel_put(scene, x, y, CYAN_GULF);
-			x++;
-		}
-		y++;
-	}
-}
 
 void	set_new_image(t_scene *scene)
 {
 	if (scene->image)
 		mlx_delete_image(scene->mlx, scene->image);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
-}
-
-void	draw_buttons(t_button *buttons, t_scene *scene)
-{
-	int	i;
-	int	xy[2];
-
-	i = 0;
-	xy[0] = (int)round(buttons->i_pt.x);
-	xy[1] = (int)round(buttons->i_pt.y);
-	set_new_image(scene);
-	while (i < 20)
-	{
-		if (i == scene->current_file && buttons[i].text)
-			draw_button_frame(scene, buttons[i].i_pt, buttons[i].f_pt);
-		if (buttons[i].text)
-		{
-			xy[0] = buttons[i].i_pt.x + scene->width * 0.03;
-			xy[1] = buttons[i].f_pt.y - scene->height * 0.02;
-			write_str(scene, buttons[i].text, xy, 5);
-		}
-		i++;
-	}
-	draw_center_line(scene);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-}
-
-void	free_buttons(t_button *buttons)
-{
-	int	i;
-
-	i = 0;
-	while (i < 20)
-	{
-		if (buttons[i].text)
-			free(buttons[i].text);
-		i++;
-	}
-}
-
-void	draw_file_menu(t_scene *scene)
-{
-	int				xy[2];
-	int				i;
-	size_t			aux;
-	DIR 			*d;
-	struct dirent	*dir;
-
-	i = 0;
-	aux = 0;
-	xy[0] = scene->width * 0.1;
-	xy[1] = scene->height * 0.075;
-	ft_bzero(scene->buttons, sizeof(t_button) * 20);
-	d = opendir("./maps");
-	if (d) {
-		while ((dir = readdir(d)) != NULL)
-		{
-			if (dir->d_name[0] && dir->d_name[0] != '.' && ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
-			{
-				aux = 0;
-				while (dir->d_name[aux] != '.')
-					aux++;
-				if (aux != ft_strlen(dir->d_name))
-					scene->buttons[i].text = ft_substr(dir->d_name, 0, aux);
-				else
-					scene->buttons[i].text = ft_strdup(dir->d_name);
-				if (i > 9)
-					xy[0] = scene->width * 0.6;
-				scene->buttons[i].i_pt.x = xy[0];
-				scene->buttons[i].i_pt.y = xy[1] + ((scene->height * 0.087) * (i % 10));
-				scene->buttons[i].f_pt.x = scene->buttons[i].i_pt.x + scene->width * 0.3;
-				scene->buttons[i].f_pt.y = scene->buttons[i].i_pt.y + scene->height * 0.07;
-				i++;
-			}
-		}
-	closedir(d);
-	}
-	draw_buttons(scene->buttons, scene);
 }
 
 void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void *sc)
@@ -316,23 +198,23 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 		scene->choose_file = 1;
 }
 
-bool	hit_sphere(t_ray ray, t_sphere sp)
+float	hit_sphere(t_ray ray, t_figure fig)
 {
 	t_vect	oc;
 	float	a;
-	float 	b;
+	float 	h;
 	float 	c;
 	float 	discr;
 
-	oc = vect_subtract(sp.center, ray.origin);
+	oc = vect_subtract(fig.sphere.center, ray.origin);
 	a = vect_dot(ray.dir, ray.dir);
-	b = -2.0 * vect_dot(ray.dir, oc);
-	c = vect_dot(oc, oc) - (sp.radius * sp.radius);
-	discr = (b * b) - 4 * a * c;
-	if (discr >= 0)
-		return (1);
+	h = vect_dot(ray.dir, oc);
+	c = vect_dot(oc, oc) - (fig.sphere.radius * fig.sphere.radius);
+	discr = (h * h) - (a * c);
+	if (discr < 0)
+		return (-1);
 	else
-		return (0);
+		return (h - sqrtf(discr) / a);
 }
 
 void	init_camera(t_scene *scene)
@@ -347,33 +229,100 @@ void	init_camera(t_scene *scene)
 	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
 	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);
 	scene->camera.pixel_delta_v = vect_simple_div(scene->camera.vp_edge_vert, scene->height);
-	scene->camera.viewport_origin.x = 0 - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
-	scene->camera.viewport_origin.y = 0 - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
-	scene->camera.viewport_origin.z = 0 - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2) - scene->camera.view_distance;
+	scene->camera.viewport_origin.x = scene->camera.origin.x - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
+	scene->camera.viewport_origin.y = scene->camera.origin.y - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
+	scene->camera.viewport_origin.z = scene->camera.origin.z - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2) - scene->camera.view_distance;
 	temp = vect_add(scene->camera.pixel_delta_h, scene->camera.pixel_delta_v);
 	scene->camera.viewport_pixel0.x = scene->camera.viewport_origin.x + (0.5 * temp.x);
 	scene->camera.viewport_pixel0.y = scene->camera.viewport_origin.y + (0.5 * temp.y);
 	scene->camera.viewport_pixel0.z = scene->camera.viewport_origin.z + (0.5 * temp.z);
 }
 
-void	init_objects(t_scene *scene)
+t_object	*last_object(t_object *objects)
 {
-	scene->sphere_test.center = new_vect(0, 0, -1);
-	scene->sphere_test.radius = 0.5;
+	if (objects)
+	{
+		if (objects->next)
+			return (last_object(objects->next));
+	}
+	return (objects);
+}
+
+int	add_object(t_object **objects, t_object *new)
+{
+	t_object 	*last_obj;
+
+	if (objects)
+	{
+		if ((*objects))
+		{
+			last_obj = last_object((*objects));
+			last_obj->next = new;
+		}
+		else
+			(*objects) = new;
+	}
+	return (0);
+}
+
+int	init_object(t_object **objects, t_figure fig, t_fig_type type)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)malloc(sizeof(t_object));
+	if (!new_obj)
+		return (-1);
+	if (type == SPHERE)
+	{
+		new_obj->type = type;
+		new_obj->figure.sphere.center = fig.sphere.center;
+		new_obj->figure.sphere.radius = fig.sphere.radius;
+		new_obj->hit_func = hit_sphere;
+		new_obj->next = NULL;
+	}
+	add_object(objects, new_obj);
+	return (0);
+}
+
+void	init_figures(t_scene *scene)
+{
+	t_figure	fig;
+	
+	fig.sphere.center = new_vect(-0.55, 0, -1);
+	fig.sphere.radius = 0.5;
+	init_object(&scene->objects, fig, SPHERE);
+	fig.sphere.center = new_vect(0.55, 0, -1);
+	fig.sphere.radius = 0.5;
+	init_object(&scene->objects, fig, SPHERE);
 }
 
 void	init_scene(t_scene *scene)
 {
+	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
 	scene->height = WINH;
 	scene->aspect_ratio = scene->width / (float)scene->height;
-	printf("adasdqweqweqe%f\n", scene->aspect_ratio);
 	scene->choose_file = 1;
 	scene->current_file = 0;
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
-	init_objects(scene);
+	init_figures(scene);
 	init_camera(scene);
+}
+
+void	free_objects(t_object **objects)
+{
+	t_object *temp;
+
+	if (objects)
+	{
+		while ((*objects))
+		{
+			temp = (*objects)->next;
+			free((*objects));
+			(*objects) = temp;
+		}
+	}
 }
 
 int	main(int argc, char **argv)
@@ -392,6 +341,7 @@ int	main(int argc, char **argv)
 	mlx_loop(scene.mlx);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
+	free_objects(&scene.objects);
 	//free_buttons(scene.buttons);
 	return (0);
 }

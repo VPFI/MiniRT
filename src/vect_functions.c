@@ -3,15 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   vect_functions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 19:57:12 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/05 21:47:07 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
 
+t_coords	new_coords(float v1, float v2, float v3)
+{
+	t_coords	coord;
+
+	coord.x = v1;
+	coord.y = v2;
+	coord.z = v3;
+	return (coord);
+}
 t_vect	new_vect(float v1, float v2, float v3)
 {
 	t_vect	vect;
@@ -22,14 +31,24 @@ t_vect	new_vect(float v1, float v2, float v3)
 	return (vect);
 }
 
-t_coords	new_coords(float v1, float v2, float v3)
+t_vect	unit_vect(t_vect vect)
 {
-	t_coords	coord;
+	t_vect 	res;
+	float	tot;
 
-	coord.x = v1;
-	coord.y = v2;
-	coord.z = v3;
-	return (coord);
+	tot = vect.x + vect.y + vect.z;
+	res.x = vect.x / tot;
+	res.y = vect.y / tot;
+	res.z = vect.z / tot;
+	return (res);
+}
+
+t_vect	ray_at(t_ray ray, float pos)
+{
+	t_vect	res;
+
+	res = vect_add(ray.origin,(vect_simple_mult(ray.dir, pos)));
+	return (res);
 }
 
 t_vect	vect_simple_div(t_vect vec, float num)
@@ -94,11 +113,6 @@ t_vect	vect_subtract(t_vect vec, t_vect vec2)
 
 float	vect_dot(t_vect vec, t_vect vec2)
 {
-	t_vect res;
-
-	res.x = vec.x * vec2.x;
-	res.y = vec.y * vec2.y;
-	res.z = vec.z * vec2.z;
 	return ((vec.x * vec2.x) + (vec.y * vec2.y) + (vec.z * vec2.z));
 }
 

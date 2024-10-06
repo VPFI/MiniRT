@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/04 20:18:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/06 21:49:30 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 1600
-# define WINH 900
+# define WINW 1400
+# define WINH 800
 
 # define DEF_COLOR 0xFF6720FF
 # define CYAN_GULF 0xC9DFECC8
@@ -84,6 +84,13 @@
 # define EXPOSE 12
 # define DESTROY 17
 
+typedef enum e_fig_type
+{
+	SPHERE = 0,
+	PLANE = 1,
+	DISK = 2,
+}						t_fig_type;
+
 typedef struct s_vect
 {
 	float	x;
@@ -125,22 +132,35 @@ typedef struct s_camera
 	t_vect		viewport_pixel0;
 }				t_camera;
 
+typedef struct s_hit_record
+{
+	
+}				t_hit_record;
+
 typedef struct s_sphere
 {
 	t_vect		center;
 	float		radius;
 }				t_sphere;
 
+typedef struct s_plane
+{
+	t_vect		center;
+	t_vect		normal;
+}				t_plane;
+
 typedef union s_figure
 {
-	t_sphere	*sphere;
+	t_sphere	sphere;
+	t_plane		plane;
 }				t_figure;
 
 typedef struct s_object
 {
-	union s_figure 	object;
+	union s_figure 	figure;
+	t_fig_type		type;
 	struct s_object	*next;
-	int				(*hit_func)(t_ray ray, void *sp);
+	float			(*hit_func)(t_ray ray, t_figure figure);
 }					t_object;
 
 typedef struct s_scene
@@ -149,7 +169,7 @@ typedef struct s_scene
 	mlx_image_t		*image;
 	t_camera		camera;
 	t_sphere		sphere_test;
-	t_object		objects;
+	t_object		*objects;
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;
@@ -190,7 +210,7 @@ void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
 
-bool	hit_sphere(t_ray ray, t_sphere sp);
+float		hit_sphere(t_ray ray, t_figure fig);
 
 t_vect		new_vect(float v1, float v2, float v3);
 t_coords	new_coords(float v1, float v2, float v3);

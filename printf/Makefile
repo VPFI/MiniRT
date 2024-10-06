@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
+#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/09 17:34:45 by vperez-f          #+#    #+#              #
-#    Updated: 2024/06/21 15:30:18 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/10/05 16:20:23 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ OFILES = $(CFILES:%.c=%.o)
 
 OBJ = $(OFILES)
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = #-Wall -Wextra -Werror
 
 CC = cc
 

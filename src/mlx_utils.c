@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   mlx_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 18:10:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/09/30 18:13:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/06 19:01:09 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
 
+//From MLX42 Documenation.
 // 'Encodes' four individual bytes into an int.
 int get_rgba(int r, int g, int b, int a)
 {
