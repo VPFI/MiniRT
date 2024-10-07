@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/06 21:53:00 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/07 02:37:19 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int		is_arrow_key_down(mlx_key_data_t key_data)
 {
 	if ((key_data.key == MLX_KEY_UP || key_data.key == MLX_KEY_DOWN
 		|| key_data.key == MLX_KEY_LEFT || key_data.key == MLX_KEY_RIGHT)
-		&& (key_data.action == MLX_PRESS || key_data.action == KEYDOWN))
+		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
 	}
@@ -103,39 +103,44 @@ t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
 	return (res);
 }
 
-int		get_normal_color()
-{
-	return (0);
-}
-
-bool	ray_hit(t_scene *scene, t_ray ray)
+bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
 {
 	t_object	*temp;
+	float		bounds[2];
+	bool		hit;
 
+	hit = false;
+	bounds[MIN] = 0;
+	bounds[MAX] = __FLT_MAX__;
 	temp = scene->objects;
 	while (temp)
 	{
-		if (temp->hit_func(ray, temp->figure) != -1)
+		if (temp->hit_func(ray, temp->figure, hit_info, bounds))
 		{
-			return (true);
+			hit = true;
+			bounds[MAX] = hit_info->t;
 		}
 		temp = temp->next;
 	}
-	return (false);
+	return (hit);
 }
 
 void	main_loop(void *sc)
 {
 	t_vect		pixel_center;
 	t_ray		ray;
+	t_hit_info	hit_info;
 	t_scene		*scene;
 	char		*fps;
 	uint32_t	x;
 	uint32_t	y;
+	int			color;
 
 	x = 0;
 	y = 0;
+	color = DEF_COLOR;
 	scene = sc;
+	ray.origin = scene->camera.origin;
 	if (!scene->choose_file)
 		return ;
 	set_new_image(scene);
@@ -147,14 +152,19 @@ void	main_loop(void *sc)
 		{
 			pixel_center = set_pixel_center(scene->camera, x,y);
 			ray.dir = vect_subtract(pixel_center, scene->camera.origin);
-			ray.origin = scene->camera.origin;
-			if (ray_hit(scene, ray))
+			if (ray_hit(scene, ray, &hit_info))
 			{
-				safe_pixel_put(scene, x, y, get_rgba(0, 225, 0, 200));
-
+				if (vect_dot(hit_info.normal, ray.dir) > 0.0)
+					color = get_rgba(0, 0, 0, 255);
+				else
+					color = get_rgba(((hit_info.normal.x + 1) * 0.5) * 255, ((hit_info.normal.y + 1) * 0.5) * 255, ((hit_info.normal.z + 1) * 0.5) * 255, 255);
+				safe_pixel_put(scene, x, y, color);
 			}
 			else
-				safe_pixel_put(scene, x, y, get_rgba(0, 0, 250, (int)round((y / (float)scene->height) * 255)));
+			{
+				color = get_rgba(0, 50, 200, (int)round((y / (float)scene->height) * 255));
+				safe_pixel_put(scene, x, y, color);
+			}
 			x++;
 		}
 		y++;
@@ -162,6 +172,35 @@ void	main_loop(void *sc)
 	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
 	mlx_set_window_title(scene->mlx, fps);
 	free(fps);
+}
+
+bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+{
+	t_vect	oc;
+	float	var[4];
+	float	sqrt_disc;
+	float	root;
+
+	oc = vect_subtract(fig.sphere.center, ray.origin);
+	var[a] = vect_dot(ray.dir, ray.dir);
+	var[h] = vect_dot(ray.dir, oc);
+	var[c] = vect_dot(oc, oc) - (fig.sphere.radius * fig.sphere.radius);
+	var[discr] = (var[h] * var[h]) - (var[a] * var[c]);
+	if (var[discr] < 0)
+		return (false);
+	sqrt_disc = sqrtf(var[discr]); 
+	root = (var[h] - sqrt_disc) / var[a];
+	if (root <= bounds[MIN] || bounds[MAX] <= root)
+	{
+		root = (var[h] + sqrt_disc) / var[a];
+		if (root <= bounds[MIN] || bounds[MAX] <= root)
+			return (false);
+	}
+	hit_info->t = root;
+	hit_info->point = ray_at(ray, root);
+	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
+	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
+	return (true);	
 }
 
 void	resize_minirt(int32_t width, int32_t height, void *sc)
@@ -196,25 +235,6 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 	(void)mods;
 	if (button == MLX_MOUSE_BUTTON_RIGHT && action == MLX_PRESS)
 		scene->choose_file = 1;
-}
-
-float	hit_sphere(t_ray ray, t_figure fig)
-{
-	t_vect	oc;
-	float	a;
-	float 	h;
-	float 	c;
-	float 	discr;
-
-	oc = vect_subtract(fig.sphere.center, ray.origin);
-	a = vect_dot(ray.dir, ray.dir);
-	h = vect_dot(ray.dir, oc);
-	c = vect_dot(oc, oc) - (fig.sphere.radius * fig.sphere.radius);
-	discr = (h * h) - (a * c);
-	if (discr < 0)
-		return (-1);
-	else
-		return (h - sqrtf(discr) / a);
 }
 
 void	init_camera(t_scene *scene)
@@ -287,12 +307,18 @@ int	init_object(t_object **objects, t_figure fig, t_fig_type type)
 void	init_figures(t_scene *scene)
 {
 	t_figure	fig;
-	
+
 	fig.sphere.center = new_vect(-0.55, 0, -1);
 	fig.sphere.radius = 0.5;
 	init_object(&scene->objects, fig, SPHERE);
-	fig.sphere.center = new_vect(0.55, 0, -1);
+	fig.sphere.center = new_vect(0.35, 0, -1.5);
 	fig.sphere.radius = 0.5;
+	init_object(&scene->objects, fig, SPHERE);
+	fig.sphere.center = new_vect(0, 3, -10);
+	fig.sphere.radius = 3;
+	init_object(&scene->objects, fig, SPHERE);
+	fig.sphere.center = new_vect(0, -50.5, -1);
+	fig.sphere.radius = 50;
 	init_object(&scene->objects, fig, SPHERE);
 }
 

@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/06 21:49:30 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/07 02:34:27 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,68 +28,31 @@
 # define WINW 1400
 # define WINH 800
 
+# define THREADS 4
+
 # define DEF_COLOR 0xFF6720FF
 # define CYAN_GULF 0xC9DFECC8
 
-# define ESC_KEY 9 //0xff1b
-# define PLUS_KEY 0x45
-# define MINUS_KEY 0x4E
-# define ONE_KEY 0x31
-# define TWO_KEY 0x32
-# define THREE_KEY 0x33
-# define FOUR_KEY 0x34
-# define FIVE_KEY 0x35
-# define SIX_KEY 0x36
-# define SEVEN_KEY 0x37
-# define ENTER_KEY 0xff0d
-# define LEFT_KEY 0xff51
-# define UP_KEY 0xff52
-# define RIGHT_KEY 0xff53
-# define DOWN_KEY 0xff54
-# define DOWN_KEY 0xff54
-# define DOWN_KEY 0xff54
-# define DOWN_KEY 0xff54
-# define W_KEY 0x0077
-# define A_KEY 0x0061
-# define S_KEY 0x0073
-# define D_KEY 0x0064
-# define M_KEY 0x6d
-# define Q_KEY 0x71
-# define E_KEY 0x65
-# define T_KEY 0x74
-# define G_KEY 0x67
-# define I_KEY 0x69
-# define O_KEY 0x6f
-# define P_KEY 0x70
-# define R_KEY 0x72
-# define COMMA_KEY 0x2c
-# define PERIOD_KEY 0x2e
-# define SLASH_KEY 0x2f
-# define SPACE_KEY 0x20
-# define SHIFT_KEY 0xffe1
-# define EIGHT_KEY 0xffb8
+typedef enum e_bounds
+{
+	MIN = 0,
+	MAX = 1,
+}			t_bounds;
 
-# define KEYPRESS_M (1L<<0)
-# define KEYRELEASE_M (1L<<1)
-# define MOUSEPRESS_M (1L<<2)
-# define MOUSERELEASE_M (1L<<3)
-# define MOUSEMOVE_M (1L<<6)
-# define STRUCTNOTIFY_M (1L<<17)
-
-# define KEYDOWN 2
-# define KEYUP 3
-# define MOUSEDOWN 4
-# define MOUSEUP 5
-# define MOUSEMOVE 6
-# define EXPOSE 12
-# define DESTROY 17
+typedef enum e_eq_indx
+{
+	a = 0,
+	h = 1,
+	c = 2,
+	discr = 3,
+}			t_eq_indx;
 
 typedef enum e_fig_type
 {
 	SPHERE = 0,
 	PLANE = 1,
 	DISK = 2,
-}						t_fig_type;
+}			t_fig_type;
 
 typedef struct s_vect
 {
@@ -132,10 +95,12 @@ typedef struct s_camera
 	t_vect		viewport_pixel0;
 }				t_camera;
 
-typedef struct s_hit_record
+typedef struct s_hit_info
 {
-	
-}				t_hit_record;
+	t_vect		point;
+	t_vect		normal;
+	float		t;
+}				t_hit_info;
 
 typedef struct s_sphere
 {
@@ -160,7 +125,7 @@ typedef struct s_object
 	union s_figure 	figure;
 	t_fig_type		type;
 	struct s_object	*next;
-	float			(*hit_func)(t_ray ray, t_figure figure);
+	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
 }					t_object;
 
 typedef struct s_scene
@@ -210,10 +175,12 @@ void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
 
-float		hit_sphere(t_ray ray, t_figure fig);
+bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
-t_vect		new_vect(float v1, float v2, float v3);
 t_coords	new_coords(float v1, float v2, float v3);
+t_vect		new_vect(float v1, float v2, float v3);
+t_vect		unit_vect(t_vect vect);
+t_vect		ray_at(t_ray ray, float pos);
 t_vect		vect_simple_mult(t_vect vec, float num);
 t_vect		vect_simple_div(t_vect vec, float num);
 t_vect		vect_simple_subtract(t_vect vec, float num);

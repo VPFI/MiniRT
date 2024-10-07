@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/05 21:47:07 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/07 00:07:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ t_vect	unit_vect(t_vect vect)
 	t_vect 	res;
 	float	tot;
 
-	tot = vect.x + vect.y + vect.z;
+	tot = sqrtf(vect_dot(vect, vect));
 	res.x = vect.x / tot;
 	res.y = vect.y / tot;
 	res.z = vect.z / tot;
@@ -105,9 +105,9 @@ t_vect	vect_subtract(t_vect vec, t_vect vec2)
 {
 	t_vect res;
 
-	res.x = vec.x + vec2.x;
-	res.y = vec.y + vec2.y;
-	res.z = vec.z + vec2.z;
+	res.x = vec.x - vec2.x;
+	res.y = vec.y - vec2.y;
+	res.z = vec.z - vec2.z;
 	return (res);
 }
 
