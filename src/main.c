@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/07 02:37:19 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/08 20:42:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
 	bool		hit;
 
 	hit = false;
-	bounds[MIN] = 0;
+	bounds[MIN] = 0.001;
 	bounds[MAX] = __FLT_MAX__;
 	temp = scene->objects;
 	while (temp)
@@ -119,56 +119,157 @@ bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
 		{
 			hit = true;
 			bounds[MAX] = hit_info->t;
+			hit_info->object = temp;
 		}
 		temp = temp->next;
 	}
 	return (hit);
 }
 
-void	main_loop(void *sc)
+int	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 {
-	t_vect		pixel_center;
-	t_ray		ray;
+	int			color;
 	t_hit_info	hit_info;
-	t_scene		*scene;
-	char		*fps;
+
+	if (ray_hit(scene, ray, &hit_info))
+	{
+		if (vect_dot(hit_info.normal, ray.dir) > 0.0)
+			color = get_rgba(0, 0, 0, 255);
+		else
+			color = get_rgba(((hit_info.normal.x + 1) * 0.5) * 255, ((hit_info.normal.y + 1) * 0.5) * 255, ((hit_info.normal.z + 1) * 0.5) * 255, 255);
+	}
+	else
+	{
+		color = get_rgba(0, 255, 255, 200);
+	}
+	return (color);
+}
+
+int	get_object_color(t_object *object)
+{
+	int	color;
+
+	color = -1;
+	if (object->type == SPHERE)
+	{
+		color = object->figure.sphere.material.color;
+	}
+	else if (object->type == PLANE)
+	{
+		color = object->figure.plane.material.color;
+	}
+	return (color);
+}
+
+int	mult_color(int color, float factor)
+{
+	int	new_color;
+
+	new_color = get_rgba(get_r(color) * factor, get_g(color) * factor, get_b(color) * factor, get_a(color));
+	return (new_color);
+}
+
+int	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
+{
+	int			color;
+	t_hit_info	hit_info;
+
+	if (depth <= 0)
+		return (get_rgba(0, 0, 0, 255));
+	ft_bzero(&hit_info, sizeof(hit_info));
+	if (ray_hit(scene, ray, &hit_info))
+	{
+		color = get_object_color(hit_info.object);
+		color = mult_color(color, scene->amb_light);
+		color = mult_color(color, (vect_dot(hit_info.normal, ray.dir)) * -1);
+		//return (color);
+		return (mult_color(calc_pixel_color(scene, new_ray(hit_info.normal, hit_info.point), depth - 1), 0.8));
+	}
+	else
+	{
+		color = get_rgba(255, 255, 255, 255);
+	}
+	return (color);
+}
+
+void	set_thread(t_thread *thread)
+{
+	//refine x/y divisions for correct bounds
+	thread->y_start = (int)roundf((thread->scene->height / (float)(THREADS)) * thread->id);
+	thread->y_end = thread->y_start + (int)roundf(thread->scene->height / (float)(THREADS));
+	thread->x_start = 0;
+	thread->x_end = thread->scene->width;
+	printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
+}
+
+void	init_render(t_scene *scene)
+{
+	int	i;
+
+	i = 0;
+	while (i < THREADS)
+	{
+		scene->threads[i].id = i;
+		scene->threads[i].scene = scene;
+		set_thread(&scene->threads[i]);
+		pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]);
+		i++;
+	}
+	i = 0;
+	while (i < THREADS)
+	{
+		if (pthread_join(scene->threads[i].self, NULL))
+		{
+			exit (200);
+		}
+		i++;
+	}	
+}
+
+void	*set_rendering(void *args)
+{
+	t_ray		ray;
+	t_vect		pixel_center;
+	int			color;
 	uint32_t	x;
 	uint32_t	y;
-	int			color;
+	t_thread 	*thread;
 
-	x = 0;
-	y = 0;
-	color = DEF_COLOR;
-	scene = sc;
-	ray.origin = scene->camera.origin;
-	if (!scene->choose_file)
-		return ;
-	set_new_image(scene);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-	while (y < scene->height)
+	thread = args;
+	x = thread->x_start;
+	y = thread->y_start;
+	ray.origin = thread->scene->camera.origin;
+	while (y < thread->y_end)
 	{
 		x = 0;
-		while (x < scene->width)
+		while (x < thread->x_end)
 		{
-			pixel_center = set_pixel_center(scene->camera, x,y);
-			ray.dir = vect_subtract(pixel_center, scene->camera.origin);
-			if (ray_hit(scene, ray, &hit_info))
-			{
-				if (vect_dot(hit_info.normal, ray.dir) > 0.0)
-					color = get_rgba(0, 0, 0, 255);
-				else
-					color = get_rgba(((hit_info.normal.x + 1) * 0.5) * 255, ((hit_info.normal.y + 1) * 0.5) * 255, ((hit_info.normal.z + 1) * 0.5) * 255, 255);
-				safe_pixel_put(scene, x, y, color);
-			}
-			else
-			{
-				color = get_rgba(0, 50, 200, (int)round((y / (float)scene->height) * 255));
-				safe_pixel_put(scene, x, y, color);
-			}
+			pixel_center = set_pixel_center(thread->scene->camera, x,y);
+			ray.dir = unit_vect(vect_subtract(pixel_center, ray.origin));
+			color = calc_pixel_color(thread->scene, ray, MAX_DEPTH);
+			safe_pixel_put(thread->scene, x, y, color);
 			x++;
 		}
 		y++;
 	}
+	return (NULL);
+}
+
+void	main_loop(void *sc)
+{
+	t_scene		*scene;
+	char		*fps;
+	double		time;
+
+	scene = sc;
+	if (!scene->choose_file)
+		return ;
+	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	time = mlx_get_time();
+	init_render(scene);
+	time = mlx_get_time() - time;
+	printf("after threads || %f\n", time);
 	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
 	mlx_set_window_title(scene->mlx, fps);
 	free(fps);
@@ -297,6 +398,7 @@ int	init_object(t_object **objects, t_figure fig, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
+		new_obj->figure.sphere.material.color = fig.sphere.material.color;
 		new_obj->hit_func = hit_sphere;
 		new_obj->next = NULL;
 	}
@@ -308,17 +410,25 @@ void	init_figures(t_scene *scene)
 {
 	t_figure	fig;
 
+	fig.sphere.center = new_vect(0.1, -0.4, -0.75);
+	fig.sphere.radius = 0.1;
+	fig.sphere.material.color = RED;
+	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(-0.55, 0, -1);
 	fig.sphere.radius = 0.5;
+	fig.sphere.material.color = DEF_COLOR;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0.35, 0, -1.5);
 	fig.sphere.radius = 0.5;
+	fig.sphere.material.color = CYAN_GULF;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0, 3, -10);
 	fig.sphere.radius = 3;
+	fig.sphere.material.color = RED;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0, -50.5, -1);
 	fig.sphere.radius = 50;
+	fig.sphere.material.color = GREEN;
 	init_object(&scene->objects, fig, SPHERE);
 }
 
@@ -327,6 +437,7 @@ void	init_scene(t_scene *scene)
 	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
 	scene->height = WINH;
+	scene->amb_light = 0.66;
 	scene->aspect_ratio = scene->width / (float)scene->height;
 	scene->choose_file = 1;
 	scene->current_file = 0;

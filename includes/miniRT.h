@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/07 02:34:27 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/08 20:09:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <signal.h>
 # include <unistd.h>
 # include <dirent.h>
+# include <pthread.h>
 # include <math.h>
 # include <limits.h>
 # include "../libft/libft.h"
@@ -28,10 +29,31 @@
 # define WINW 1400
 # define WINH 800
 
-# define THREADS 4
+# define THREADS 8
+# define MAX_DEPTH 10
 
-# define DEF_COLOR 0xFF6720FF
-# define CYAN_GULF 0xC9DFECC8
+# define DEF_COLOR	0xFF6720FF
+# define CYAN_GULF	0xC9DFECFF
+# define GREEN		0x43FF64FF 
+# define RED		0xFF3232FF
+
+typedef struct s_object t_object;
+
+typedef struct s_material
+{
+	int		color;
+}			t_material;
+
+typedef struct s_thread
+{
+	int				id;
+	pthread_t		self;
+	struct s_scene	*scene;
+	uint32_t		x_start;
+	uint32_t		x_end;
+	uint32_t		y_start;
+	uint32_t		y_end;
+}					t_thread;
 
 typedef enum e_bounds
 {
@@ -61,7 +83,8 @@ typedef struct s_vect
 	float	z;
 }			t_vect;
 
-typedef struct s_coords{
+typedef struct s_coords
+{
 	float   x;
 	float   y;
 	float   z;
@@ -74,7 +97,8 @@ typedef struct s_ray
 	t_vect		dir;
 }				t_ray;
 
-typedef struct s_button{
+typedef struct s_button
+{
 	t_coords	i_pt;
 	t_coords	f_pt;
 	char		*text;
@@ -99,6 +123,7 @@ typedef struct s_hit_info
 {
 	t_vect		point;
 	t_vect		normal;
+	t_object	*object;
 	float		t;
 }				t_hit_info;
 
@@ -106,12 +131,14 @@ typedef struct s_sphere
 {
 	t_vect		center;
 	float		radius;
+	t_material	material;
 }				t_sphere;
 
 typedef struct s_plane
 {
 	t_vect		center;
 	t_vect		normal;
+	t_material	material;
 }				t_plane;
 
 typedef union s_figure
@@ -132,18 +159,22 @@ typedef struct s_scene
 {
 	mlx_t			*mlx;
 	mlx_image_t		*image;
+	t_thread		threads[THREADS];
 	t_camera		camera;
+	float			amb_light;
 	t_sphere		sphere_test;
 	t_object		*objects;
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;
+
 	t_button		buttons[20];
 	int				choose_file;
 	int				current_file;
 }					t_scene;
 
-typedef struct s_bresenham{
+typedef struct s_bresenham
+{
 	t_coords	i_pt;
 	t_coords	f_pt;
 	int			d;
@@ -175,9 +206,16 @@ void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
 
+int			calc_pixel_color_normal(t_scene *scene, t_ray ray);
+
+void		*set_rendering(void *args);
+
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
+t_ray		new_ray(t_vect dir, t_vect origin);
+
 t_coords	new_coords(float v1, float v2, float v3);
+
 t_vect		new_vect(float v1, float v2, float v3);
 t_vect		unit_vect(t_vect vect);
 t_vect		ray_at(t_ray ray, float pos);
