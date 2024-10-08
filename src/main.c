@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/08 20:42:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 01:27:17 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,10 +169,21 @@ int	mult_color(int color, float factor)
 	return (new_color);
 }
 
+int	sum_colors(int color, int color2)
+{
+	int	new_color;
+
+	new_color = get_rgba(get_r(color) + get_r(color2), get_g(color) + get_r(color2), get_b(color) + get_r(color2), get_a(color));
+	return (new_color);
+}
+
 int	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 {
 	int			color;
+	float		mod;
+	float		norm;
 	t_hit_info	hit_info;
+	t_vect		test;
 
 	if (depth <= 0)
 		return (get_rgba(0, 0, 0, 255));
@@ -181,13 +192,20 @@ int	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 	{
 		color = get_object_color(hit_info.object);
 		color = mult_color(color, scene->amb_light);
-		color = mult_color(color, (vect_dot(hit_info.normal, ray.dir)) * -1);
+		norm = vect_dot(hit_info.normal, ray.dir);
+		if (norm < 0)
+			norm *= -1;
+		color = mult_color(color, norm);
 		//return (color);
-		return (mult_color(calc_pixel_color(scene, new_ray(hit_info.normal, hit_info.point), depth - 1), 0.8));
+		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));
+		return (mult_color(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
 	}
 	else
 	{
-		color = get_rgba(255, 255, 255, 255);
+		t_vect	unit_dir = unit_vect(ray.dir);
+		mod = 0.5 * (unit_dir.y + 1);
+		color = sum_colors(mult_color(get_rgba(255, 255, 255, 255), (1 - mod)), mult_color(get_rgba(255 * 0.5, 255 * 0.7, 255, 255), mod));
+		//color = get_rgba(255, 255, 255, 255);
 	}
 	return (color);
 }

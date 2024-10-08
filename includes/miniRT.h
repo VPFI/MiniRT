@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/08 20:09:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 01:28:11 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 # define WINH 800
 
 # define THREADS 8
-# define MAX_DEPTH 10
+# define MAX_DEPTH 20
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
