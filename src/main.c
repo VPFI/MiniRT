@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 20:50:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/10 00:16:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,13 +221,14 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 		//if (norm < 0)
 		//	norm *= -1;
 		//color = vect_simple_mult(color, norm);
-		test = get_random_uvect();
-		if (vect_dot(test, hit_info.normal) < 0.0)
-			test = vect_simple_mult(test, -1);
-		test = vect_add(test, hit_info.normal);
-		return (vect_mult(vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8), hit_info.object->get_color_func(hit_info.object)));
 		if (!hit_info.object->get_specular_func(hit_info.object))
-			return (color);
+		{
+			test = get_random_uvect();
+			if (vect_dot(test, hit_info.normal) < 0.0)
+				test = vect_simple_mult(test, -1);
+			test = vect_add(test, hit_info.normal);
+			return (vect_mult(vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8), hit_info.object->get_color_func(hit_info.object)));
+		}
 		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));
 		return (vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
 	}
@@ -482,17 +483,17 @@ void	init_figures(t_scene *scene)
 	fig.sphere.center = new_vect(0.1, -0.4, -0.75);
 	fig.sphere.radius = 0.1;
 	fig.sphere.material.color = hexa_to_vect(GREEN);
-	fig.sphere.material.specular = 1;
+	fig.sphere.material.specular = 0;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(-0.55, 0, -1);
 	fig.sphere.radius = 0.5;
 	fig.sphere.material.color = hexa_to_vect(DEF_COLOR);
 	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
-	fig.sphere.center = new_vect(0.35, 0, -1.5);
+	fig.sphere.center = new_vect(0.40, 0, -1.5);
 	fig.sphere.radius = 0.5;
 	fig.sphere.material.color = hexa_to_vect(CYAN_GULF);
-	fig.sphere.material.specular = 1;
+	fig.sphere.material.specular = 0;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0, 3, -10);
 	fig.sphere.radius = 3;
@@ -502,7 +503,7 @@ void	init_figures(t_scene *scene)
 	fig.sphere.center = new_vect(0, -50.5, -1);
 	fig.sphere.radius = 50;
 	fig.sphere.material.color = hexa_to_vect(RED);
-	fig.sphere.material.specular = 0;
+	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
 }
 
