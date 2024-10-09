@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 20:38:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 20:50:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,7 +225,7 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 		if (vect_dot(test, hit_info.normal) < 0.0)
 			test = vect_simple_mult(test, -1);
 		test = vect_add(test, hit_info.normal);
-		return (vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
+		return (vect_mult(vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8), hit_info.object->get_color_func(hit_info.object)));
 		if (!hit_info.object->get_specular_func(hit_info.object))
 			return (color);
 		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 16:28:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 20:44:15 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,16 @@ t_vect	vect_add(t_vect vec, t_vect vec2)
 	res.x = vec.x + vec2.x;
 	res.y = vec.y + vec2.y;
 	res.z = vec.z + vec2.z;
+	return (res);
+}
+
+t_vect	vect_mult(t_vect vec, t_vect vec2)
+{
+	t_vect res;
+
+	res.x = vec.x * vec2.x;
+	res.y = vec.y * vec2.y;
+	res.z = vec.z * vec2.z;
 	return (res);
 }
 

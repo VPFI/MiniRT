@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 20:38:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 20:46:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@
 # define WINH 		1300
 
 # define THREADS 	8
-# define MAX_DEPTH 	8
-# define AMB 		0.8
+# define MAX_DEPTH 	20
+# define AMB 		0.9
 # define AA 		6
 
 # define DEF_COLOR	0xFF6720FF
@@ -234,9 +234,11 @@ t_vect		vect_simple_mult(t_vect vec, float num);
 t_vect		vect_simple_div(t_vect vec, float num);
 t_vect		vect_simple_subtract(t_vect vec, float num);
 t_vect		vect_simple_add(t_vect vec, float num);
+
 t_vect		vect_add(t_vect vec, t_vect vec2);
 t_vect		vect_subtract(t_vect vec, t_vect vec2);
 t_vect		vect_cross(t_vect vec, t_vect vec2);
+t_vect		vect_mult(t_vect vec, t_vect vec2);
 float		vect_dot(t_vect vec, t_vect vec2);
 
 #endif
