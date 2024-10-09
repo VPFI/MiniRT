@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   file_selector.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2024/10/06 21:53:34 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/09 17:04:09 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 		x = i_pt.x;
 		while (x < f_pt.x)
 		{
-			safe_pixel_put(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y - 3)), DEF_COLOR);
+			safe_pixel_put_bres(scene, (int)round(x), (int)round(y), DEF_COLOR);
+			safe_pixel_put_bres(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y - 3)), DEF_COLOR);
 			x++;
 		}
 		y++;
@@ -38,8 +38,8 @@ void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 		x = i_pt.x - 3;
 		while (x < i_pt.x)
 		{
-			safe_pixel_put(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put(scene, (int)round(x + (f_pt.x - i_pt.x)), (int)round(y), DEF_COLOR);
+			safe_pixel_put_bres(scene, (int)round(x), (int)round(y), DEF_COLOR);
+			safe_pixel_put_bres(scene, (int)round(x + (f_pt.x - i_pt.x)), (int)round(y), DEF_COLOR);
 			x++;
 		}
 		y++;
@@ -60,7 +60,7 @@ void	draw_center_line(t_scene *scene)
 		x = aux;
 		while (x < scene->width * 0.502)
 		{
-			safe_pixel_put(scene, x, y, CYAN_GULF);
+			safe_pixel_put_bres(scene, x, y, CYAN_GULF);
 			x++;
 		}
 		y++;

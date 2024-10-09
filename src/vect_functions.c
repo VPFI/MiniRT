@@ -6,11 +6,21 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/08 19:10:41 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 16:28:30 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
+
+t_vect		new_color(float v1, float v2, float v3)
+{
+	t_vect	vect;
+
+	vect.x = v1;
+	vect.y = v2;
+	vect.z = v3;
+	return (vect);
+}
 
 t_coords	new_coords(float v1, float v2, float v3)
 {

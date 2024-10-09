@@ -3,14 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 01:27:17 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/09 17:34:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
+
+float	get_rnd_norm_float(void)
+{
+	float	res;
+
+	res = rand();
+	return (res / (float)RAND_MAX);
+}
 
 void	print_vec(t_vect vect)
 {
@@ -19,11 +27,18 @@ void	print_vec(t_vect vect)
 	printf("VECT Z: %f\n", vect.z);
 }
 
-void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color)
+void	safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color)
 {
 	if ((x >= scene->width) || y >= scene->height)
 		return ;
 	mlx_put_pixel(scene->image, x, y, color);
+}
+
+void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
+{
+	if ((x >= scene->width) || y >= scene->height)
+		return ;
+	mlx_put_pixel(scene->image, x, y, get_rgba((int)(color.x * 255.9), (int)(color.y * 255.9), (int)(color.z * 255.9), 255));
 }
 
 void	close_all(t_scene *scene)
@@ -103,6 +118,19 @@ t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
 	return (res);
 }
 
+t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y)
+{
+	t_vect	res;
+	t_vect	aux1;
+	t_vect	aux2;
+
+	aux1 = vect_simple_mult(camera.pixel_delta_h, (x + (get_rnd_norm_float() - 0.5)));
+	aux2 = vect_simple_mult(camera.pixel_delta_v, (y + (get_rnd_norm_float() - 0.5)));
+	res = vect_add(aux1, aux2);
+	res = vect_add(res, camera.viewport_pixel0);
+	return (res);
+}
+
 bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
 {
 	t_object	*temp;
@@ -126,87 +154,62 @@ bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
 	return (hit);
 }
 
-int	calc_pixel_color_normal(t_scene *scene, t_ray ray)
+t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 {
-	int			color;
+	t_color		color;
 	t_hit_info	hit_info;
 
 	if (ray_hit(scene, ray, &hit_info))
 	{
 		if (vect_dot(hit_info.normal, ray.dir) > 0.0)
-			color = get_rgba(0, 0, 0, 255);
+			color = new_color(0, 0, 0);
 		else
-			color = get_rgba(((hit_info.normal.x + 1) * 0.5) * 255, ((hit_info.normal.y + 1) * 0.5) * 255, ((hit_info.normal.z + 1) * 0.5) * 255, 255);
+			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 	}
 	else
 	{
-		color = get_rgba(0, 255, 255, 200);
+		color = new_color(0, 0.8, 1);
 	}
 	return (color);
 }
 
-int	get_object_color(t_object *object)
+int	get_sphere_specular(t_object *object)
 {
-	int	color;
-
-	color = -1;
-	if (object->type == SPHERE)
-	{
-		color = object->figure.sphere.material.color;
-	}
-	else if (object->type == PLANE)
-	{
-		color = object->figure.plane.material.color;
-	}
-	return (color);
+	return (object->figure.sphere.material.specular);
 }
 
-int	mult_color(int color, float factor)
+t_color	get_sphere_color(t_object *object)
 {
-	int	new_color;
-
-	new_color = get_rgba(get_r(color) * factor, get_g(color) * factor, get_b(color) * factor, get_a(color));
-	return (new_color);
+	return (object->figure.sphere.material.color);
 }
 
-int	sum_colors(int color, int color2)
+t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 {
-	int	new_color;
-
-	new_color = get_rgba(get_r(color) + get_r(color2), get_g(color) + get_r(color2), get_b(color) + get_r(color2), get_a(color));
-	return (new_color);
-}
-
-int	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
-{
-	int			color;
+	t_color		color;
 	float		mod;
 	float		norm;
 	t_hit_info	hit_info;
 	t_vect		test;
 
 	if (depth <= 0)
-		return (get_rgba(0, 0, 0, 255));
+		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
 	if (ray_hit(scene, ray, &hit_info))
 	{
-		color = get_object_color(hit_info.object);
-		color = mult_color(color, scene->amb_light);
+		color = hit_info.object->get_color_func(hit_info.object);
+		color = vect_simple_mult(color, scene->amb_light);
 		norm = vect_dot(hit_info.normal, ray.dir);
 		if (norm < 0)
 			norm *= -1;
-		color = mult_color(color, norm);
-		//return (color);
+		color = vect_simple_mult(color, norm);
+		if (!hit_info.object->get_specular_func(hit_info.object))
+			return (color);
 		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));
-		return (mult_color(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
+		return (vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
 	}
-	else
-	{
-		t_vect	unit_dir = unit_vect(ray.dir);
-		mod = 0.5 * (unit_dir.y + 1);
-		color = sum_colors(mult_color(get_rgba(255, 255, 255, 255), (1 - mod)), mult_color(get_rgba(255 * 0.5, 255 * 0.7, 255, 255), mod));
-		//color = get_rgba(255, 255, 255, 255);
-	}
+	t_vect	unit_dir = unit_vect(ray.dir);
+	mod = 0.5 * (unit_dir.y + 1);
+	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
 	return (color);
 }
 
@@ -247,13 +250,17 @@ void	init_render(t_scene *scene)
 void	*set_rendering(void *args)
 {
 	t_ray		ray;
-	t_vect		pixel_center;
-	int			color;
+	//t_vect		pixel_center;
+	t_vect		pixel_offset;
+	int			aa_sample;
+	t_color		color;
 	uint32_t	x;
 	uint32_t	y;
 	t_thread 	*thread;
 
+	color = new_color(0, 0, 0);
 	thread = args;
+	aa_sample = 0;
 	x = thread->x_start;
 	y = thread->y_start;
 	ray.origin = thread->scene->camera.origin;
@@ -262,10 +269,17 @@ void	*set_rendering(void *args)
 		x = 0;
 		while (x < thread->x_end)
 		{
-			pixel_center = set_pixel_center(thread->scene->camera, x,y);
-			ray.dir = unit_vect(vect_subtract(pixel_center, ray.origin));
-			color = calc_pixel_color(thread->scene, ray, MAX_DEPTH);
-			safe_pixel_put(thread->scene, x, y, color);
+			aa_sample = 0;
+			color = new_color(0, 0, 0);
+			//pixel_center = set_pixel_center(thread->scene->camera, x,y);
+			while(aa_sample < AA)
+			{
+				pixel_offset = set_pixel_offset(thread->scene->camera, x, y);
+				ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+				color = vect_add(color, calc_pixel_color(thread->scene, ray, MAX_DEPTH));
+				aa_sample++;
+			}
+			safe_pixel_put(thread->scene, x, y, vect_simple_mult(color, 1 / (float)aa_sample));
 			x++;
 		}
 		y++;
@@ -337,7 +351,6 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 	else
 		mlx_resize_image(scene->image, scene->width, scene->height);
 }
-
 
 void	set_new_image(t_scene *scene)
 {
@@ -417,11 +430,24 @@ int	init_object(t_object **objects, t_figure fig, t_fig_type type)
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
 		new_obj->figure.sphere.material.color = fig.sphere.material.color;
+		new_obj->figure.sphere.material.specular = fig.sphere.material.specular;
 		new_obj->hit_func = hit_sphere;
+		new_obj->get_specular_func = get_sphere_specular;
+		new_obj->get_color_func = get_sphere_color;
 		new_obj->next = NULL;
 	}
 	add_object(objects, new_obj);
 	return (0);
+}
+
+t_color	hexa_to_vect(int color)
+{
+	t_color	res;
+
+	res.x = get_r(color) / 255.0;
+	res.y = get_g(color) / 255.0;
+	res.z = get_b(color) / 255.0;
+	return (res);
 }
 
 void	init_figures(t_scene *scene)
@@ -430,23 +456,28 @@ void	init_figures(t_scene *scene)
 
 	fig.sphere.center = new_vect(0.1, -0.4, -0.75);
 	fig.sphere.radius = 0.1;
-	fig.sphere.material.color = RED;
+	fig.sphere.material.color = hexa_to_vect(GREEN);
+	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(-0.55, 0, -1);
 	fig.sphere.radius = 0.5;
-	fig.sphere.material.color = DEF_COLOR;
+	fig.sphere.material.color = hexa_to_vect(DEF_COLOR);
+	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0.35, 0, -1.5);
 	fig.sphere.radius = 0.5;
-	fig.sphere.material.color = CYAN_GULF;
+	fig.sphere.material.color = hexa_to_vect(CYAN_GULF);
+	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0, 3, -10);
 	fig.sphere.radius = 3;
-	fig.sphere.material.color = RED;
+	fig.sphere.material.color = hexa_to_vect(RED);
+	fig.sphere.material.specular = 1;
 	init_object(&scene->objects, fig, SPHERE);
 	fig.sphere.center = new_vect(0, -50.5, -1);
 	fig.sphere.radius = 50;
-	fig.sphere.material.color = GREEN;
+	fig.sphere.material.color = hexa_to_vect(RED);
+	fig.sphere.material.specular = 0;
 	init_object(&scene->objects, fig, SPHERE);
 }
 
@@ -455,7 +486,7 @@ void	init_scene(t_scene *scene)
 	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
 	scene->height = WINH;
-	scene->amb_light = 0.66;
+	scene->amb_light = AMB;
 	scene->aspect_ratio = scene->width / (float)scene->height;
 	scene->choose_file = 1;
 	scene->current_file = 0;

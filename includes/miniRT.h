@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 01:28:11 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/09 17:28:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,23 +26,22 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 1400
-# define WINH 800
+# define WINW 		2000
+# define WINH 		1200
 
-# define THREADS 8
-# define MAX_DEPTH 20
+# define THREADS 	8
+# define MAX_DEPTH 	10
+# define AMB 		0.9
+# define AA 		8
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
 # define GREEN		0x43FF64FF 
 # define RED		0xFF3232FF
 
-typedef struct s_object t_object;
+typedef struct s_vect	t_color;
 
-typedef struct s_material
-{
-	int		color;
-}			t_material;
+typedef struct s_object t_object;
 
 typedef struct s_thread
 {
@@ -127,6 +126,12 @@ typedef struct s_hit_info
 	float		t;
 }				t_hit_info;
 
+typedef struct s_material
+{
+	t_color	color;
+	int		specular;
+}			t_material;
+
 typedef struct s_sphere
 {
 	t_vect		center;
@@ -153,6 +158,8 @@ typedef struct s_object
 	t_fig_type		type;
 	struct s_object	*next;
 	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
+	int				(*get_specular_func)(t_object *object);
+	t_vect			(*get_color_func)(t_object *object);
 }					t_object;
 
 typedef struct s_scene
@@ -196,7 +203,9 @@ int get_g(int rgba);
 int get_b(int rgba);
 int get_a(int rgba);
 
-void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, uint32_t color);
+void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_vect color);
+void	safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color);
+
 void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
 void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
 void	write_str(t_scene *scene, char *msg, int *xy, int size);
@@ -206,7 +215,7 @@ void	draw_buttons(t_button *buttons, t_scene *scene);
 
 void	set_new_image(t_scene *scene);
 
-int			calc_pixel_color_normal(t_scene *scene, t_ray ray);
+t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 
 void		*set_rendering(void *args);
 
@@ -215,6 +224,8 @@ bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 t_ray		new_ray(t_vect dir, t_vect origin);
 
 t_coords	new_coords(float v1, float v2, float v3);
+
+t_vect		new_color(float v1, float v2, float v3);
 
 t_vect		new_vect(float v1, float v2, float v3);
 t_vect		unit_vect(t_vect vect);

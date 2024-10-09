@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/25 16:49:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/01 20:28:31 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 17:03:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)
 	res_y = bres->i_pt.y;
 	while (!(res_x == bres->f_pt.x) || !(res_y == bres->f_pt.y))
 	{
-		safe_pixel_put(scene, res_x, res_y, bres->color);
+		safe_pixel_put_bres(scene, res_x, res_y, bres->color);
 		bres->d2 = bres->d * 2;
 		if (bres->d2 >= bres->dy)
 		{
@@ -34,7 +34,7 @@ void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)
 			res_y += bres->i_two;
 		}
 	}
-	safe_pixel_put(scene, res_x, res_y, bres->color);
+	safe_pixel_put_bres(scene, res_x, res_y, bres->color);
 }
 
 void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt)
