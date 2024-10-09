@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 17:34:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 20:38:56 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,11 +183,30 @@ t_color	get_sphere_color(t_object *object)
 	return (object->figure.sphere.material.color);
 }
 
+t_vect	get_random_uvect(void)
+{
+	t_vect	res;
+	float	bound;
+
+	while (1)
+	{
+		res.x = (get_rnd_norm_float() - 0.5) * 2;
+		res.y = (get_rnd_norm_float() - 0.5) * 2;
+		res.z = (get_rnd_norm_float() - 0.5) * 2;
+		bound = vect_dot(res, res);
+		if ( 0.000000001 < bound && bound <= 1)
+		{
+			res = vect_simple_div(res, sqrtf(bound));
+			return (res);
+		}
+	}
+}
+
 t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 {
 	t_color		color;
 	float		mod;
-	float		norm;
+	//float		norm;
 	t_hit_info	hit_info;
 	t_vect		test;
 
@@ -196,12 +215,17 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 	ft_bzero(&hit_info, sizeof(hit_info));
 	if (ray_hit(scene, ray, &hit_info))
 	{
-		color = hit_info.object->get_color_func(hit_info.object);
-		color = vect_simple_mult(color, scene->amb_light);
-		norm = vect_dot(hit_info.normal, ray.dir);
-		if (norm < 0)
-			norm *= -1;
-		color = vect_simple_mult(color, norm);
+		//color = hit_info.object->get_color_func(hit_info.object);
+		//color = vect_simple_mult(color, scene->amb_light);
+		//norm = vect_dot(hit_info.normal, ray.dir);
+		//if (norm < 0)
+		//	norm *= -1;
+		//color = vect_simple_mult(color, norm);
+		test = get_random_uvect();
+		if (vect_dot(test, hit_info.normal) < 0.0)
+			test = vect_simple_mult(test, -1);
+		test = vect_add(test, hit_info.normal);
+		return (vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
 		if (!hit_info.object->get_specular_func(hit_info.object))
 			return (color);
 		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));
@@ -210,6 +234,7 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 	t_vect	unit_dir = unit_vect(ray.dir);
 	mod = 0.5 * (unit_dir.y + 1);
 	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
+	color = vect_simple_mult(color, scene->amb_light);
 	return (color);
 }
 
@@ -376,7 +401,7 @@ void	init_camera(t_scene *scene)
 	scene->camera.origin = new_vect(0, 0, 0);
 	scene->camera.view_distance = 1;
 	scene->camera.viewport_height = 2;
-	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
+	scene->camera.viewport_width = 4;
 	scene->camera.vp_edge_horizntl = new_vect(scene->camera.viewport_width, 0, 0);
 	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
 	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);
@@ -494,6 +519,7 @@ void	init_scene(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	init_figures(scene);
 	init_camera(scene);
+	srand(mlx_get_time());
 }
 
 void	free_objects(t_object **objects)

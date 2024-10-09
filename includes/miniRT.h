@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 17:28:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/09 20:38:52 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		2000
-# define WINH 		1200
+# define WINW 		2200
+# define WINH 		1300
 
 # define THREADS 	8
-# define MAX_DEPTH 	10
-# define AMB 		0.9
-# define AA 		8
+# define MAX_DEPTH 	8
+# define AMB 		0.8
+# define AA 		6
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
