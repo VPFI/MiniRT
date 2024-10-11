@@ -3,21 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/10 00:16:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/11 17:16:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
 
-float	get_rnd_norm_float(void)
+// Xorshift || https://en.wikipedia.org/wiki/Xorshift
+float fast_rand(uint32_t *state)
 {
-	float	res;
-
-	res = rand();
-	return (res / (float)RAND_MAX);
+	uint32_t x = *state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    *state = x;
+    return (x / (float)UINT32_MAX);
 }
 
 void	print_vec(t_vect vect)
@@ -118,14 +121,14 @@ t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
 	return (res);
 }
 
-t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y)
+t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state)
 {
 	t_vect	res;
 	t_vect	aux1;
 	t_vect	aux2;
 
-	aux1 = vect_simple_mult(camera.pixel_delta_h, (x + (get_rnd_norm_float() - 0.5)));
-	aux2 = vect_simple_mult(camera.pixel_delta_v, (y + (get_rnd_norm_float() - 0.5)));
+	aux1 = vect_simple_mult(camera.pixel_delta_h, (x + (fast_rand(state) - 0.5)));
+	aux2 = vect_simple_mult(camera.pixel_delta_v, (y + (fast_rand(state) - 0.5)));
 	res = vect_add(aux1, aux2);
 	res = vect_add(res, camera.viewport_pixel0);
 	return (res);
@@ -183,16 +186,16 @@ t_color	get_sphere_color(t_object *object)
 	return (object->figure.sphere.material.color);
 }
 
-t_vect	get_random_uvect(void)
+t_vect	get_random_uvect(uint32_t *state)
 {
 	t_vect	res;
 	float	bound;
 
 	while (1)
 	{
-		res.x = (get_rnd_norm_float() - 0.5) * 2;
-		res.y = (get_rnd_norm_float() - 0.5) * 2;
-		res.z = (get_rnd_norm_float() - 0.5) * 2;
+		res.x = (fast_rand(state) - 0.5) * 2;
+		res.y = (fast_rand(state) - 0.5) * 2;
+		res.z = (fast_rand(state) - 0.5) * 2;
 		bound = vect_dot(res, res);
 		if ( 0.000000001 < bound && bound <= 1)
 		{
@@ -202,7 +205,7 @@ t_vect	get_random_uvect(void)
 	}
 }
 
-t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
+t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 {
 	t_color		color;
 	float		mod;
@@ -213,7 +216,7 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 	if (depth <= 0)
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
-	if (ray_hit(scene, ray, &hit_info))
+	if (ray_hit(thread->scene, ray, &hit_info))
 	{
 		//color = hit_info.object->get_color_func(hit_info.object);
 		//color = vect_simple_mult(color, scene->amb_light);
@@ -223,29 +226,40 @@ t_color	calc_pixel_color(t_scene *scene, t_ray ray, int depth)
 		//color = vect_simple_mult(color, norm);
 		if (!hit_info.object->get_specular_func(hit_info.object))
 		{
-			test = get_random_uvect();
+			test = get_random_uvect(thread->state);
 			if (vect_dot(test, hit_info.normal) < 0.0)
 				test = vect_simple_mult(test, -1);
 			test = vect_add(test, hit_info.normal);
-			return (vect_mult(vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8), hit_info.object->get_color_func(hit_info.object)));
+			return (vect_mult(vect_simple_mult(calc_pixel_color(thread, new_ray(test, hit_info.point), depth - 1), 0.8), hit_info.object->get_color_func(hit_info.object)));
 		}
 		test = vect_subtract(ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(ray.dir, hit_info.normal)));
-		return (vect_simple_mult(calc_pixel_color(scene, new_ray(test, hit_info.point), depth - 1), 0.8));
+		return (vect_simple_mult(calc_pixel_color(thread, new_ray(test, hit_info.point), depth - 1), 0.8));
 	}
 	t_vect	unit_dir = unit_vect(ray.dir);
 	mod = 0.5 * (unit_dir.y + 1);
 	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	color = vect_simple_mult(color, scene->amb_light);
+	color = vect_simple_mult(color, thread->scene->amb_light);
 	return (color);
 }
 
 void	set_thread(t_thread *thread)
 {
 	//refine x/y divisions for correct bounds
-	thread->y_start = (int)roundf((thread->scene->height / (float)(THREADS)) * thread->id);
-	thread->y_end = thread->y_start + (int)roundf(thread->scene->height / (float)(THREADS));
-	thread->x_start = 0;
+	//thread->y_start = (int)roundf((thread->scene->height / (float)(THREADS)) * thread->id);
+	//thread->y_end = thread->y_start + (int)roundf(thread->scene->height / (float)(THREADS));
+	//thread->x_start = 0;
+	//thread->x_end = thread->scene->width;
+	//thread->x_increment = 1;
+	thread->y_start = 0;
+	thread->y_end = thread->scene->height;
+	thread->x_start = thread->id;
 	thread->x_end = thread->scene->width;
+	thread->x_increment = THREADS;
+	thread->pix_rendered = 0;
+	thread->state = malloc(sizeof(uint32_t));
+	if (!thread->state)
+		exit (205);
+	*(thread->state) = mlx_get_time() * (thread->id + 1) * 123456;
 	printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
 }
 
@@ -292,7 +306,7 @@ void	*set_rendering(void *args)
 	ray.origin = thread->scene->camera.origin;
 	while (y < thread->y_end)
 	{
-		x = 0;
+		x = thread->x_start;
 		while (x < thread->x_end)
 		{
 			aa_sample = 0;
@@ -300,16 +314,19 @@ void	*set_rendering(void *args)
 			//pixel_center = set_pixel_center(thread->scene->camera, x,y);
 			while(aa_sample < AA)
 			{
-				pixel_offset = set_pixel_offset(thread->scene->camera, x, y);
+				pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
 				ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-				color = vect_add(color, calc_pixel_color(thread->scene, ray, MAX_DEPTH));
+				color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
 				aa_sample++;
 			}
 			safe_pixel_put(thread->scene, x, y, vect_simple_mult(color, 1 / (float)aa_sample));
-			x++;
+			thread->pix_rendered++;
+			x += thread->x_increment;
 		}
 		y++;
 	}
+	free(thread->state);
+	printf("THREAD: %i --- || %i || TIME: %f\n", thread->id, thread->pix_rendered, mlx_get_time());
 	return (NULL);
 }
 
@@ -327,6 +344,7 @@ void	main_loop(void *sc)
 	time = mlx_get_time();
 	init_render(scene);
 	time = mlx_get_time() - time;
+	printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
 	printf("after threads || %f\n", time);
 	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
 	mlx_set_window_title(scene->mlx, fps);
@@ -401,8 +419,8 @@ void	init_camera(t_scene *scene)
 
 	scene->camera.origin = new_vect(0, 0, 0);
 	scene->camera.view_distance = 1;
-	scene->camera.viewport_height = 2;
-	scene->camera.viewport_width = 4;
+	scene->camera.viewport_height = 2.0;
+	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
 	scene->camera.vp_edge_horizntl = new_vect(scene->camera.viewport_width, 0, 0);
 	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
 	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);

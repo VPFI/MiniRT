@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/10 00:05:56 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/11 17:02:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@
 # define WINH 		900
 
 # define THREADS 	8
-# define MAX_DEPTH 	20
+# define MAX_DEPTH 	30
 # define AMB 		0.9
-# define AA 		6
+# define AA 		12
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
@@ -46,10 +46,13 @@ typedef struct s_object t_object;
 typedef struct s_thread
 {
 	int				id;
+	int				pix_rendered;
 	pthread_t		self;
 	struct s_scene	*scene;
+	uint32_t		*state;
 	uint32_t		x_start;
 	uint32_t		x_end;
+	uint32_t		x_increment;
 	uint32_t		y_start;
 	uint32_t		y_end;
 }					t_thread;
