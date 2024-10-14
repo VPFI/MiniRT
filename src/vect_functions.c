@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vect_functions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 20:44:15 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/14 00:54:27 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,4 +157,29 @@ t_vect	vect_cross(t_vect vec, t_vect vec2)
 	res.y = (vec.z * vec2.x) - (vec.x * vec2.z);
 	res.z = (vec.x * vec2.y) - (vec.y * vec2.x);
 	return (res);
+}
+
+bool	zero_vect(t_vect vect)
+{
+	float	threshold;
+
+	threshold = 1e-8;
+	return ((fabsf(vect.x) < threshold) && (fabsf(vect.y) < threshold) && (fabsf(vect.z) < threshold));
+}
+
+t_vect	clamp_vect( t_vect vect, float min, float max)
+{
+	if (vect.x < min)
+		vect.x = min;
+	else if (vect.x > max)
+		vect.x = max;
+	if (vect.y < min)
+		vect.y = min;
+	else if (vect.y > max)
+		vect.y = max;
+	if (vect.z < min)
+		vect.z = min;
+	else if (vect.z > max)
+		vect.z = max;
+	return (vect);
 }

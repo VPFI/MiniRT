@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/11 17:02:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/14 04:28:46 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,18 +26,22 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1600
-# define WINH 		900
+# define WINW 		1400
+# define WINH 		800
 
 # define THREADS 	8
-# define MAX_DEPTH 	30
-# define AMB 		0.9
-# define AA 		12
+# define MAX_DEPTH 	50
+# define AMB 		0.8
+# define AA 		100
+# define BG_COLOR	0x101010FF
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
 # define GREEN		0x43FF64FF 
 # define RED		0xFF3232FF
+# define YELLOW		0xEEEE9BFF
+# define BLACK		0x000000FF
+# define WHITE		0xFFFFFFFF
 
 typedef struct s_vect	t_color;
 
@@ -56,6 +60,14 @@ typedef struct s_thread
 	uint32_t		y_start;
 	uint32_t		y_end;
 }					t_thread;
+
+typedef enum e_mat_type
+{
+	LAMBERTIAN = 0,
+	METAL = 1,
+	DIELECTRIC = 2,
+	EMISSIVE = 3,
+}			t_mat_type;
 
 typedef enum e_bounds
 {
@@ -131,22 +143,24 @@ typedef struct s_hit_info
 
 typedef struct s_material
 {
-	t_color	color;
-	int		specular;
+	t_color		color;
+	t_mat_type	type;
+	float		specular;
+	float		albedo;
+	float		metal_roughness;
+	bool		emissive;
 }			t_material;
 
 typedef struct s_sphere
 {
 	t_vect		center;
 	float		radius;
-	t_material	material;
 }				t_sphere;
 
 typedef struct s_plane
 {
 	t_vect		center;
 	t_vect		normal;
-	t_material	material;
 }				t_plane;
 
 typedef union s_figure
@@ -158,11 +172,10 @@ typedef union s_figure
 typedef struct s_object
 {
 	union s_figure 	figure;
+	t_material		material;
 	t_fig_type		type;
 	struct s_object	*next;
 	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
-	int				(*get_specular_func)(t_object *object);
-	t_vect			(*get_color_func)(t_object *object);
 }					t_object;
 
 typedef struct s_scene
@@ -224,6 +237,8 @@ void		*set_rendering(void *args);
 
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
+t_color		hexa_to_vect(int color);
+
 t_ray		new_ray(t_vect dir, t_vect origin);
 
 t_coords	new_coords(float v1, float v2, float v3);
@@ -243,5 +258,9 @@ t_vect		vect_subtract(t_vect vec, t_vect vec2);
 t_vect		vect_cross(t_vect vec, t_vect vec2);
 t_vect		vect_mult(t_vect vec, t_vect vec2);
 float		vect_dot(t_vect vec, t_vect vec2);
+
+bool		zero_vect(t_vect vect);
+
+t_vect		clamp_vect( t_vect vect, float min, float max);
 
 #endif

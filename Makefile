@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
+#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/10/08 16:46:41 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/10/12 01:21:18 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,7 @@ DIR_MLX	 = ./mlx/MLX42/build
 
 PATH_MLX = $(DIR_MLX)/libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -O2  -fsanitize=address -fsanitize=leak #-fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -O3  -fsanitize=address -fsanitize=leak #-fsanitize=thread
 
 MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
 
