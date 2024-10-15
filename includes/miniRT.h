@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/14 22:18:07 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/15 19:11:20 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		2200
+# define WINH 		1400
 
 # define THREADS 	8
-# define MAX_DEPTH 	30
-# define AA 		50
-# define AMB 		0.6
+# define MAX_DEPTH 	12
+# define SPP 		16
+# define AMB 		1
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
@@ -43,7 +43,7 @@
 # define YELLOW		0xEEEE9BFF
 # define SILVER		0xC0C0C0FF
 # define BLACK		0x000000FF
-# define WHITE		0xFFFFFFFF
+# define WHITE		0xF1F1F1FF
 
 typedef struct s_vect	t_color;
 
@@ -151,7 +151,7 @@ typedef struct s_material
 	float		specular;
 	float		albedo;
 	float		metal_roughness;
-	bool		emissive;
+	float		emission_intensity;
 }			t_material;
 
 typedef struct s_sphere
