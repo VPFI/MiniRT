@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/14 04:29:30 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/15 00:55:01 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,20 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 	return (color);
 }
 
+t_vect	get_random_uvect_alt(uint32_t *state)
+{
+	t_vect	res;
+	float	a;
+	float	r;
+
+	a = fast_rand(state) * 2.0 * M_PI;
+	res.z = (fast_rand(state) * 2.0) - 1.0;
+	r = sqrtf(1.0 - (res.z * res.z));
+	res.x = r * cosf(a);
+	res.y = r * sinf(a);
+	return (res);
+}
+
 t_vect	get_random_uvect(uint32_t *state)
 {
 	t_vect	res;
@@ -207,23 +221,65 @@ t_ray	metal_scatter(t_hit_info hit_info, t_ray inc_ray, uint32_t *state)
 	return (bounce_ray);
 }
 
+t_color	test_light(t_thread *thread, t_hit_info hit_info, t_color color)
+{
+	t_hit_info	test_hit;
+	t_ray		shadow_ray;
+	float		mod;
+	float		mod2;
+
+	shadow_ray = new_ray((vect_subtract(new_vect(-3, 1, -1), hit_info.point)), hit_info.point);
+	if (ray_hit(thread->scene, shadow_ray, &test_hit))
+	{
+		color = vect_simple_mult(color, thread->scene->amb_light);
+	}
+	else
+	{
+		mod = vect_dot(hit_info.normal, shadow_ray.dir);
+		mod2 = 1 / sqrtf(vect_dot(shadow_ray.dir, shadow_ray.dir));
+		if (mod < 0)
+			mod = 0;
+		color = vect_simple_mult(color, (thread->scene->amb_light + 3 * mod * mod2));
+	}
+	return (color);
+}
+
+t_color	test_lambert(t_thread *thread, t_hit_info hit_info, t_ray ray)
+{
+	t_color	color;
+	float	norm;
+
+	color = hit_info.object->material.color;
+	norm = vect_dot(hit_info.normal, ray.dir);
+	if (norm < 0)
+		norm *= -1;
+	color = vect_simple_mult(color, norm);
+	color = test_light(thread, hit_info, color);
+	return (color);
+}
+
 t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info)
 {
 	t_vect		bounce_dir;
+	t_vect		target_on_sphere;
 	t_ray		bounce_ray;
 
 	bounce_dir = get_random_uvect(state);
-	bounce_dir = vect_add(bounce_dir, hit_info.normal);
+	target_on_sphere = vect_add(bounce_dir, hit_info.normal);
 	if (zero_vect(bounce_dir))
-		bounce_dir = hit_info.normal;
-	bounce_ray = new_ray(bounce_dir, hit_info.point);
+		target_on_sphere = hit_info.normal;
+	target_on_sphere = vect_add(target_on_sphere, hit_info.point);
+	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
 	return (bounce_ray);
 }
 
-bool	scatter_ray( t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray)
+bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray)
 {
 	if (hit_info.object->material.type == LAMBERTIAN)
+	{
 		(*bounce_ray) = lambertian_scatter(thread->state, hit_info);
+		return (true);
+	}
 	else if (hit_info.object->material.type == METAL)
 	{
 		(*bounce_ray) = metal_scatter(hit_info, ray, thread->state);
@@ -237,6 +293,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 {
 	t_color		color;
 	t_color		throughput;
+	float		time_aux;
 	float		norm;
 	float		mod;
 	t_hit_info	hit_info;
@@ -245,10 +302,13 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	if (depth <= 0)
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
+	time_aux = 0;
 	throughput = new_color(1, 1, 1);
 	color = new_color(0, 0, 0);
+	time_aux = mlx_get_time();
 	if (ray_hit(thread->scene, ray, &hit_info))
 	{
+		thread->time_hit += mlx_get_time() - time_aux;
 		if (hit_info.object->material.type == EMISSIVE)
 		{
 			color = vect_mult(throughput, hit_info.object->material.color);
@@ -263,14 +323,21 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 			return (color);
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray))
+		{
+			//color = test_lambert(thread, hit_info, ray);
 			return (color);
-		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), color));
+		}
+		//vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), 0.8), color)
+		//vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), color)
+		return (vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), 1), color));
 	}
+	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
-	mod = 0.5 * (unit_dir.y + 1);
-	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	//color = new_color(1, 1, 1);
+	mod = 0.5 * (unit_dir.y + 1.0);
+	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
+	color = hexa_to_vect(AMB_COLOR);
 	color = vect_simple_mult(color, thread->scene->amb_light);
+	//color = vect_add(color, BG_COLOR);
 	return (color);
 }
 
@@ -282,6 +349,7 @@ void	set_thread(t_thread *thread)
 	thread->x_end = thread->scene->width;
 	thread->x_increment = THREADS;
 	thread->pix_rendered = 0;
+	thread->time_hit = 0;
 	thread->state = malloc(sizeof(uint32_t));
 	if (!thread->state)
 		exit (205);
@@ -340,6 +408,7 @@ void	*set_rendering(void *args)
 			//pixel_center = set_pixel_center(thread->scene->camera, x,y);
 			while(aa_sample < AA)
 			{
+				//better offset
 				pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
 				ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
 				color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
@@ -353,7 +422,7 @@ void	*set_rendering(void *args)
 		y++;
 	}
 	free(thread->state);
-	printf("THREAD: %i --- || %i || TIME: %f\n", thread->id, thread->pix_rendered, mlx_get_time());
+	printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
 	return (NULL);
 }
 
@@ -542,7 +611,7 @@ void	init_figures(t_scene *scene)
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 1;
 	mat.albedo = 0.8;
-	mat.metal_roughness = 0.8;
+	mat.metal_roughness = 0.3;
 	mat.emissive = false;
 	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
@@ -553,7 +622,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0;
 	mat.emissive = false;
-	mat.type = EMISSIVE;
+	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
@@ -575,7 +644,7 @@ void	init_figures(t_scene *scene)
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(1.4, 1, -2.1);
 	fig.sphere.radius = 0.7;
-	mat.color = hexa_to_vect(YELLOW);
+	mat.color = hexa_to_vect(SILVER);
 	mat.specular = 1;
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0.0;
@@ -584,7 +653,7 @@ void	init_figures(t_scene *scene)
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0, -50.8, -1);
 	fig.sphere.radius = 50;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = new_color(0.9, 0.9, 0.9);
 	mat.specular = 1;
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0;

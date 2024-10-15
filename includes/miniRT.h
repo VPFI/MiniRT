@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/14 04:28:46 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/14 22:18:07 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,10 @@
 # define WINH 		800
 
 # define THREADS 	8
-# define MAX_DEPTH 	50
-# define AMB 		0.8
-# define AA 		100
+# define MAX_DEPTH 	30
+# define AA 		50
+# define AMB 		0.6
+# define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
 # define DEF_COLOR	0xFF6720FF
@@ -40,6 +41,7 @@
 # define GREEN		0x43FF64FF 
 # define RED		0xFF3232FF
 # define YELLOW		0xEEEE9BFF
+# define SILVER		0xC0C0C0FF
 # define BLACK		0x000000FF
 # define WHITE		0xFFFFFFFF
 
@@ -52,6 +54,7 @@ typedef struct s_thread
 	int				id;
 	int				pix_rendered;
 	pthread_t		self;
+	float			time_hit;
 	struct s_scene	*scene;
 	uint32_t		*state;
 	uint32_t		x_start;
