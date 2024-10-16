@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/16 18:31:44 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/17 01:30:45 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,20 +26,21 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		2200
-# define WINH 		1400
+# define WINW 		1500
+# define WINH 		800
 
 # define THREADS 	8
 
 # define MAX_DEPTH 	50
-# define SPP 		12
+# define SPP 		150
 
-# define AMB 		0.9
+# define AMB 		0.1
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
+# define TURQUOISE	0x40E0D0FF
 # define GREEN		0x43FF64FF 
 # define RED		0xFF3232FF
 # define YELLOW		0xEEEE9BFF

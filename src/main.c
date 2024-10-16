@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/16 20:29:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/17 01:30:48 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,7 +294,7 @@ t_ray	refract(t_hit_info hit_info, t_vect udir, float index, float cos)
 
 	perp = vect_simple_mult(vect_add(udir, vect_simple_mult(hit_info.normal, cos)), index);
 	parallel = vect_simple_mult(hit_info.normal, sqrtf(fabs(1.0 - vect_dot(perp, perp))) * -1.0);
-	res = new_ray(vect_add(perp, parallel), hit_info.normal);
+	res = new_ray(vect_add(perp, parallel), hit_info.point);
 	return (res);
 }
 
@@ -307,18 +307,22 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray)
 	float	index;
 	float	cos;
 	float	sin;
+	t_hit_info adj_hit;
 
+	adj_hit = hit_info;
 	unit_dir = unit_vect(inc_ray.dir);
 	index = 1.5;
-	front_face = vect_dot(hit_info.normal, inc_ray.dir) < 0;
+	front_face = vect_dot(hit_info.normal, inc_ray.dir) <= 0.0;
 	if (front_face)
 		index = 1.0 / index;
-	cos = fminf(vect_dot(vect_simple_mult(unit_dir, -1.0), hit_info.normal), 1.0);
+	else
+		adj_hit.normal = vect_simple_mult(hit_info.normal, -1); //if not inverted + normal in point inception material
+	cos = fminf(vect_dot(vect_simple_mult(unit_dir, -1.0), adj_hit.normal), 1.0);
 	sin = sqrtf(1.0 - (cos * cos));
 	if (((index * sin) > 1.0) || (reflectance(index, cos) > fast_rand(state)))
-		bounce_ray = metal_scatter(state, hit_info, inc_ray);
+		bounce_ray = metal_scatter(state, adj_hit, inc_ray);
 	else
-		bounce_ray = refract(hit_info, unit_dir, index, cos);
+		bounce_ray = refract(adj_hit, unit_dir, index, cos);
 	return (bounce_ray);
 }
 
@@ -672,14 +676,14 @@ void	init_figures(t_scene *scene)
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(-0.6, -0.8, -1.5);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(SILVER);
+	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.0;
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0;
 	mat.emission_intensity = 3.0;
 	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(0.6, -0.5, -2.1);
+	fig.sphere.center = new_vect(0.6, -0.5, -2.8);
 	fig.sphere.radius = 0.3;
 	mat.color = new_color(0.7, 0.7, 0.7);
 	mat.specular = 0;
@@ -699,16 +703,16 @@ void	init_figures(t_scene *scene)
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(1.4, 1, -2.1);
 	fig.sphere.radius = 0.7;
-	mat.color = hexa_to_vect(SILVER);
+	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 1;
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0.5;
-	mat.emission_intensity = 4.0;
-	mat.type = METAL;
+	mat.emission_intensity = 3.0;
+	mat.type = EMISSIVE;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0, -50.8, -1);
 	fig.sphere.radius = 50;
-	mat.color = new_color(0.9, 0.9, 0.9);
+	mat.color = hexa_to_vect(TURQUOISE);
 	mat.specular = 1;
 	mat.albedo = 0.8;
 	mat.metal_roughness = 0;
