@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/15 19:11:20 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/16 18:31:44 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,11 @@
 # define WINH 		1400
 
 # define THREADS 	8
-# define MAX_DEPTH 	12
-# define SPP 		16
-# define AMB 		1
+
+# define MAX_DEPTH 	50
+# define SPP 		12
+
+# define AMB 		0.9
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 

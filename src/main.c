@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/15 19:15:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/16 20:29:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info)
 	target_on_sphere = vect_add(bounce_dir, hit_info.normal);
 	if (zero_vect(bounce_dir))
 		target_on_sphere = hit_info.normal;
-	target_on_sphere = vect_add(target_on_sphere, hit_info.point);
+	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
 	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
 	return (bounce_ray);
 }
@@ -277,13 +277,11 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info)
 float	reflectance(float index, float cos)
 {
 	float	r;
-	float	aux;
 	float	res;
 
-	aux = 1 - cos;
 	r = (1 - index) / (1 + index);
 	r = r * r;
-	res = r + (1 - r) * (aux * aux * aux * aux * aux);
+	res = r + (1 - r) * powf((1 - cos), 5);
 	return (res);
 }
 
@@ -313,13 +311,11 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray)
 	unit_dir = unit_vect(inc_ray.dir);
 	index = 1.5;
 	front_face = vect_dot(hit_info.normal, inc_ray.dir) < 0;
-	if (!front_face)
+	if (front_face)
 		index = 1.0 / index;
-	cos = vect_dot(vect_simple_mult(unit_dir, -1), hit_info.normal);
-	if (cos < 1.0)
-		cos = 1;
-	sin = sqrtf(1.0 - cos * cos);
-	if ((index * sin) > 1.0 || reflectance(index, cos) > fast_rand(state))
+	cos = fminf(vect_dot(vect_simple_mult(unit_dir, -1.0), hit_info.normal), 1.0);
+	sin = sqrtf(1.0 - (cos * cos));
+	if (((index * sin) > 1.0) || (reflectance(index, cos) > fast_rand(state)))
 		bounce_ray = metal_scatter(state, hit_info, inc_ray);
 	else
 		bounce_ray = refract(hit_info, unit_dir, index, cos);
@@ -331,6 +327,7 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
 		(*bounce_ray) = lambertian_scatter(thread->state, hit_info);
+		return(true);
 	}
 	else if (hit_info.object->material.type == METAL)
 	{
@@ -341,6 +338,7 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	else if (hit_info.object->material.type == DIELECTRIC)
 	{
 		(*bounce_ray) = dielectric_scatter(thread->state, hit_info, ray);
+		return (true);
 	}
 	return (true);
 }
@@ -391,7 +389,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_vect	unit_dir = unit_vect(ray.dir);
 	mod = 0.5 * (unit_dir.y + 1.0);
 	color = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	//color = hexa_to_vect(AMB_COLOR);
+	color = hexa_to_vect(AMB_COLOR);
 	color = vect_simple_mult(color, thread->scene->amb_light);
 	//color = vect_add(color, BG_COLOR);
 	//color = vect_div(color, BG_COLOR);
@@ -659,48 +657,62 @@ void	init_figures(t_scene *scene)
 	mat.color = hexa_to_vect(RED);
 	mat.specular = 0;
 	mat.albedo = 0.8;
+	mat.metal_roughness = 0;
+	mat.emission_intensity = 3.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0.6, -0.5, -1.5);
 	fig.sphere.radius = 0.3;
-	mat.color = new_color(255, 255, 255);
-	mat.specular = 0.5;
+	mat.color = new_color(1.0, 1.0, 1.0);
+	mat.specular = 1;
 	mat.albedo = 0.8;
+	mat.metal_roughness = 0.0;
+	mat.emission_intensity = 3.0;
 	mat.type = DIELECTRIC;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(-0.6, -0.5, -1.5);
+	fig.sphere.center = new_vect(-0.6, -0.8, -1.5);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0;
+	mat.color = hexa_to_vect(SILVER);
+	mat.specular = 0.0;
 	mat.albedo = 0.8;
-	mat.type = LAMBERTIAN;
+	mat.metal_roughness = 0;
+	mat.emission_intensity = 3.0;
+	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = new_color(0.7, 0.7, 0.7);
 	mat.specular = 0;
 	mat.albedo = 0.8;
+	mat.metal_roughness = 0;
+	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(-0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0;
 	mat.albedo = 0.8;
+	mat.metal_roughness = 0;
+	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(0, 0.1, -2.1);
-	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
+	fig.sphere.center = new_vect(1.4, 1, -2.1);
+	fig.sphere.radius = 0.7;
+	mat.color = hexa_to_vect(SILVER);
 	mat.specular = 1;
-	mat.albedo = 0.2;
+	mat.albedo = 0.8;
+	mat.metal_roughness = 0.5;
+	mat.emission_intensity = 4.0;
 	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0, -50.8, -1);
 	fig.sphere.radius = 50;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = new_color(0.9, 0.9, 0.9);
 	mat.specular = 1;
 	mat.albedo = 0.8;
+	mat.metal_roughness = 0;
+	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
 }
@@ -718,7 +730,6 @@ void	init_scene(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	init_figures(scene);
 	init_camera(scene);
-	srand(mlx_get_time());
 }
 
 void	free_objects(t_object **objects)
