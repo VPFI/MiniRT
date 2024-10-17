@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/17 01:30:45 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/17 20:27:09 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,12 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1500
-# define WINH 		800
+# define WINW 		2200
+# define WINH 		1200
 
 # define THREADS 	8
 
-# define MAX_DEPTH 	50
+# define MAX_DEPTH 	20
 # define SPP 		150
 
 # define AMB 		0.1
@@ -73,6 +73,7 @@ typedef enum e_mat_type
 	METAL = 1,
 	DIELECTRIC = 2,
 	EMISSIVE = 3,
+	TEST = 4,
 }			t_mat_type;
 
 typedef enum e_bounds
@@ -150,9 +151,9 @@ typedef struct s_hit_info
 typedef struct s_material
 {
 	t_color		color;
+	t_color		albedo;
 	t_mat_type	type;
 	float		specular;
-	float		albedo;
 	float		metal_roughness;
 	float		emission_intensity;
 }			t_material;

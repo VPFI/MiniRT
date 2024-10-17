@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/17 01:30:48 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/17 20:27:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,7 @@ t_ray	metal_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray)
 	if (hit_info.object->material.metal_roughness)
 		bounce_dir = vect_add(unit_vect(bounce_dir), vect_simple_mult(get_random_uvect(state), hit_info.object->material.metal_roughness));
 	bounce_ray = new_ray(bounce_dir, hit_info.point);
+	hit_info.object->material.albedo = hit_info.object->material.color;
 	return (bounce_ray);
 }
 
@@ -270,6 +271,7 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info)
 		target_on_sphere = hit_info.normal;
 	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
 	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
+	hit_info.object->material.albedo = hit_info.object->material.color;
 	return (bounce_ray);
 }
 
@@ -323,6 +325,7 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray)
 		bounce_ray = metal_scatter(state, adj_hit, inc_ray);
 	else
 		bounce_ray = refract(adj_hit, unit_dir, index, cos);
+	hit_info.object->material.albedo = hit_info.object->material.color;
 	return (bounce_ray);
 }
 
@@ -335,7 +338,7 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	}
 	else if (hit_info.object->material.type == METAL)
 	{
-		(*bounce_ray) = metal_scatter( thread->state, hit_info, ray);
+		(*bounce_ray) = metal_scatter(thread->state, hit_info, ray);
 		if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
 			return (false);
 	}
@@ -343,6 +346,22 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	{
 		(*bounce_ray) = dielectric_scatter(thread->state, hit_info, ray);
 		return (true);
+	}
+	else if (hit_info.object->material.type == TEST)
+	{
+		if (hit_info.object->material.specular > fast_rand(thread->state))
+		{
+			(*bounce_ray) = metal_scatter(thread->state, hit_info, ray);
+			if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
+				return (false);
+			hit_info.object->material.albedo = new_color(0.9, 0.9, 0.9);
+			return (true);
+		}
+		else
+		{
+			(*bounce_ray) = lambertian_scatter(thread->state, hit_info);
+			return(true);
+		}
 	}
 	return (true);
 }
@@ -382,12 +401,13 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray))
 		{
+			//optimize things etc... // setting of albedo etc...
 			//color = test_lambert(thread, hit_info, ray);
 			return (color);
 		}
 		//vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), 0.8), color)
 		//vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), color)
-		return (vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), 1), color));
+		return (vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), 1), color));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
@@ -659,27 +679,27 @@ void	init_figures(t_scene *scene)
 	fig.sphere.center = new_vect(0, -0.5, -1.8);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(RED);
-	mat.specular = 0;
-	mat.albedo = 0.8;
-	mat.metal_roughness = 0;
+	mat.specular = 0.05;
+	mat.albedo = mat.color;
+	mat.metal_roughness = 0.1;
 	mat.emission_intensity = 3.0;
-	mat.type = LAMBERTIAN;
+	mat.type = TEST;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0.6, -0.5, -1.5);
 	fig.sphere.radius = 0.3;
 	mat.color = new_color(1.0, 1.0, 1.0);
 	mat.specular = 1;
-	mat.albedo = 0.8;
+	mat.albedo = mat.color;
 	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 3.0;
+	mat.emission_intensity = 4.0;
 	mat.type = DIELECTRIC;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(-0.6, -0.8, -1.5);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0.0;
-	mat.albedo = 0.8;
-	mat.metal_roughness = 0;
+	mat.albedo = mat.color;
+	mat.metal_roughness = 0.5;
 	mat.emission_intensity = 3.0;
 	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
@@ -687,34 +707,34 @@ void	init_figures(t_scene *scene)
 	fig.sphere.radius = 0.3;
 	mat.color = new_color(0.7, 0.7, 0.7);
 	mat.specular = 0;
-	mat.albedo = 0.8;
+	mat.albedo = mat.color;
 	mat.metal_roughness = 0;
 	mat.emission_intensity = 0.0;
-	mat.type = LAMBERTIAN;
+	mat.type = METAL;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(-0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(YELLOW);
+	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0;
-	mat.albedo = 0.8;
-	mat.metal_roughness = 0;
+	mat.albedo = mat.color;
+	mat.metal_roughness = 0.6;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(1.4, 1, -2.1);
-	fig.sphere.radius = 0.7;
-	mat.color = hexa_to_vect(YELLOW);
+	fig.sphere.center = new_vect(1.4, 20, -2.1);
+	fig.sphere.radius = 10;
+	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1;
-	mat.albedo = 0.8;
+	mat.albedo = mat.color;
 	mat.metal_roughness = 0.5;
-	mat.emission_intensity = 3.0;
+	mat.emission_intensity = 4.0;
 	mat.type = EMISSIVE;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0, -50.8, -1);
 	fig.sphere.radius = 50;
-	mat.color = hexa_to_vect(TURQUOISE);
+	mat.color = hexa_to_vect(DEF_COLOR);
 	mat.specular = 1;
-	mat.albedo = 0.8;
+	mat.albedo = mat.color;
 	mat.metal_roughness = 0;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
