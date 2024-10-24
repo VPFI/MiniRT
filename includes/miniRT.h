@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/17 20:27:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/24 21:00:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,9 @@
 # define THREADS 	8
 
 # define MAX_DEPTH 	20
-# define SPP 		150
+# define SPP 		10
 
-# define AMB 		0.1
+# define AMB 		0.0
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
@@ -73,7 +73,7 @@ typedef enum e_mat_type
 	METAL = 1,
 	DIELECTRIC = 2,
 	EMISSIVE = 3,
-	TEST = 4,
+	GLOSSY = 4,
 }			t_mat_type;
 
 typedef enum e_bounds
@@ -156,6 +156,7 @@ typedef struct s_material
 	float		specular;
 	float		metal_roughness;
 	float		emission_intensity;
+	float		refraction_index;
 }			t_material;
 
 typedef struct s_sphere
@@ -197,7 +198,6 @@ typedef struct s_scene
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;
-
 	t_button		buttons[20];
 	int				choose_file;
 	int				current_file;
