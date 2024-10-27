@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/24 21:02:42 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/27 02:11:20 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,19 +106,6 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
 	}
 		
-}
-
-t_vect	set_pixel_center(t_camera camera, uint32_t x, uint32_t y)
-{
-	t_vect	res;
-	t_vect	temp1;
-	t_vect	temp2;
-
-	temp1 = vect_simple_mult(camera.pixel_delta_h, x);
-	temp2 = vect_simple_mult(camera.pixel_delta_v, y);
-	res = vect_add(temp1, temp2);
-	res = vect_add(res, camera.viewport_pixel0);
-	return (res);
 }
 
 t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state)
@@ -354,7 +341,7 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray)
 	index = hit_info.object->material.refraction_index;
 	front_face = vect_dot(hit_info.normal, inc_ray.dir) <= 0.0;
 	if (front_face)
-		index = 1.0 / index;
+		index = 1.0003 / index;
 	else
 		adj_hit.normal = vect_simple_mult(hit_info.normal, -1); //if not inverted + normal in point inception material
 	cos = fminf(vect_dot(vect_simple_mult(unit_dir, -1.0), adj_hit.normal), 1.0);
@@ -435,10 +422,10 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 			//color = test_lambert(thread, hit_info, ray);
 			return (color);
 		}
-		t_ray shadow_ray = new_ray((vect_subtract(new_vect(-5, 4, -2), hit_info.point)), hit_info.point);
-		color = light_sampling(thread, hit_info, hit_info.object->material.color, shadow_ray);
-		shadow_ray = new_ray((vect_subtract(new_vect(5, 4, -2), hit_info.point)), hit_info.point);
-		color = light_sampling(thread, hit_info, color, shadow_ray);
+		//t_ray shadow_ray = new_ray((vect_subtract(new_vect(-5, 4, -2), hit_info.point)), hit_info.point);
+		//color = light_sampling(thread, hit_info, hit_info.object->material.color, shadow_ray);
+		//shadow_ray = new_ray((vect_subtract(new_vect(5, 4, -2), hit_info.point)), hit_info.point);
+		//color = light_sampling(thread, hit_info, color, shadow_ray);
 		//vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), 0.8), color)
 		//vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.color), color)
 		return (vect_add(vect_simple_mult(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), 1), color));
@@ -494,15 +481,38 @@ void	init_render(t_scene *scene)
 	}	
 }
 
+t_vect	get_random_disk_sample(uint32_t *state)
+{
+	t_vect	res;
+
+	while (true)
+	{
+		res = new_vect((fast_rand(state) * 2.0) - 1.0, (fast_rand(state) * 2.0) - 1.0, 0.0);
+		if (sqrtf(vect_dot(res, res)) < 1.0) //sample from -1,1 square | keep only the ones inside disk
+			return (res);
+	}
+}
+
+t_vect	defocus_sample(t_camera camera, uint32_t *state)
+ {
+	t_vect	disk_sample;
+	t_vect	res;
+
+	if (camera.defocus_angle <= 0)
+		return (camera.origin);
+	disk_sample = get_random_disk_sample(state);
+	res = vect_add(vect_simple_mult(camera.defocus_disk_u, disk_sample.x), vect_simple_mult(camera.defocus_disk_v, disk_sample.y));
+	return (vect_add(camera.origin, res));	
+ }
+
 void	*set_rendering(void *args)
 {
-	t_ray		ray;
-	//t_vect	pixel_center;
-	t_vect		pixel_offset;
 	int			aa_sample;
-	t_color		color;
 	uint32_t	x;
 	uint32_t	y;
+	t_ray		ray;
+	t_vect		pixel_offset;
+	t_color		color;
 	t_thread 	*thread;
 
 	color = new_color(0, 0, 0);
@@ -510,7 +520,6 @@ void	*set_rendering(void *args)
 	aa_sample = 0;
 	x = thread->x_start;
 	y = thread->y_start;
-	ray.origin = thread->scene->camera.origin;
 	while (y < thread->y_end)
 	{
 		x = thread->x_start;
@@ -518,7 +527,7 @@ void	*set_rendering(void *args)
 		{
 			aa_sample = 0;
 			color = new_color(0, 0, 0);
-			//pixel_center = set_pixel_center(thread->scene->camera, x,y);
+			ray.origin = defocus_sample(thread->scene->camera, thread->state);
 			while(aa_sample < SPP)
 			{
 				//better offset | stratified offset etc...
@@ -626,17 +635,31 @@ void	init_camera(t_scene *scene)
 {
 	t_vect temp;
 
-	scene->camera.origin = new_vect(0, 0, 0);
-	scene->camera.view_distance = 1;
-	scene->camera.viewport_height = 2.0;
+	scene->camera.origin = new_vect(0, 3, 2);
+	scene->camera.orientation = new_vect(0, -2.75, -3);
+	scene->camera.fov = FOV;
+	scene->camera.defocus_angle = DEFOCUS;
+	scene->camera.focus_dist = FOCUS_DIST;
+	scene->camera.viewport_height = 2.0 * tanf((scene->camera.fov * M_PI / 180) * 0.5) * scene->camera.focus_dist;
 	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
-	scene->camera.vp_edge_horizntl = new_vect(scene->camera.viewport_width, 0, 0);
-	scene->camera.vp_edge_vert = new_vect(0, (scene->camera.viewport_height) * -1, 0);
+
+	scene->camera.w = unit_vect(scene->camera.orientation);
+	scene->camera.u = unit_vect(vect_cross(scene->camera.w, new_vect(0, 1, 0)));
+	scene->camera.v = unit_vect(vect_cross(scene->camera.u, scene->camera.w));
+
+	scene->camera.defocus_radius = scene->camera.focus_dist * (tanf((scene->camera.defocus_angle * M_PI / 180) * 0.5));
+	scene->camera.defocus_disk_u = vect_simple_mult(scene->camera.u, scene->camera.defocus_radius);
+	scene->camera.defocus_disk_v = vect_simple_mult(scene->camera.v, scene->camera.defocus_radius);
+
+	scene->camera.vp_edge_horizntl = vect_simple_mult(scene->camera.u, scene->camera.viewport_width);
+	scene->camera.vp_edge_vert = vect_simple_mult(vect_simple_mult(scene->camera.v, -1.0), scene->camera.viewport_height);
+	
 	scene->camera.pixel_delta_h = vect_simple_div(scene->camera.vp_edge_horizntl, scene->width);
 	scene->camera.pixel_delta_v = vect_simple_div(scene->camera.vp_edge_vert, scene->height);
-	scene->camera.viewport_origin.x = scene->camera.origin.x - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
-	scene->camera.viewport_origin.y = scene->camera.origin.y - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
-	scene->camera.viewport_origin.z = scene->camera.origin.z - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2) - scene->camera.view_distance;
+	
+	scene->camera.viewport_origin.x = scene->camera.origin.x + (scene->camera.focus_dist * scene->camera.w.x) - (scene->camera.vp_edge_horizntl.x / 2) - (scene->camera.vp_edge_vert.x / 2);	
+	scene->camera.viewport_origin.y = scene->camera.origin.y + (scene->camera.focus_dist * scene->camera.w.y) - (scene->camera.vp_edge_horizntl.y / 2) - (scene->camera.vp_edge_vert.y / 2);
+	scene->camera.viewport_origin.z = scene->camera.origin.z + (scene->camera.focus_dist * scene->camera.w.z) - (scene->camera.vp_edge_horizntl.z / 2) - (scene->camera.vp_edge_vert.z / 2);
 	temp = vect_add(scene->camera.pixel_delta_h, scene->camera.pixel_delta_v);
 	scene->camera.viewport_pixel0.x = scene->camera.viewport_origin.x + (0.5 * temp.x);
 	scene->camera.viewport_pixel0.y = scene->camera.viewport_origin.y + (0.5 * temp.y);
@@ -711,14 +734,16 @@ void	init_figures(t_scene *scene)
 	t_figure	fig;
 	t_material	mat;
 
+	ft_bzero(&mat, sizeof(mat));
+	ft_bzero(&fig, sizeof(fig));
 	fig.sphere.center = new_vect(0, -0.5, -1.8);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(RED);
-	mat.specular = 0;
+	mat.specular = 0.1;
 	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
+	mat.type = GLOSSY;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(0.6, -0.5, -1.0);
+	fig.sphere.center = new_vect(0.6, -0.5, -1.2);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1;
@@ -726,25 +751,26 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.type = DIELECTRIC;
 	init_object(&scene->objects, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(-0.6, -0.5, -1.5);
+	fig.sphere.center = new_vect(-0.6, -0.8, -1.5);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.1;
+	mat.specular = 0.2;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.type = GLOSSY;
+	mat.emission_intensity = 2.0;
+	mat.type = EMISSIVE;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0;
+	mat.color = hexa_to_vect(GREEN);
+	mat.specular = 0.1;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 8.0;
 	mat.type = LAMBERTIAN;
 	init_object(&scene->objects, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(-0.6, -0.5, -2.1);
 	fig.sphere.radius = 0.3;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
