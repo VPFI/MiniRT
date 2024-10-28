@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/27 02:10:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/28 21:10:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ typedef enum e_fig_type
 	SPHERE = 0,
 	PLANE = 1,
 	DISK = 2,
+	LIGHT = 3,
 }			t_fig_type;
 
 typedef struct s_2dpoint
@@ -178,6 +179,11 @@ typedef struct s_material
 	float		refraction_index;
 }			t_material;
 
+typedef struct s_point_light
+{
+	t_vect		location;
+}				t_point_light;
+
 typedef struct s_sphere
 {
 	t_vect		center;
@@ -192,8 +198,9 @@ typedef struct s_plane
 
 typedef union s_figure
 {
-	t_sphere	sphere;
-	t_plane		plane;
+	t_sphere		sphere;
+	t_plane			plane;
+	t_point_light	p_light;
 }				t_figure;
 
 typedef struct s_object
@@ -214,6 +221,7 @@ typedef struct s_scene
 	float			amb_light;
 	t_sphere		sphere_test;
 	t_object		*objects;
+	t_object		*lights;
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;
