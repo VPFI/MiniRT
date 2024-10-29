@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/29 03:39:26 by vpf              ###   ########.fr       */
+/*   Updated: 2024/10/29 20:07:34 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info)
 			if (mod < 0)
 				mod = 0;
 			emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
-			if (hit_info.object->material.type == METAL || hit_info.object->material.type == DIELECTRIC)
+			if (hit_info.object->material.type == METAL || hit_info.object->material.type == DIELECTRIC || hit_info.object->material.type == GLOSSY) 
 				emittance = vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10);
 		}
 		tot_intensity += temp->material.emission_intensity;
@@ -739,6 +739,31 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	return (0);
 }
 
+void	init_lights(t_scene *scene)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	ft_bzero(&mat, sizeof(mat));
+	ft_bzero(&fig, sizeof(fig));
+	fig.p_light.location = new_vect(3.0, 1, -1.8);
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.0;
+	mat.metal_roughness = 0.0;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 3.0;
+	mat.type = EMISSIVE;
+	init_object(scene, fig, mat, LIGHT);
+	fig.p_light.location = new_vect(-3.0, 1, -1.8);
+	mat.color = hexa_to_vect(GREEN);
+	mat.specular = 0.0;
+	mat.metal_roughness = 0.0;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 3.0;
+	mat.type = EMISSIVE;
+	init_object(scene, fig, mat, LIGHT);
+}
+
 void	init_figures(t_scene *scene)
 {
 	t_figure	fig;
@@ -749,11 +774,12 @@ void	init_figures(t_scene *scene)
 	fig.sphere.center = new_vect(0, -0.5, -1.8);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(RED);
-	mat.specular = 0.15;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
 	mat.albedo = mat.color;
 	mat.type = GLOSSY;
 	init_object(scene, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(0.6, -0.5, -1.2);
+	fig.sphere.center = new_vect(0.6, -0.5, -1.3);
 	fig.sphere.radius = 0.3;
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1;
@@ -794,13 +820,13 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 0.8;
 	mat.type = METAL;
 	init_object(scene, fig, mat, SPHERE);
-	fig.sphere.center = new_vect(0, 12, -2.1);
+	fig.sphere.center = new_vect(0, 8, -2.1);
 	fig.sphere.radius = 4;
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(SILVER);
 	mat.albedo = mat.color;
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 4.0;
+	mat.emission_intensity = 3.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, SPHERE);
 	fig.sphere.center = new_vect(0, -50.8, -1);
@@ -811,22 +837,6 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, SPHERE);
-	fig.p_light.location = new_vect(3.0, 1, -1.8);
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(-3.0, 1, -1.8);
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 20.0;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, LIGHT);
 	//print_list(scene->objects);
 	//print_list(scene->lights);
 }
@@ -844,6 +854,7 @@ void	init_scene(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
+	init_lights(scene);
 	init_camera(scene);
 }
 
