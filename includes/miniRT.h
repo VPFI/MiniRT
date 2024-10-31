@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/29 20:13:34 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/10/31 20:10:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,26 +31,29 @@
 
 # define THREADS 	8
 
-# define MAX_DEPTH 	20
-# define SPP 		50
+# define MAX_DEPTH 	10
+# define SPP 		10
 
-# define DEFOCUS	4.0
+# define DEFOCUS	0.0
 # define FOCUS_DIST	5.15
-# define FOV		25
+# define FOV		70
 
-# define AMB 		0.8
+# define AMB 		0.1
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
 # define TURQUOISE	0x40E0D0FF
-# define GREEN		0x43FF64FF 
 # define RED		0xFF3232FF
+# define GREEN		0x43FF64FF 
+# define BLUE		0x1C1C84FF 
 # define YELLOW		0xEEEE9BFF
 # define SILVER		0xC0C0C0FF
 # define BLACK		0x000000FF
 # define WHITE		0xF1F1F1FF
+
+# define AIR_REF_INDEX	1.0003
 
 typedef struct s_vect	t_color;
 
@@ -98,7 +101,7 @@ typedef enum e_fig_type
 {
 	SPHERE = 0,
 	PLANE = 1,
-	DISK = 2,
+	QUAD = 2,
 	LIGHT = 3,
 }			t_fig_type;
 
@@ -196,10 +199,18 @@ typedef struct s_plane
 	t_vect		normal;
 }				t_plane;
 
+typedef struct s_quad
+{
+	t_vect		u_vect;
+	t_vect		v_vect;
+	t_vect		origin;
+}				t_quad;
+
 typedef union s_figure
 {
 	t_sphere		sphere;
 	t_plane			plane;
+	t_quad			quad;
 	t_point_light	p_light;
 }				t_figure;
 
