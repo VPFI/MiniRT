@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/02 02:08:19 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/02 02:44:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,14 +227,12 @@ float	test_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
 	t_vect		bounce_dir;
 	float		test;
 
+	inc_ray.dir = unit_vect(inc_ray.dir);
 	bounce_dir = vect_subtract(inc_ray.dir, vect_simple_mult(hit_info.normal, 2 * vect_dot(inc_ray.dir, hit_info.normal)));
-	//if (hit_info.object->material.metal_roughness)
-	//	bounce_dir = vect_add(unit_vect(bounce_dir), vect_simple_mult(get_random_uvect(thread->state), hit_info.object->material.metal_roughness));
 	test = vect_dot(unit_vect(bounce_dir), cam_orientation);
 	if (test < 0)
 		test = 0;
 	test = pow(test, 256);
-	//test = 0.0;
 	return (test);
 }
 
@@ -262,13 +260,16 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info)
 		shadow_ray.dir = vect_subtract(temp->figure.p_light.location, hit_info.point);
 		if (!shadow_hit(thread->scene, shadow_ray, &test_hit, sqrtf(vect_dot(shadow_ray.dir, shadow_ray.dir))))
 		{
-			mod = vect_dot(hit_info.normal, unit_vect(shadow_ray.dir));
 			mod2 = 1 / sqrtf(vect_dot(shadow_ray.dir, shadow_ray.dir));
-			if (mod < 0)
-				mod = 0;
-			emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
-			if (hit_info.object->material.type == METAL || hit_info.object->material.type == DIELECTRIC || hit_info.object->material.type == GLOSSY) 
-				emittance = vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10);
+			if (hit_info.object->material.type == LAMBERTIAN)
+			{
+				mod = vect_dot(hit_info.normal, unit_vect(shadow_ray.dir));
+				if (mod < 0)
+					mod = 0;
+				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
+			}
+			else
+				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
 		}
 		tot_intensity += temp->material.emission_intensity;
 		temp = temp->next;
@@ -875,20 +876,28 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(5, 4.0, -7.0);
-	mat.color = hexa_to_vect(RED);
+	fig.p_light.location = new_vect(0, 0.0, -7.0);
+	mat.color = hexa_to_vect(BLUE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 1.5;
+	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
 	init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(-5, -4.0, -7.0);
+	fig.p_light.location = new_vect(-5.0, -4.0, -7.0);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 1.5;
+	mat.emission_intensity = 2.5;
+	mat.type = EMISSIVE;
+	init_object(scene, fig, mat, LIGHT);
+	fig.p_light.location = new_vect(5.0, 4.0, -7.0);
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.0;
+	mat.metal_roughness = 0.0;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
 	init_object(scene, fig, mat, LIGHT);
 	(void)scene;
@@ -905,8 +914,8 @@ void	init_figures(t_scene *scene)
 	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
 	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
+	mat.specular = 0.1;
+	mat.metal_roughness = 0.2;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
@@ -925,7 +934,7 @@ void	init_figures(t_scene *scene)
 	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.81;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 0.5;
 	mat.type = METAL;
@@ -938,7 +947,7 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.81;
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
-	mat.type = METAL;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(10.0, 0.0, 0);
@@ -961,7 +970,7 @@ void	init_figures(t_scene *scene)
 	mat.type = GLOSSY;
 	init_object(scene, fig, mat, SPHERE);
 
-	fig.sphere.center = new_vect(-5.0, 5.0, -7);
+	fig.sphere.center = new_vect(-7.0, 5.0, -7);
 	fig.sphere.radius = 3;
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;

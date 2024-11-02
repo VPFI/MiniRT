@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/02 02:08:39 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/02 02:16:05 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@
 # define DEF_COLOR	0xFF6720FF
 # define CYAN_GULF	0xC9DFECFF
 # define TURQUOISE	0x40E0D0FF
-# define RED		0xFF3232FF
+# define RED		0xFF4364FF
 # define GREEN		0x43FF64FF 
 # define BLUE		0x1C1CFFFF 
 # define YELLOW		0xEEEE9BFF
