@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/31 20:10:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/02 02:08:39 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		2200
-# define WINH 		1400
+# define WINW 		1400
+# define WINH 		800
 
 # define THREADS 	8
 
 # define MAX_DEPTH 	10
-# define SPP 		10
+# define SPP 		5
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5.15
@@ -47,10 +47,11 @@
 # define TURQUOISE	0x40E0D0FF
 # define RED		0xFF3232FF
 # define GREEN		0x43FF64FF 
-# define BLUE		0x1C1C84FF 
+# define BLUE		0x1C1CFFFF 
 # define YELLOW		0xEEEE9BFF
 # define SILVER		0xC0C0C0FF
-# define BLACK		0x000000FF
+# define BLACK		0x505050FF
+# define TRUE_BLACK	0x000000FF
 # define WHITE		0xF1F1F1FF
 
 # define AIR_REF_INDEX	1.0003
