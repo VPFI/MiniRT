@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/03 07:57:44 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/04 04:01:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -639,7 +639,9 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_v = vect_mult(hit_origin, unit_vect(fig.quad.v_vect));
 	if ((sqrtf(vect_dot(hit_u, hit_u)) > sqrtf(vect_dot(fig.quad.u_vect, fig.quad.u_vect)))
 		|| (sqrtf(vect_dot(hit_v, hit_v)) > sqrtf(vect_dot(fig.quad.v_vect, fig.quad.v_vect))))
+	{
 		return (false);
+	}
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
@@ -736,7 +738,7 @@ void	init_camera(t_scene *scene)
 
 	//scene->camera.origin = new_vect(0, 3, 2);
 	//scene->camera.orientation = unit_vect(new_vect(0, -2.75, -3));
-	scene->camera.origin = new_vect(0.0, 0.0, 9.0);
+	scene->camera.origin = new_vect(0.0, 0.0, 15.0);
 	scene->camera.orientation = unit_vect(new_vect(0.0, 0.0, -1.0));
 	scene->camera.fov = FOV;
 	scene->camera.defocus_angle = DEFOCUS;
@@ -956,163 +958,100 @@ void	init_figures(t_scene *scene)
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
 
-	fig.plane.center = new_vect(0, 0.0, 10.01);
-	fig.plane.normal = unit_vect(new_vect(0, 0, -1));
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.type = METAL;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.plane.center = new_vect(0, 0.0, -10.01);
+	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(BLACK);
 	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.2;
 	mat.albedo = mat.color;
 	mat.type = METAL;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(0, -10.01, 0);
+	fig.plane.center = new_vect(0, -10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(SILVER);
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
-	mat.type = METAL;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(0, 10.01, 0);
+	fig.plane.center = new_vect(0, 10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.81;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 1.5;
-	mat.type = METAL;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(-10.01, 0.0, 0);
+	fig.plane.center = new_vect(-10.0, 0.0, 0);
 	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.4;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.91;
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
 	mat.type = METAL;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(10.01, 0.0, 0);
+	fig.plane.center = new_vect(10.0, 0.0, 0);
 	fig.plane.normal = unit_vect(new_vect(-1, 0, 0));
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(RED);
 	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.51;
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
-	mat.type = METAL;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
-	fig.sphere.radius = 4.5;
+	fig.sphere.center = new_vect(7.0, -5.0, -7);
+	fig.sphere.radius = 3;
+	mat.color = hexa_to_vect(YELLOW);
+	mat.specular = 0.1;
+	mat.metal_roughness = 0.2;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 6.0;
+	mat.type = EMISSIVE;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(-7.0, -5.0, -6);
+	fig.sphere.radius = 3;
+	mat.color = hexa_to_vect(BLUE);
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.1;
+	mat.emission_intensity = 2.0;
+	mat.albedo = mat.color;
+	mat.refraction_index = 1.0;
+	mat.type = EMISSIVE;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(3.0, 6.0, -7.0);
+	fig.sphere.radius = 3;
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 1.0;
+	mat.metal_roughness = 1.0;
+	mat.emission_intensity = 2.0;
+	mat.albedo = mat.color;
+	mat.refraction_index = 1.5;
+	mat.type = DIELECTRIC;
+	init_object(scene, fig, mat, SPHERE);
+
+
+
+
+	fig.quad.u_vect = new_vect(0.0, 4.0, 0.0);
+	fig.quad.v_vect = new_vect(-7.0, 0.0, -7.0);
+	fig.quad.origin = new_vect(0.0, -4.49, -8.0);
 	mat.color = hexa_to_vect(BLACK);
 	mat.specular = 0.1;
 	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
+	mat.emission_intensity = 9.0;
 	mat.albedo = mat.color;
-	mat.refraction_index = 1.0;
 	mat.type = GLOSSY;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(0.0, 0.0, -19.99);
-	fig.quad.origin = new_vect(10.0, 10.0, 0.0);
-	mat.color = hexa_to_vect(BLUE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);	
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(0.0, 0.0, -19.99);
-	fig.quad.origin = new_vect(-10.0, 10.0, 0.0);
-	mat.color = hexa_to_vect(BLUE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);	
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(0.0, 0.0, -19.99);
-	fig.quad.origin = new_vect(10.0, -10.0, 0.0);
-	mat.color = hexa_to_vect(GREEN);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
 	init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(0.0, 0.0, -19.99);
-	fig.quad.origin = new_vect(-10.0, -10.0, 0.0);
-	mat.color = hexa_to_vect(GREEN);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(10.0, 0.0, 0.0);
-	fig.quad.origin = new_vect(0.0, -10.0, -9.99);
-	mat.color = hexa_to_vect(RED);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.0, 0.08, 0.0);
-	fig.quad.v_vect = new_vect(10.0, 0.0, 0.0);
-	fig.quad.origin = new_vect(0.0, 10.0, -9.99);
-	mat.color = hexa_to_vect(RED);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.08, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0.0, -9.99, 0.0);
-	fig.quad.origin = new_vect(9.99, 0.0, -9.99);
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.08, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0.0, -9.99, 0.0);
-	fig.quad.origin = new_vect(-9.99, 0.0, -9.99);
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 1.0;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
 }
 
 void	init_scene(t_scene *scene)
