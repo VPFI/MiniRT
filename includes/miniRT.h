@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/04 04:02:10 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/05 02:11:20 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		500
+# define SPP 		10
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	14.0 // 5.15
@@ -302,8 +302,10 @@ t_vect		vect_simple_add(t_vect vec, float num);
 t_vect		vect_add(t_vect vec, t_vect vec2);
 t_vect		vect_subtract(t_vect vec, t_vect vec2);
 t_vect		vect_cross(t_vect vec, t_vect vec2);
+t_vect		vect_div(t_vect vec, t_vect vec2);
 t_vect		vect_mult(t_vect vec, t_vect vec2);
 float		vect_dot(t_vect vec, t_vect vec2);
+float		vect_length(t_vect vec);
 
 bool		zero_vect(t_vect vect);
 

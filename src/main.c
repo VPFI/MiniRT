@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/04 04:01:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/05 02:11:10 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 	}
 	else
 	{
-		color = new_color(0, 0.8, 1);
+		color = new_color(0, 0.0, 0.0);
 	}
 	return (color);
 }
@@ -621,11 +621,11 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	t_vect	normal;
 
 	//careful with dot products close to 0 || floating point etc...
-	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
+	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect)); // cache normal
 	denominator = vect_dot(normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
 		return (false);
-	q = vect_dot(fig.quad.origin, normal);
+	q = vect_dot(normal, fig.quad.origin);
 	point = vect_subtract(ray.origin, fig.plane.center);
 	root = (q - vect_dot(point, normal)) / denominator;
 	if (root <= bounds[MIN] || bounds[MAX] <= root)
@@ -635,10 +635,9 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->t = root;
 	hit_info->point = ray_at(ray, root);
 	hit_origin = vect_subtract(hit_info->point, fig.quad.origin);
-	hit_u = vect_mult(hit_origin, unit_vect(fig.quad.u_vect));
-	hit_v = vect_mult(hit_origin, unit_vect(fig.quad.v_vect));
-	if ((sqrtf(vect_dot(hit_u, hit_u)) > sqrtf(vect_dot(fig.quad.u_vect, fig.quad.u_vect)))
-		|| (sqrtf(vect_dot(hit_v, hit_v)) > sqrtf(vect_dot(fig.quad.v_vect, fig.quad.v_vect))))
+	hit_u = vect_simple_mult(fig.quad.u_vect, vect_dot(hit_origin, vect_div(new_vect(1.0, 1.0, 1.0), fig.quad.u_vect)));
+	hit_v = vect_simple_mult(fig.quad.v_vect, vect_dot(hit_origin, vect_div(new_vect(1.0, 1.0, 1.0), fig.quad.v_vect)));
+	if (vect_length(hit_u) > vect_length(fig.quad.u_vect) || vect_length(hit_v) > vect_length(fig.quad.v_vect))
 	{
 		return (false);
 	}
@@ -657,7 +656,7 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	denominator = vect_dot(fig.plane.normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
 		return (false);
-	point = vect_subtract(ray.origin, fig.plane	.center);
+	point = vect_subtract(ray.origin, fig.plane.center);
 	root = -1 * (vect_dot(fig.plane.normal, point)) / denominator;
 	if (root <= bounds[MIN] || bounds[MAX] <= root)
 	{
@@ -739,7 +738,9 @@ void	init_camera(t_scene *scene)
 	//scene->camera.origin = new_vect(0, 3, 2);
 	//scene->camera.orientation = unit_vect(new_vect(0, -2.75, -3));
 	scene->camera.origin = new_vect(0.0, 0.0, 15.0);
-	scene->camera.orientation = unit_vect(new_vect(0.0, 0.0, -1.0));
+	scene->camera.orientation = unit_vect(new_vect(0.0, 0, -1.0));
+	//scene->camera.origin = new_vect(20.0, 3.0, -0.0);
+	//scene->camera.orientation = unit_vect(new_vect(-1.0, -0.5, -1.0));
 	scene->camera.fov = FOV;
 	scene->camera.defocus_angle = DEFOCUS;
 	scene->camera.focus_dist = FOCUS_DIST;
@@ -923,7 +924,7 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(15, 0.0, -8.0);
+	fig.p_light.location = new_vect(8, 0.0, -8.0);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
@@ -931,7 +932,7 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(-15.0, 0.0, -8.0);
+	fig.p_light.location = new_vect(-8.0, 0.0, -8.0);
 	mat.color = hexa_to_vect(BLUE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
@@ -939,8 +940,8 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0.0, 0.0, -8.0);
-	mat.color = hexa_to_vect(RED);
+	fig.p_light.location = new_vect(1.0, -5.0, -2.0);
+	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
@@ -957,6 +958,30 @@ void	init_figures(t_scene *scene)
 
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
+
+	fig.quad.u_vect = new_vect(6.0, 0.0, 6.0);
+	fig.quad.v_vect = new_vect(6.0, 0.0, -6.0);
+	fig.quad.origin = new_vect(7.0, -2.49, -7.0);
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.81;
+	mat.emission_intensity = 4.0;
+	mat.refraction_index = 1.5;
+	mat.albedo = mat.color;
+	mat.type = DIELECTRIC;
+	init_object(scene, fig, mat, QUAD);
+
+	fig.quad.u_vect = new_vect(0.0, -3.0, 0.0);
+	fig.quad.v_vect = new_vect(7.0, 0.0, 7.0);
+	fig.quad.origin = new_vect(4.0, -5.49, -4.5);
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
+	mat.emission_intensity = 9.0;
+	mat.refraction_index = 1.2;
+	mat.albedo = mat.color;
+	mat.type = GLOSSY;
+	init_object(scene, fig, mat, QUAD);
 
 	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
@@ -991,7 +1016,7 @@ void	init_figures(t_scene *scene)
 	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.4;
-	mat.metal_roughness = 0.91;
+	mat.metal_roughness = 0.81;
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
 	mat.type = METAL;
@@ -1007,7 +1032,7 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(7.0, -5.0, -7);
+	fig.sphere.center = new_vect(7.0, -9.0, -7.5);
 	fig.sphere.radius = 3;
 	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0.1;
@@ -1025,7 +1050,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.0;
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
-	mat.type = EMISSIVE;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, SPHERE);
 
 	fig.sphere.center = new_vect(3.0, 6.0, -7.0);
@@ -1038,20 +1063,6 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.type = DIELECTRIC;
 	init_object(scene, fig, mat, SPHERE);
-
-
-
-
-	fig.quad.u_vect = new_vect(0.0, 4.0, 0.0);
-	fig.quad.v_vect = new_vect(-7.0, 0.0, -7.0);
-	fig.quad.origin = new_vect(0.0, -4.49, -8.0);
-	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.1;
-	mat.emission_intensity = 9.0;
-	mat.albedo = mat.color;
-	mat.type = GLOSSY;
-	init_object(scene, fig, mat, QUAD);
 }
 
 void	init_scene(t_scene *scene)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vect_functions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/16 13:51:41 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/04 21:09:37 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,20 @@ t_vect	vect_add(t_vect vec, t_vect vec2)
 	return (res);
 }
 
+t_vect	vect_div(t_vect vec, t_vect vec2)
+{
+	t_vect res;
+
+	res = new_vect(0.0f, 0.0f, 0.0f);
+	if (vec2.x)
+		res.x = vec.x / vec2.x;
+	if (vec2.y)
+		res.y = vec.y / vec2.y;
+	if (vec2.z)
+		res.z = vec.z / vec2.z;
+	return (res);
+}
+
 t_vect	vect_mult(t_vect vec, t_vect vec2)
 {
 	t_vect res;
@@ -182,4 +196,9 @@ t_vect	clamp_vect( t_vect vect, float min, float max)
 	else if (vect.z > max)
 		vect.z = max;
 	return (vect);
+}
+
+float	vect_length(t_vect vec)
+{
+	return (sqrtf((vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z)));
 }
