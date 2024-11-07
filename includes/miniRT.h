@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/07 01:19:55 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/07 20:41:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,19 +26,19 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		2200
+# define WINH 		1400
 
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		25
+# define SPP 		1
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	14.0 // 5.15
-# define FOV		35
+# define FOV		80
 
-# define AMB 		0.8
+# define AMB 		0.3
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
@@ -103,7 +103,8 @@ typedef enum e_fig_type
 	SPHERE = 0,
 	PLANE = 1,
 	QUAD = 2,
-	LIGHT = 3,
+	DISK = 3,
+	LIGHT = 4,
 }			t_fig_type;
 
 typedef struct s_2dpoint
@@ -207,11 +208,19 @@ typedef struct s_quad
 	t_vect		origin;
 }				t_quad;
 
+typedef struct s_disk
+{
+	t_vect		center;
+	t_vect		normal;
+	float		radius;
+}				t_disk;
+
 typedef union s_figure
 {
 	t_sphere		sphere;
 	t_plane			plane;
 	t_quad			quad;
+	t_disk			disk;
 	t_point_light	p_light;
 }				t_figure;
 
