@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/06 03:37:10 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/07 01:21:09 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -361,7 +361,11 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 	if (((index * sin) > 1.0) || (reflectance(index, cos) > fast_rand(state)))
 		bounce_ray = metal_scatter(state, adj_hit, inc_ray, emittance, thread);
 	else
+	{
 		bounce_ray = refract(adj_hit, udir, index, cos);
+		if (hit_info.object->material.metal_roughness)
+			bounce_ray.dir = vect_add(unit_vect(bounce_ray.dir), vect_simple_mult(get_random_uvect(state), powf(hit_info.object->material.metal_roughness, 2)));
+	}
 	hit_info.object->material.albedo = hit_info.object->material.color;
 	return (bounce_ray);
 }
@@ -440,7 +444,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_vect	unit_dir = unit_vect(ray.dir);
 	mod = 0.5 * (unit_dir.y + 1.0);
 	background = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	//background = hexa_to_vect(AMB_COLOR);
+	background = hexa_to_vect(AMB_COLOR);
 	background = vect_simple_mult(background, thread->scene->amb_light);
 	//background = vect_add(color, BG_COLOR);
 	//background = vect_div(color, BG_COLOR);
@@ -548,6 +552,8 @@ void	*set_rendering(void *args)
 			x += thread->x_increment;
 		}
 		y++;
+		if (!((int)(y / (float)thread->y_end * 100) % 10))
+			printf("THREAD: %i || %f %%\r", thread->id, (y / (float)thread->y_end * 100));
 	}
 	free(thread->state);
 	printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
@@ -1101,14 +1107,14 @@ void	init_figures(t_scene *scene)
 
 
 
-	fig.sphere.center = new_vect(-2, 1.0, -5.0);
+	fig.sphere.center = new_vect(-4, -1.0, -5.0);
 	fig.sphere.radius = 1.0;
-	mat.color = hexa_to_vect(YELLOW);
+	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.1;
-	mat.metal_roughness = 0.2;
+	mat.metal_roughness = 0.81;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 18.0;
-	mat.type = EMISSIVE;
+	mat.type = DIELECTRIC;
 	init_object(scene, fig, mat, SPHERE);
 
 	fig.sphere.center = new_vect(0.0, -2.0, -2.0);
@@ -1128,15 +1134,15 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.1;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
-	mat.type = GLOSSY;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
 	t_vect u = new_vect(0.7, 0.0, 0.0);
 	t_vect v = new_vect(0.0, 2.0, 0.0);
 	t_vect center = new_vect(0.0, 0.01, -3.0);
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(SILVER);
 	mat.specular = 1.0;
-	mat.metal_roughness = 0.81;
+	mat.metal_roughness = 0.21;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.refraction_index = 1.5;
