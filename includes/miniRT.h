@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/08 02:11:44 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/08 21:10:31 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,15 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		2200
+# define WINH 		1400
 
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		2500
+# define SPP 		1
 
-# define DEFOCUS	3.0
+# define DEFOCUS	1.0
 # define FOCUS_DIST	17.26 // 5.15
 # define FOV		70
 
@@ -64,6 +64,7 @@ typedef struct s_thread
 {
 	int				id;
 	int				pix_rendered;
+	int				iterations;
 	pthread_t		self;
 	float			time_hit;
 	struct s_scene	*scene;

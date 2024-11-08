@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/08 02:11:45 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/08 21:15:04 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,22 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
 	mlx_put_pixel(scene->image, x, y, get_rgba((int)(color.x * 255.9), (int)(color.y * 255.9), (int)(color.z * 255.9), 255));
 }
 
+void	test_progresive(t_scene *scene, uint32_t x, uint32_t y, t_color color, int iterations)
+{
+	uint8_t	*prev_color_index;
+
+	if ((x >= scene->width) || y >= scene->height)
+		return ;
+	prev_color_index = &scene->image->pixels[(y * scene->image->width + x) * sizeof(uint32_t)];
+	mlx_put_pixel(scene->image, x, y, get_rgba(
+		(int)(((color.x * 255.9) + *(prev_color_index) * (iterations - 1)) / iterations),
+		(int)(((color.y * 255.9) + *(prev_color_index + 1) * (iterations - 1)) / iterations),
+		(int)(((color.z * 255.9) + *(prev_color_index + 2) * (iterations - 1)) / iterations),
+		255));
+}
+
 void	close_all(t_scene *scene)
 {
-	if (scene->image)
-	{
-		mlx_delete_image(scene->mlx, scene->image);
-	}
 	mlx_close_window(scene->mlx);
 }
 
@@ -480,6 +490,7 @@ void	init_render(t_scene *scene)
 		pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]);
 		i++;
 	}
+	/*
 	i = 0;
 	while (i < THREADS)
 	{
@@ -489,6 +500,7 @@ void	init_render(t_scene *scene)
 		}
 		i++;
 	}	
+	*/
 }
 
 t_vect	get_random_disk_sample(uint32_t *state)
@@ -526,34 +538,40 @@ void	*set_rendering(void *args)
 	t_thread 	*thread;
 
 	thread = args;
-	color = new_color(0, 0, 0);
-	x = thread->x_start;
-	y = thread->y_start;
-	while (y < thread->y_end)
+	thread->iterations = 0;
+	while (true)
 	{
+		// Scene-wise | not thread-wise --> create back-up img with unclamped values being static and accessing
+		// directly with index should make quite fast
+		thread->iterations++;
+		color = new_color(0, 0, 0);
 		x = thread->x_start;
-		while (x < thread->x_end)
+		y = thread->y_start;
+		while (y < thread->y_end)
 		{
-			aa_sample = 0;
-			color = new_color(0, 0, 0);
-			while(aa_sample < SPP)
+			x = thread->x_start;
+			while (x < thread->x_end)
 			{
-				//better offset | stratified offset etc...
-				ray.origin = defocus_sample(thread->scene->camera, thread->state);
-				pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
-				ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-				color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
-				//color = calc_pixel_color_normal(thread->scene, ray);
-				aa_sample++;
+				aa_sample = 0;
+				color = new_color(0, 0, 0);
+				while(aa_sample < SPP)
+				{
+					//better offset | stratified offset etc...
+					ray.origin = defocus_sample(thread->scene->camera, thread->state);
+					pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
+					ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+					color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
+					//color = calc_pixel_color_normal(thread->scene, ray);
+					aa_sample++;
+				}
+				color = clamp_vect(vect_simple_mult(color, 1 / (float)aa_sample), 0.0, 1.0);
+				test_progresive(thread->scene, x, y, color, thread->iterations);
+				//safe_pixel_put(thread->scene, x, y, color);
+				thread->pix_rendered++;
+				x += thread->x_increment;
 			}
-			color = clamp_vect(vect_simple_mult(color, 1 / (float)aa_sample), 0.0, 1.0);
-			safe_pixel_put(thread->scene, x, y, color);
-			thread->pix_rendered++;
-			x += thread->x_increment;
+			y++;
 		}
-		y++;
-		if (!((int)(y / (float)thread->y_end * 100) % 10))
-			printf("THREAD: %i || %f %%\r", thread->id, (y / (float)thread->y_end * 100));
 	}
 	free(thread->state);
 	printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
@@ -1034,7 +1052,7 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.1;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 18.0;
-	mat.type = EMISSIVE;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, QUAD);
 
 	fig.plane.center = new_vect(0, 0.0, 0);
@@ -1291,6 +1309,21 @@ void	free_objects(t_object **objects)
 	}
 }
 
+void	wait_for_threads(t_scene *scene)
+{
+	int i;
+	
+	i = 0;
+	while (i < THREADS)
+	{
+		if (pthread_join(scene->threads[i].self, NULL))
+		{
+			exit (200);
+		}
+		i++;
+	}			
+}
+
 int	main(int argc, char **argv)
 {
 	(void)argc;
@@ -1305,6 +1338,7 @@ int	main(int argc, char **argv)
 	mlx_resize_hook(scene.mlx, resize_minirt, &scene);
 	//mlx_loop_hook(scene.mlx, main_loop, &scene);
 	mlx_loop(scene.mlx);
+	wait_for_threads(&scene);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
 	free_objects(&scene.objects);
