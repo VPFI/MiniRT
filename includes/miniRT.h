@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/07 20:41:13 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/08 01:50:43 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,17 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		2200
-# define WINH 		1400
+# define WINW 		1400
+# define WINH 		800
 
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		1
+# define SPP 		5
 
 # define DEFOCUS	0.0
-# define FOCUS_DIST	14.0 // 5.15
-# define FOV		80
+# define FOCUS_DIST	17.26 // 5.15
+# define FOV		70
 
 # define AMB 		0.3
 # define AMB_COLOR	0xFFFFFFFF
