@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/08 01:50:43 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/08 02:11:44 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,13 @@
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		5
+# define SPP 		2500
 
-# define DEFOCUS	0.0
+# define DEFOCUS	3.0
 # define FOCUS_DIST	17.26 // 5.15
 # define FOV		70
 
-# define AMB 		0.3
+# define AMB 		0.1
 # define AMB_COLOR	0xFFFFFFFF
 # define BG_COLOR	0x101010FF
 
