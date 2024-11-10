@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/10 12:03:21 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/10 21:30:27 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		2200
+# define WINH 		1400
 
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		1
+# define SPP 		2
 
 # define DEFOCUS	1.0
 # define FOCUS_DIST	17.26 // 5.15
@@ -244,9 +244,11 @@ typedef struct s_scene
 	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
 	bool			stop;
+	bool			edit_mode;
 	pthread_mutex_t	stop_flag;
 	float			time;
 	t_camera		camera;
+	t_camera		back_up_camera;
 	float			amb_light;
 	t_sphere		sphere_test;
 	t_object		*objects;
@@ -281,6 +283,9 @@ int get_r(int rgba);
 int get_g(int rgba);
 int get_b(int rgba);
 int get_a(int rgba);
+
+void	main_loop(void *sc);
+void	recalculate_view(t_scene *scene);
 
 void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_vect color);
 void	safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color);

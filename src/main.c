@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/10 12:03:45 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/10 21:38:27 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,117 @@ int		is_arrow_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
+int		is_wasd_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_W || key_data.key == MLX_KEY_S
+		|| key_data.key == MLX_KEY_A || key_data.key == MLX_KEY_D)
+		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int		is_extra_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_LEFT_SHIFT
+		|| key_data.key == MLX_KEY_SPACE
+		|| key_data.key == MLX_KEY_F
+		|| key_data.key == MLX_KEY_G
+		|| key_data.key == MLX_KEY_V
+		|| key_data.key == MLX_KEY_T)
+		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int		is_camera_key_down(mlx_key_data_t key_data)
+{
+	if (is_arrow_key_down(key_data)
+		|| is_wasd_key_down(key_data)
+		|| is_extra_key_down(key_data))
+	{
+		return (1);
+	}
+	return (0);
+}
+
+void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_W)
+	{
+		camera->orientation.y += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_A)
+	{
+		camera->orientation.x -= 0.25;
+	}
+	else if (key_data.key == MLX_KEY_S)
+	{
+		camera->orientation.y -= 0.25;
+	}
+	else if (key_data.key == MLX_KEY_D)
+	{
+		camera->orientation.x += 0.25;
+	}
+//---------------------------------------------------------------------
+	else if (key_data.key == MLX_KEY_UP)
+	{
+		camera->origin = vect_add(camera->origin, vect_simple_mult(camera->orientation, 0.5));
+	}
+	else if (key_data.key == MLX_KEY_DOWN)
+	{
+		camera->origin = vect_add(camera->origin, vect_simple_mult(
+			vect_simple_mult(camera->orientation, -1.0), 0.5));
+	}
+	else if (key_data.key == MLX_KEY_RIGHT)
+	{
+		camera->origin.x += 0.5;
+	}
+	else if (key_data.key == MLX_KEY_LEFT)
+	{
+		camera->origin.x -= 0.5;
+	}
+//---------------------------------------------------------------------
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		camera->origin.y += 0.5;
+	}
+	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
+	{
+		camera->origin.y -= 0.5;
+	}
+	else if (key_data.key == MLX_KEY_F)
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			camera->fov -= 1;
+		else
+			camera->fov += 1;
+	}
+	else if (key_data.key == MLX_KEY_G)
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			camera->defocus_angle -= 0.25;
+		else
+			camera->defocus_angle += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_V)
+	{
+		camera->focus_dist += 0.5;
+		if (key_data.modifier == MLX_CONTROL)
+			camera->focus_dist -= 0.5;
+		else
+			camera->defocus_angle += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_T)
+	{
+		*camera = *backup;
+	}
+	return ;
+}
+
 void	key_down(mlx_key_data_t key_data, void *sc)
 {
 	t_scene	*scene;
@@ -125,7 +236,32 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
 	}
-		
+	else if (scene->edit_mode == true && is_camera_key_down(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		move_camera(&scene->camera, &scene->back_up_camera, key_data);
+		recalculate_view(scene);
+		main_loop(scene);
+	}
+	else if (scene->edit_mode == false && key_data.key == MLX_KEY_E && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		scene->edit_mode = true;
+		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
+		main_loop(scene);
+	}
+	else if (scene->edit_mode == true && key_data.key == MLX_KEY_R && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		scene->edit_mode = false;
+		main_loop(scene);
+	}
 }
 
 t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state)
@@ -545,27 +681,37 @@ void	*set_rendering(void *args)
 		thread->iterations++;
 		x = thread->x_start;
 		y = thread->y_start;
-		while (y < thread->y_end)
+		while (y < thread->y_end && (thread->scene->stop == false))
 		{
 			x = thread->x_start;
 			while (x < thread->x_end)
 			{
 				sample_count = 0;
 				color = new_color(0, 0, 0);
+				if (thread->scene->edit_mode == true)
+					sample_count = SPP - 1;
 				while(sample_count < SPP)
 				{
 					//better offset | stratified offset etc...
 					ray.origin = defocus_sample(thread->scene->camera, thread->state);
 					pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
 					ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-					color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
-					//color = calc_pixel_color_normal(thread->scene, ray);
+					if (thread->scene->edit_mode)
+						color = calc_pixel_color_normal(thread->scene, ray);
+					else
+						color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
 					sample_count++;
 				}
-				color = vect_simple_mult(color, 1 / (float)sample_count);
-				test_progresive(thread->scene, x, y, color, thread->iterations);
-				//color = clamp_vect(vect_simple_mult(color, 1 / (float)sample_count), 0.0, 1.0);
-				//safe_pixel_put(thread->scene, x, y, color);
+				if (thread->scene->edit_mode)
+				{
+					color = clamp_vect(color, 0.0, 1.0);
+					safe_pixel_put(thread->scene, x, y, color);
+				}
+				else
+				{
+					color = vect_simple_mult(color, 1 / (float)sample_count);
+					test_progresive(thread->scene, x, y, color, thread->iterations);
+				}
 				thread->pix_rendered++;
 				x += thread->x_increment;
 			}
@@ -748,22 +894,10 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 		scene->choose_file = 1;
 }
 
-void	init_camera(t_scene *scene)
+void	recalculate_view(t_scene *scene)
 {
 	t_vect temp;
 
-
-	scene->camera.origin = new_vect(0.0, 6.0, 10);
-	scene->camera.orientation = unit_vect(new_vect(0, 0.0, -1));
-	//scene->camera.origin = new_vect(0, 0, 10);
-	//scene->camera.orientation = unit_vect(new_vect(0, 0, -1));
-	//scene->camera.origin = new_vect(-5.0, 16.0, 11.0);
-	//scene->camera.orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
-	//scene->camera.origin = new_vect(20.0, 3.0, -0.0);
-	//scene->camera.orientation = unit_vect(new_vect(-1.0, -0.5, -1.0));
-	scene->camera.fov = FOV;
-	scene->camera.defocus_angle = DEFOCUS;
-	scene->camera.focus_dist = FOCUS_DIST;
 	scene->camera.viewport_height = 2.0 * tanf((scene->camera.fov * M_PI / 180) * 0.5) * scene->camera.focus_dist;
 	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
 
@@ -788,6 +922,48 @@ void	init_camera(t_scene *scene)
 	scene->camera.viewport_pixel0.x = scene->camera.viewport_origin.x + (0.5 * temp.x);
 	scene->camera.viewport_pixel0.y = scene->camera.viewport_origin.y + (0.5 * temp.y);
 	scene->camera.viewport_pixel0.z = scene->camera.viewport_origin.z + (0.5 * temp.z);
+}
+
+void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
+{
+	t_vect temp;
+
+
+	camera->origin = new_vect(0.0, 6.0, 10);
+	camera->orientation = unit_vect(new_vect(0, 0.0, -1));
+	//camera->origin = new_vect(0, 0, 10);
+	//camera->orientation = unit_vect(new_vect(0, 0, -1));
+	//camera->origin = new_vect(-5.0, 16.0, 11.0);
+	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
+	//camera->origin = new_vect(20.0, 3.0, -0.0);
+	//camera->orientation = unit_vect(new_vect(-1.0, -0.5, -1.0));
+	camera->fov = FOV;
+	camera->defocus_angle = DEFOCUS;
+	camera->focus_dist = FOCUS_DIST;
+	camera->viewport_height = 2.0 * tanf((camera->fov * M_PI / 180) * 0.5) * camera->focus_dist;
+	camera->viewport_width = camera->viewport_height * (width / (float)height);
+
+	camera->w = camera->orientation;
+	camera->u = unit_vect(vect_cross(camera->w, new_vect(0, 1, 0)));
+	camera->v = unit_vect(vect_cross(camera->u, camera->w));
+
+	camera->defocus_radius = camera->focus_dist * (tanf((camera->defocus_angle * M_PI / 180) * 0.5));
+	camera->defocus_disk_u = vect_simple_mult(camera->u, camera->defocus_radius);
+	camera->defocus_disk_v = vect_simple_mult(camera->v, camera->defocus_radius);
+
+	camera->vp_edge_horizntl = vect_simple_mult(camera->u, camera->viewport_width);
+	camera->vp_edge_vert = vect_simple_mult(vect_simple_mult(camera->v, -1.0), camera->viewport_height);
+	
+	camera->pixel_delta_h = vect_simple_div(camera->vp_edge_horizntl, width);
+	camera->pixel_delta_v = vect_simple_div(camera->vp_edge_vert, height);
+	
+	camera->viewport_origin.x = camera->origin.x + (camera->focus_dist * camera->w.x) - (camera->vp_edge_horizntl.x / 2.0) - (camera->vp_edge_vert.x / 2.0);	
+	camera->viewport_origin.y = camera->origin.y + (camera->focus_dist * camera->w.y) - (camera->vp_edge_horizntl.y / 2.0) - (camera->vp_edge_vert.y / 2.0);
+	camera->viewport_origin.z = camera->origin.z + (camera->focus_dist * camera->w.z) - (camera->vp_edge_horizntl.z / 2.0) - (camera->vp_edge_vert.z / 2.0);
+	temp = vect_add(camera->pixel_delta_h, camera->pixel_delta_v);
+	camera->viewport_pixel0.x = camera->viewport_origin.x + (0.5 * temp.x);
+	camera->viewport_pixel0.y = camera->viewport_origin.y + (0.5 * temp.y);
+	camera->viewport_pixel0.z = camera->viewport_origin.z + (0.5 * temp.z);
 }
 
 t_color	hexa_to_vect(int color)
@@ -1038,237 +1214,77 @@ void	init_figures(t_scene *scene)
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
 
-	fig.quad.u_vect = new_vect(-20.0, 0.0, -20.0);
-	fig.quad.v_vect = new_vect(9.0, 20.0, 0.0);
-	fig.quad.origin = new_vect(-50, 20.0, 5);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 8.0;
-	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, QUAD);
-
-	fig.plane.center = new_vect(0, 0.0, 0);
-	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
-	
-	fig.plane.center = new_vect(0, 0.0, -10);
+	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
+	mat.color = hexa_to_vect(BLACK);
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
+	mat.albedo = mat.color;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, PLANE);
+
+	fig.plane.center = new_vect(0, -10.0, 0);
+	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
+	mat.color = hexa_to_vect(SILVER);
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
-	fig.disk.center = new_vect(14.0, 9.0, -7.0);
-	fig.disk.normal = new_vect(-1.3, -1, 1);
-	fig.disk.radius = 2;
+	fig.plane.center = new_vect(0, 10.0, 0);
+	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.type = METAL;
-	init_object(scene, fig, mat, DISK);
-
-	fig.sphere.center = new_vect(5.0, 2, -4);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
+	mat.emission_intensity = 0.9;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
+	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(-5.0, 2, -4);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 1.5;
-	mat.type = DIELECTRIC;
-	init_object(scene, fig, mat, SPHERE);
-//---------------------------------------------------------------------------------
-
-	fig.sphere.center = new_vect(-10.0, 1.5, -4);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(RED);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 1.5;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(0.0, 0.0, -4);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(TURQUOISE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.81;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 1.5;
-	mat.type = METAL;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(10.0, 1.5, -4);
-	fig.sphere.radius = 1.5;
+	fig.plane.center = new_vect(-10.0, 0.0, 0);
+	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
 	mat.color = hexa_to_vect(GREEN);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
+	mat.specular = 0.4;
+	mat.metal_roughness = 0.31;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
+	mat.refraction_index = 1.0;
 	mat.type = GLOSSY;
-	init_object(scene, fig, mat, SPHERE);
-//----------------------------------------------------------------------
+	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(7.0, 11, -6);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(CYAN_GULF);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 1.5;
-	mat.type = DIELECTRIC;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(0.0, 11, -6);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(DEF_COLOR);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.2;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 2.0;
-	mat.type = DIELECTRIC;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(-7.0, 11, -6);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.1;
+	fig.plane.center = new_vect(10.0, 0.0, 0);
+	fig.plane.normal = unit_vect(new_vect(-1, 0, 0));
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.2;
 	mat.metal_roughness = 0.51;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.refraction_index = 1.3;
-	mat.type = DIELECTRIC;
-	init_object(scene, fig, mat, SPHERE);
-//----------------------------------------------------------------------
-
-	fig.sphere.center = new_vect(7.0, 3, -7);
-	fig.sphere.radius = 2.75;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.type = METAL;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(0.0, 3, -7);
-	fig.sphere.radius = 2.75;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
+	mat.refraction_index = 1.0;
 	mat.type = GLOSSY;
-	init_object(scene, fig, mat, SPHERE);
+	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(-7.0, 3, -7);
-	fig.sphere.radius = 2.75;
+	fig.sphere.center = new_vect(0.0, -5.0, -4);
+	fig.sphere.radius = 3;
 	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.1;
+	mat.specular = 0.4;
 	mat.metal_roughness = 0.0;
+	mat.emission_intensity = 2.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.type = LAMBERTIAN;
+	mat.refraction_index = 1.5;
+	mat.type = EMISSIVE;
 	init_object(scene, fig, mat, SPHERE);
-//----------------------------------------------------------------------
-
-	fig.sphere.center = new_vect(3.0, 0.4, 0);
-	fig.sphere.radius = 0.4;
-	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(-3.0, 0.4, 1);
-	fig.sphere.radius = 0.4;
-	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 12.0;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
-//----------------------------------------------------------------------
 
 	t_vect u = new_vect(1.0, 0.0, 0.0);
 	t_vect v = new_vect(0.0, 1.0, 0.0);
-	t_vect center = new_vect(5.0, 0.25, -4.0);
+	t_vect center = new_vect(0.0, -5.0, -4);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.4;
-	mat.metal_roughness = 0.2;
+	mat.metal_roughness = 0.61;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.refraction_index = 1.5;
-	mat.type = GLOSSY;
-	create_box(scene, center, u, v, mat, 2, 2, 0.25);
-
-	u = new_vect(1.0, 0.0, 0.0);
-	v = new_vect(0.0, 1.0, 0.0);
-	center = new_vect(-5.0, 0.25, -4.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.1;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
-	mat.type = METAL;
-	create_box(scene, center, u, v, mat, 2, 2, 0.25);
-
-	u = new_vect(1.0, 0.0, 0.0);
-	v = new_vect(0.0, 1.0, 0.0);
-	center = new_vect(-5.0, 6.0, -9.5);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
-	mat.type = METAL;
-	create_box(scene, center, u, v, mat, 0.5, 2, 6);
-
-	u = new_vect(1.0, 0.0, 0.0);
-	v = new_vect(0.0, 1.0, 0.0);
-	center = new_vect(5.0, 6.0, -9.5);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
-	mat.type = METAL;
-	create_box(scene, center, u, v, mat, 0.5, 2, 6);
+	mat.type = DIELECTRIC;
+	create_box(scene, center, u, v, mat, 3.1, 3.1, 3.1);
 
 
 	fig.sphere.center = new_vect(0.0, -0.8, 0.0);
@@ -1300,7 +1316,8 @@ void	init_scene(t_scene *scene)
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
 	init_lights(scene);
-	init_camera(scene);
+	init_camera(&scene->camera, scene->width, scene->height);
+	scene->back_up_camera = scene->camera;
 }
 
 void	free_objects(t_object **objects)
