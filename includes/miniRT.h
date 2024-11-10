@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/08 21:10:31 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/10 12:03:21 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		2200
-# define WINH 		1400
+# define WINW 		1400
+# define WINH 		800
 
 # define THREADS 	8
 
@@ -38,11 +38,14 @@
 # define FOCUS_DIST	17.26 // 5.15
 # define FOV		70
 
-# define AMB 		0.1
-# define AMB_COLOR	0xFFFFFFFF
+# define AMB		0
+
+# define AMB_LIGHT	0.1
+# define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
 # define DEF_COLOR	0xFF6720FF
+# define BRONZE		0xCD7F32FF
 # define CYAN_GULF	0xC9DFECFF
 # define TURQUOISE	0x40E0D0FF
 # define RED		0xFF4364FF
@@ -238,7 +241,11 @@ typedef struct s_scene
 {
 	mlx_t			*mlx;
 	mlx_image_t		*image;
+	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
+	bool			stop;
+	pthread_mutex_t	stop_flag;
+	float			time;
 	t_camera		camera;
 	float			amb_light;
 	t_sphere		sphere_test;
@@ -290,6 +297,7 @@ void	set_new_image(t_scene *scene);
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 
 void		*set_rendering(void *args);
+void		wait_for_threads(t_scene *scene);
 
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 

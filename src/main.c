@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/08 21:15:04 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/10 12:03:45 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,15 +46,20 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
 
 void	test_progresive(t_scene *scene, uint32_t x, uint32_t y, t_color color, int iterations)
 {
-	uint8_t	*prev_color_index;
+	t_vect		*prev_color_index;
+	t_color		final_color;
 
 	if ((x >= scene->width) || y >= scene->height)
 		return ;
-	prev_color_index = &scene->image->pixels[(y * scene->image->width + x) * sizeof(uint32_t)];
+	prev_color_index = &scene->cumulative_image[((y * scene->image->width) + x)];
+	prev_color_index->x += color.x;
+	prev_color_index->y += color.y;
+	prev_color_index->z += color.z;
+	final_color = clamp_vect(vect_simple_mult(*prev_color_index, 1.0 / (float)iterations), 0.0, 1.0);
 	mlx_put_pixel(scene->image, x, y, get_rgba(
-		(int)(((color.x * 255.9) + *(prev_color_index) * (iterations - 1)) / iterations),
-		(int)(((color.y * 255.9) + *(prev_color_index + 1) * (iterations - 1)) / iterations),
-		(int)(((color.z * 255.9) + *(prev_color_index + 2) * (iterations - 1)) / iterations),
+		(int)(final_color.x * 255.9),
+		(int)(final_color.y * 255.9),
+		(int)(final_color.z * 255.9),
 		255));
 }
 
@@ -104,11 +109,16 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 	t_scene	*scene;
 
 	scene = sc;
-	if (key_data.key == MLX_KEY_ESCAPE)
+	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
+	{
+		//pthread_mutex_lock(&scene->stop_flag);
+		scene->stop = true;
+		//pthread_mutex_unlock(&scene->stop_flag);
 		close_all(scene);
+	}
 	else if (!scene->choose_file && is_arrow_key_down(key_data))
 		move_menu(scene, key_data.key);
-	else if (!scene->choose_file && key_data.key == MLX_KEY_ENTER)
+	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
 	{
 		scene->choose_file = 1;
 		set_new_image(scene);
@@ -454,10 +464,9 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_vect	unit_dir = unit_vect(ray.dir);
 	mod = 0.5 * (unit_dir.y + 1.0);
 	background = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	//background = hexa_to_vect(AMB_COLOR);
+	if (AMB)
+		background = hexa_to_vect(AMB_COLOR);
 	background = vect_simple_mult(background, thread->scene->amb_light);
-	//background = vect_add(color, BG_COLOR);
-	//background = vect_div(color, BG_COLOR);
 	return (background);
 }
 
@@ -487,20 +496,10 @@ void	init_render(t_scene *scene)
 		scene->threads[i].id = i;
 		scene->threads[i].scene = scene;
 		set_thread(&scene->threads[i]);
-		pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]);
+		if (pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]))
+			exit (201);
 		i++;
 	}
-	/*
-	i = 0;
-	while (i < THREADS)
-	{
-		if (pthread_join(scene->threads[i].self, NULL))
-		{
-			exit (200);
-		}
-		i++;
-	}	
-	*/
 }
 
 t_vect	get_random_disk_sample(uint32_t *state)
@@ -529,7 +528,7 @@ t_vect	defocus_sample(t_camera camera, uint32_t *state)
 
 void	*set_rendering(void *args)
 {
-	int			aa_sample;
+	int			sample_count;
 	uint32_t	x;
 	uint32_t	y;
 	t_ray		ray;
@@ -539,12 +538,11 @@ void	*set_rendering(void *args)
 
 	thread = args;
 	thread->iterations = 0;
-	while (true)
+	//pthread_mutex_lock(&thread->scene->stop_flag);
+	while (thread->scene->stop == false)
 	{
-		// Scene-wise | not thread-wise --> create back-up img with unclamped values being static and accessing
-		// directly with index should make quite fast
+		//pthread_mutex_unlock(&thread->scene->stop_flag);
 		thread->iterations++;
-		color = new_color(0, 0, 0);
 		x = thread->x_start;
 		y = thread->y_start;
 		while (y < thread->y_end)
@@ -552,9 +550,9 @@ void	*set_rendering(void *args)
 			x = thread->x_start;
 			while (x < thread->x_end)
 			{
-				aa_sample = 0;
+				sample_count = 0;
 				color = new_color(0, 0, 0);
-				while(aa_sample < SPP)
+				while(sample_count < SPP)
 				{
 					//better offset | stratified offset etc...
 					ray.origin = defocus_sample(thread->scene->camera, thread->state);
@@ -562,41 +560,38 @@ void	*set_rendering(void *args)
 					ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
 					color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
 					//color = calc_pixel_color_normal(thread->scene, ray);
-					aa_sample++;
+					sample_count++;
 				}
-				color = clamp_vect(vect_simple_mult(color, 1 / (float)aa_sample), 0.0, 1.0);
+				color = vect_simple_mult(color, 1 / (float)sample_count);
 				test_progresive(thread->scene, x, y, color, thread->iterations);
+				//color = clamp_vect(vect_simple_mult(color, 1 / (float)sample_count), 0.0, 1.0);
 				//safe_pixel_put(thread->scene, x, y, color);
 				thread->pix_rendered++;
 				x += thread->x_increment;
 			}
 			y++;
 		}
+		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);\
+		//pthread_mutex_lock(&thread->scene->stop_flag);
 	}
+	//pthread_mutex_unlock(&thread->scene->stop_flag);
 	free(thread->state);
-	printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
+	//printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
 	return (NULL);
 }
 
 void	main_loop(void *sc)
 {
 	t_scene		*scene;
-	char		*fps;
-	double		time;
 
 	scene = sc;
 	if (!scene->choose_file)
 		return ;
 	set_new_image(scene);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-	time = mlx_get_time();
+	scene->time = mlx_get_time();
 	init_render(scene);
-	time = mlx_get_time() - time;
 	printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
-	printf("after threads || %f\n", time);
-	fps = ft_itoa((int)round(1 / scene->mlx->delta_time));
-	mlx_set_window_title(scene->mlx, fps);
-	free(fps);
 }
 
 bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -608,7 +603,6 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	t_vect	point;
 	t_vect	normal;
 
-	//careful with dot products close to 0 || floating point etc...
 	normal = fig.disk.normal;
 	denominator = vect_dot(normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
@@ -761,8 +755,8 @@ void	init_camera(t_scene *scene)
 
 	scene->camera.origin = new_vect(0.0, 6.0, 10);
 	scene->camera.orientation = unit_vect(new_vect(0, 0.0, -1));
-	//scene->camera.origin = new_vect(8, 3.3, 4);
-	//scene->camera.orientation = unit_vect(new_vect(-1, -0.5, -1));
+	//scene->camera.origin = new_vect(0, 0, 10);
+	//scene->camera.orientation = unit_vect(new_vect(0, 0, -1));
 	//scene->camera.origin = new_vect(-5.0, 16.0, 11.0);
 	//scene->camera.orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//scene->camera.origin = new_vect(20.0, 3.0, -0.0);
@@ -1044,15 +1038,15 @@ void	init_figures(t_scene *scene)
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
 
-	fig.quad.u_vect = new_vect(-15.0, 0.0, -15.0);
-	fig.quad.v_vect = new_vect(6.0, 15.0, 0.0);
-	fig.quad.origin = new_vect(-30, 20.0, 5);
+	fig.quad.u_vect = new_vect(-20.0, 0.0, -20.0);
+	fig.quad.v_vect = new_vect(9.0, 20.0, 0.0);
+	fig.quad.origin = new_vect(-50, 20.0, 5);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.1;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 18.0;
-	mat.type = LAMBERTIAN;
+	mat.emission_intensity = 8.0;
+	mat.type = EMISSIVE;
 	init_object(scene, fig, mat, QUAD);
 
 	fig.plane.center = new_vect(0, 0.0, 0);
@@ -1168,7 +1162,7 @@ void	init_figures(t_scene *scene)
 	fig.sphere.radius = 1.5;
 	mat.color = hexa_to_vect(YELLOW);
 	mat.specular = 0.1;
-	mat.metal_roughness = 0.81;
+	mat.metal_roughness = 0.51;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 12.0;
 	mat.refraction_index = 1.3;
@@ -1275,6 +1269,18 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.type = METAL;
 	create_box(scene, center, u, v, mat, 0.5, 2, 6);
+
+
+	fig.sphere.center = new_vect(0.0, -0.8, 0.0);
+	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
+	mat.color = hexa_to_vect(BLACK);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 1.5;
+	mat.type = LAMBERTIAN;
+	//init_object(scene, fig, mat, PLANE);
 }
 
 void	init_scene(t_scene *scene)
@@ -1282,12 +1288,15 @@ void	init_scene(t_scene *scene)
 	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
 	scene->height = WINH;
-	scene->amb_light = AMB;
+	scene->amb_light = AMB_LIGHT;
 	scene->aspect_ratio = scene->width / (float)scene->height;
 	scene->choose_file = 1;
 	scene->current_file = 0;
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
+	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	pthread_mutex_init(&scene->stop_flag, NULL);
+	scene->stop = false;
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
 	init_lights(scene);
@@ -1321,7 +1330,8 @@ void	wait_for_threads(t_scene *scene)
 			exit (200);
 		}
 		i++;
-	}			
+	}
+	pthread_mutex_destroy(&scene->stop_flag);
 }
 
 int	main(int argc, char **argv)
@@ -1338,9 +1348,11 @@ int	main(int argc, char **argv)
 	mlx_resize_hook(scene.mlx, resize_minirt, &scene);
 	//mlx_loop_hook(scene.mlx, main_loop, &scene);
 	mlx_loop(scene.mlx);
+	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
+	free(scene.cumulative_image);
 	free_objects(&scene.objects);
 	free_objects(&scene.lights);
 	//free_buttons(scene.buttons);
