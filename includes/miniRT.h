@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 14:12:38 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/11 17:01:59 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		632
+# define WINH 		492
 
 # define THREADS 	8
 
@@ -76,9 +76,11 @@ typedef struct s_thread
 	float			time_hit;
 	struct s_scene	*scene;
 	uint32_t		*state;
+	uint32_t		current_x;
 	uint32_t		x_start;
 	uint32_t		x_end;
 	uint32_t		x_increment;
+	uint32_t		current_y;
 	uint32_t		y_start;
 	uint32_t		y_end;
 }					t_thread;
@@ -86,8 +88,7 @@ typedef struct s_thread
 typedef struct s_thread_backup
 {
 	int				iterations;
-	uint32_t		y_start;
-	uint32_t		y_end;
+	uint32_t		current_y;
 }					t_thread_backup;
 
 typedef enum e_mat_type
@@ -290,27 +291,30 @@ typedef struct s_bresenham
 	float		fade_comp[4];
 }           	t_bresenham;
 
-int get_rgba(int r, int g, int b, int a);
+int 		get_rgba(int r, int g, int b, int a);
 
-int get_r(int rgba);
-int get_g(int rgba);
-int get_b(int rgba);
-int get_a(int rgba);
+int 		get_r(int rgba);
+int 		get_g(int rgba);
+int 		get_b(int rgba);
+int 		get_a(int rgba);
 
-void	main_loop(void *sc);
-void	recalculate_view(t_scene *scene);
+void		main_loop(void *sc);
+void		recalculate_view(t_scene *scene);
 
-void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_vect color);
-void	safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color);
+void		wait_for_threads(t_scene *scene);
+void		wait_for_threads_and_backup(t_scene *scene);
 
-void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
-void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
-void	write_str(t_scene *scene, char *msg, int *xy, int size);
+void		safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_vect color);
+void		safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color);
 
-void	draw_file_menu(t_scene *scene);
-void	draw_buttons(t_button *buttons, t_scene *scene);
+void		init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
+void		calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
+void		write_str(t_scene *scene, char *msg, int *xy, int size);
 
-void	set_new_image(t_scene *scene);
+void		draw_file_menu(t_scene *scene);
+void		draw_buttons(t_button *buttons, t_scene *scene);
+
+void		set_new_image(t_scene *scene);
 
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 

@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 14:28:18 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/11 17:45:17 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,7 +251,7 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 		{
 			camera->focus_dist -= 0.5;
 			if (camera->focus_dist < 0)
-				camera->focus_dist = 0;
+				camera->focus_dist = 0.1;
 		}
 		else
 			camera->focus_dist += 0.5;
@@ -291,20 +291,29 @@ void	write_ppm(mlx_image_t *image, int fd, char *filename)
 	uint32_t	y;
 	uint8_t		*pixel;
 
-	x = 0;
 	y = 0;
-	ft_printf(STDOUT_FILENO, "Exporting %i x %i image named: %s\n", image->width, image->height, filename);
+	pixel = NULL;
+	ft_printf(STDOUT_FILENO, "\n\nExporting %i x %i image\n", image->width, image->height);
 	ft_printf(fd, "P3\n");
 	ft_printf(fd, "%i %i\n", image->width, image->height);
 	ft_printf(fd, "255\n");
 	while (y < image->height)
 	{
+		x = 0;
+		pixel = &image->pixels[((y * image->width)) * sizeof(uint32_t)];
 		while (x < image->width)
 		{
-			
+			ft_printf(fd, "%i %i %i", *(pixel), *(pixel + 1), *(pixel + 2));
+			x++;
+			pixel = pixel + sizeof(uint32_t);
+			if (x < image->width)
+				ft_printf(fd, "  ");
 		}
+		ft_printf(fd, "\n");
+		y++;
+		ft_printf(STDERR_FILENO, "--| %i%% |--\r", (int)((y / (float)image->height) * 100));
 	}
-
+	ft_printf(STDOUT_FILENO, "Image exported succesfully to \"%s\"\n\n", filename);
 }
 int	export_to_ppm(mlx_image_t *image)
 {
@@ -312,8 +321,9 @@ int	export_to_ppm(mlx_image_t *image)
 	char	*filename;
 
 	fd = 0;
-	filename = ft_itoa((int)(mlx_get_time() * mlx_get_time() * 100000));
-	filename = ft_strattach("/img/", &filename);
+	filename = ft_itoa((int)(mlx_get_time() * mlx_get_time() * 1000));
+	filename = ft_strattach("img/exported/", &filename);
+	filename = ft_strappend(&filename, ".ppm");
 	fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fd < 0)
 	{
@@ -354,23 +364,14 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
 	}
-	else if (key_data.key == MLX_KEY_X && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
+	else if (scene->edit_mode == false && key_data.key == MLX_KEY_X && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
 	{
 		scene->stop = true;
-		wait_for_threads(scene);
-		scene->do_backup == true;
+		wait_for_threads_and_backup(scene);
+		scene->do_backup = true;
 		scene->stop = false;
 		if (export_to_ppm(scene->image))
 			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
-		main_loop(scene);
-	}
-	else if (scene->edit_mode == true && is_camera_key_down(key_data))
-	{
-		scene->stop = true;
-		wait_for_threads(scene);
-		scene->stop = false;
-		move_camera(&scene->camera, &scene->back_up_camera, key_data);
-		recalculate_view(scene);
 		main_loop(scene);
 	}
 	else if (scene->edit_mode == false && key_data.key == MLX_KEY_E && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
@@ -380,6 +381,15 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		scene->stop = false;
 		scene->edit_mode = true;
 		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
+		main_loop(scene);
+	}
+	else if (scene->edit_mode == true && is_camera_key_down(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		move_camera(&scene->camera, &scene->back_up_camera, key_data);
+		recalculate_view(scene);
 		main_loop(scene);
 	}
 	else if (scene->edit_mode == true && key_data.key == MLX_KEY_R && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
@@ -749,22 +759,19 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 
 void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
 {
-	thread->y_start = back_up->y_start;
-	thread->y_end = back_up->y_end;
+	thread->current_y = back_up->current_y;
 	thread->iterations = back_up->iterations;
 }
 
 void	set_thread_default(t_thread *thread)
 {
-	thread->y_start = 0;
-	thread->y_end = thread->scene->height;
+	thread->current_y = 0;
 	thread->iterations = 1;
 }
 
-void	set_thread(t_thread *thread, t_thread_backup *back_up)
+void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup)
 {
-	printf("ID: %i || Backup: %p\n", thread->id, back_up);
-	if (back_up == true)
+	if (do_backup)
 	{
 		set_thread_backup(thread, back_up);
 	}
@@ -772,6 +779,9 @@ void	set_thread(t_thread *thread, t_thread_backup *back_up)
 	{
 		set_thread_default(thread);		
 	}
+	thread->y_start = 0;
+	thread->y_end = thread->scene->height;
+	thread->current_x = 0;
 	thread->x_start = thread->id;
 	thread->x_end = thread->scene->width;
 	thread->x_increment = THREADS;
@@ -795,14 +805,14 @@ void	init_render(t_scene *scene)
 	{
 		scene->threads[i].id = i;
 		scene->threads[i].scene = scene;
-		set_thread(&scene->threads[i], &scene->threads_backup[i]);
+		set_thread(&scene->threads[i], &scene->threads_backup[i], scene->do_backup);
 		if (pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]))
 			exit (201);
 		i++;
 	}
 	if (scene->do_backup)
 	{
-		scene->do_backup == false;
+		scene->do_backup = false;
 		ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	}
 }
@@ -868,8 +878,6 @@ void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
 
 void	*set_rendering(void *args)
 {
-	uint32_t	x;
-	uint32_t	y;
 	t_thread 	*thread;
 
 	thread = args;
@@ -877,20 +885,21 @@ void	*set_rendering(void *args)
 	while (thread->scene->stop == false)
 	{
 		//pthread_mutex_unlock(&thread->scene->stop_flag);
-		y = thread->y_start;
-		while (y < thread->y_end && (thread->scene->stop == false))
+		if (thread->current_y >= thread->y_end)
+			thread->current_y = thread->y_start;
+		while (thread->current_y < thread->y_end && (thread->scene->stop == false))
 		{
-			x = thread->x_start;
-			while (x < thread->x_end)
+			thread->current_x = thread->x_start;
+			while (thread->current_x < thread->x_end)
 			{
 				if (thread->scene->edit_mode == true)
-					edit_mode(thread, x, y);
+					edit_mode(thread, thread->current_x, thread->current_y);
 				else
-					render_mode(thread, x, y);
+					render_mode(thread, thread->current_x, thread->current_y);
 				thread->pix_rendered++;
-				x += thread->x_increment;
+				thread->current_x += thread->x_increment;
 			}
-			y++;
+			thread->current_y++;
 		}
 		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);\
 		thread->iterations++;
@@ -909,8 +918,11 @@ void	main_loop(void *sc)
 	scene = sc;
 	if (!scene->choose_file)
 		return ;
-	set_new_image(scene);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	if (!scene->do_backup)
+	{	
+		set_new_image(scene);
+		mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	}
 	scene->time = mlx_get_time();
 	init_render(scene);
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
@@ -1500,6 +1512,7 @@ void	init_scene(t_scene *scene)
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	pthread_mutex_init(&scene->stop_flag, NULL);
 	scene->stop = false;
 	scene->edit_mode = false;
@@ -1541,14 +1554,15 @@ void	wait_for_threads(t_scene *scene)
 	}
 }
 
-void	wait_for_threadsbackup_and(t_scene *scene)
+void	wait_for_threads_and_backup(t_scene *scene)
 {
 	int i;
 	
 	i = 0;
 	while (i < THREADS)
 	{
-
+		scene->threads_backup[i].iterations = scene->threads[i].iterations;
+		scene->threads_backup[i].current_y = scene->threads[i].current_y;
 		if (pthread_join(scene->threads[i].self, NULL))
 		{
 			exit (200);
