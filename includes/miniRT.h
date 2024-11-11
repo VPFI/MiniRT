@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 03:29:21 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/11 14:12:38 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@
 
 # define AIR_REF_INDEX	1.0003
 
+# define ERR_NOFILE_MSG		"miniRT: no such file or dir: %s\n"
+# define ERR_PERM_MSG		"miniRT: permission denied: %s\n"
+# define ERR_STD_MSG		"miniRT: Unexpected error\n"
+
 typedef struct s_vect	t_color;
 
 typedef struct s_object t_object;
@@ -78,6 +82,13 @@ typedef struct s_thread
 	uint32_t		y_start;
 	uint32_t		y_end;
 }					t_thread;
+
+typedef struct s_thread_backup
+{
+	int				iterations;
+	uint32_t		y_start;
+	uint32_t		y_end;
+}					t_thread_backup;
 
 typedef enum e_mat_type
 {
@@ -243,6 +254,8 @@ typedef struct s_scene
 	mlx_image_t		*image;
 	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
+	t_thread_backup	threads_backup[THREADS];
+	bool			do_backup;
 	bool			stop;
 	bool			edit_mode;
 	pthread_mutex_t	stop_flag;

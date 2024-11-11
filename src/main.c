@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 03:34:41 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/11 14:28:18 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,6 +273,7 @@ int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 
 void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 {
+	//control for infinite moving overflows etc....
 	if (check_reset(camera, backup, key_data))
 		return ;
 	else if (check_rotations(camera, key_data))
@@ -284,11 +285,59 @@ void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 	return ;
 }
 
+void	write_ppm(mlx_image_t *image, int fd, char *filename)
+{
+	uint32_t	x;
+	uint32_t	y;
+	uint8_t		*pixel;
+
+	x = 0;
+	y = 0;
+	ft_printf(STDOUT_FILENO, "Exporting %i x %i image named: %s\n", image->width, image->height, filename);
+	ft_printf(fd, "P3\n");
+	ft_printf(fd, "%i %i\n", image->width, image->height);
+	ft_printf(fd, "255\n");
+	while (y < image->height)
+	{
+		while (x < image->width)
+		{
+			
+		}
+	}
+
+}
+int	export_to_ppm(mlx_image_t *image)
+{
+	int		fd;
+	char	*filename;
+
+	fd = 0;
+	filename = ft_itoa((int)(mlx_get_time() * mlx_get_time() * 100000));
+	filename = ft_strattach("/img/", &filename);
+	fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0644);
+	if (fd < 0)
+	{
+		if (access(filename, F_OK))
+			ft_printf(STDERR_FILENO, ERR_NOFILE_MSG);
+		else if (access(filename, R_OK))
+			ft_printf(STDERR_FILENO, ERR_PERM_MSG);
+		else
+			ft_printf(STDERR_FILENO, ERR_STD_MSG);
+		free(filename);
+		return (1);
+	}
+	write_ppm(image, fd, filename);
+	close(fd);
+	free(filename);
+	return (0);
+}
+
 void	key_down(mlx_key_data_t key_data, void *sc)
 {
 	t_scene	*scene;
 
 	scene = sc;
+	// agrupate scene stop | wait threads | scene stop  |+| specific functionality
 	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
 	{
 		//pthread_mutex_lock(&scene->stop_flag);
@@ -304,6 +353,16 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		set_new_image(scene);
 		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
+	}
+	else if (key_data.key == MLX_KEY_X && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->do_backup == true;
+		scene->stop = false;
+		if (export_to_ppm(scene->image))
+			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
+		main_loop(scene);
 	}
 	else if (scene->edit_mode == true && is_camera_key_down(key_data))
 	{
@@ -688,10 +747,31 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	return (background);
 }
 
-void	set_thread(t_thread *thread)
+void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
+{
+	thread->y_start = back_up->y_start;
+	thread->y_end = back_up->y_end;
+	thread->iterations = back_up->iterations;
+}
+
+void	set_thread_default(t_thread *thread)
 {
 	thread->y_start = 0;
 	thread->y_end = thread->scene->height;
+	thread->iterations = 1;
+}
+
+void	set_thread(t_thread *thread, t_thread_backup *back_up)
+{
+	printf("ID: %i || Backup: %p\n", thread->id, back_up);
+	if (back_up == true)
+	{
+		set_thread_backup(thread, back_up);
+	}
+	else
+	{
+		set_thread_default(thread);		
+	}
 	thread->x_start = thread->id;
 	thread->x_end = thread->scene->width;
 	thread->x_increment = THREADS;
@@ -699,7 +779,9 @@ void	set_thread(t_thread *thread)
 	thread->time_hit = 0;
 	thread->state = malloc(sizeof(uint32_t));
 	if (!thread->state)
+	{
 		exit (205);
+	}
 	*(thread->state) = mlx_get_time() * (thread->id + 1) * 123456;
 	//printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
 }
@@ -713,10 +795,15 @@ void	init_render(t_scene *scene)
 	{
 		scene->threads[i].id = i;
 		scene->threads[i].scene = scene;
-		set_thread(&scene->threads[i]);
+		set_thread(&scene->threads[i], &scene->threads_backup[i]);
 		if (pthread_create(&scene->threads[i].self, NULL, &set_rendering, (void *)&scene->threads[i]))
 			exit (201);
 		i++;
+	}
+	if (scene->do_backup)
+	{
+		scene->do_backup == false;
+		ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	}
 }
 
@@ -786,7 +873,6 @@ void	*set_rendering(void *args)
 	t_thread 	*thread;
 
 	thread = args;
-	thread->iterations = 1;
 	//pthread_mutex_lock(&thread->scene->stop_flag);
 	while (thread->scene->stop == false)
 	{
@@ -991,7 +1077,7 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 
 	scene = sc;
 	(void)mods;
-	if (button == MLX_MOUSE_BUTTON_RIGHT && action == MLX_PRESS)
+	if (button == MLX_MOUSE_BUTTON_LEFT && action == MLX_PRESS)
 		scene->choose_file = 1;
 }
 
@@ -1416,6 +1502,8 @@ void	init_scene(t_scene *scene)
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	pthread_mutex_init(&scene->stop_flag, NULL);
 	scene->stop = false;
+	scene->edit_mode = false;
+	scene->do_backup = false;
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
 	init_lights(scene);
@@ -1451,7 +1539,22 @@ void	wait_for_threads(t_scene *scene)
 		}
 		i++;
 	}
-	pthread_mutex_destroy(&scene->stop_flag);
+}
+
+void	wait_for_threadsbackup_and(t_scene *scene)
+{
+	int i;
+	
+	i = 0;
+	while (i < THREADS)
+	{
+
+		if (pthread_join(scene->threads[i].self, NULL))
+		{
+			exit (200);
+		}
+		i++;
+	}
 }
 
 int	main(int argc, char **argv)
@@ -1470,6 +1573,7 @@ int	main(int argc, char **argv)
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
+	pthread_mutex_destroy(&scene.stop_flag);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
 	free(scene.cumulative_image);
