@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/10 21:38:27 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/11 03:34:41 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,9 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_F
 		|| key_data.key == MLX_KEY_G
 		|| key_data.key == MLX_KEY_V
-		|| key_data.key == MLX_KEY_T)
+		|| key_data.key == MLX_KEY_T
+		|| key_data.key == MLX_KEY_Q
+		|| key_data.key == MLX_KEY_E)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -141,77 +143,144 @@ int		is_camera_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
-void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
+int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_W)
 	{
 		camera->orientation.y += 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
 		camera->orientation.x -= 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
 		camera->orientation.y -= 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
 		camera->orientation.x += 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
 	}
-//---------------------------------------------------------------------
-	else if (key_data.key == MLX_KEY_UP)
+	else if (key_data.key == MLX_KEY_Q)
+	{
+		camera->orientation.z -= 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_E)
+	{
+		camera->orientation.z += 0.25;
+		print_vec(unit_vect(camera->orientation));
+		return (1);
+	}
+	return (0);
+}
+int	check_translations(t_camera *camera, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_UP)
 	{
 		camera->origin = vect_add(camera->origin, vect_simple_mult(camera->orientation, 0.5));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_DOWN)
 	{
-		camera->origin = vect_add(camera->origin, vect_simple_mult(
-			vect_simple_mult(camera->orientation, -1.0), 0.5));
+		camera->origin = vect_subtract(camera->origin, vect_simple_mult(camera->orientation, 0.5));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_RIGHT)
 	{
-		camera->origin.x += 0.5;
+		camera->origin = vect_add(camera->origin, vect_simple_mult(camera->u, 0.5));
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_LEFT)
 	{
-		camera->origin.x -= 0.5;
+		camera->origin = vect_subtract(camera->origin, vect_simple_mult(camera->u, 0.5));
+		return (1);
 	}
-//---------------------------------------------------------------------
 	else if (key_data.key == MLX_KEY_SPACE)
 	{
 		camera->origin.y += 0.5;
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
 	{
 		camera->origin.y -= 0.5;
+		return (1);
 	}
-	else if (key_data.key == MLX_KEY_F)
+	return (0);
+}
+int	check_settings(t_camera *camera, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_F)
 	{
 		if (key_data.modifier == MLX_CONTROL)
+		{
 			camera->fov -= 1;
+			if (camera->fov < 0)
+				camera->fov = 0;
+		}
 		else
 			camera->fov += 1;
+		printf("FOV: %f\n", camera->fov);
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_G)
 	{
 		if (key_data.modifier == MLX_CONTROL)
+		{
 			camera->defocus_angle -= 0.25;
+			if (camera->defocus_angle < 0)
+				camera->defocus_angle = 0;
+		}
 		else
 			camera->defocus_angle += 0.25;
+		printf("DEFOCUS ANGLE: %f\n", camera->defocus_angle);
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_V)
 	{
-		camera->focus_dist += 0.5;
 		if (key_data.modifier == MLX_CONTROL)
+		{
 			camera->focus_dist -= 0.5;
+			if (camera->focus_dist < 0)
+				camera->focus_dist = 0;
+		}
 		else
-			camera->defocus_angle += 0.25;
+			camera->focus_dist += 0.5;
+		printf("FOCUS DIST: %f\n", camera->focus_dist);
+		return (1);
 	}
-	else if (key_data.key == MLX_KEY_T)
+	return (0);
+}
+
+int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_T)
 	{
 		*camera = *backup;
+		return (1);
 	}
+	return (0);
+}
+
+void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
+{
+	if (check_reset(camera, backup, key_data))
+		return ;
+	else if (check_rotations(camera, key_data))
+		return ;
+	else if (check_translations(camera, key_data))
+		return ;
+	else if (check_settings(camera, key_data))
+		return ;
 	return ;
 }
 
@@ -272,6 +341,19 @@ t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state
 
 	aux1 = vect_simple_mult(camera.pixel_delta_h, (x + (fast_rand(state) - 0.5)));
 	aux2 = vect_simple_mult(camera.pixel_delta_v, (y + (fast_rand(state) - 0.5)));
+	res = vect_add(aux1, aux2);
+	res = vect_add(res, camera.viewport_pixel0);
+	return (res);
+}
+
+t_vect	set_pixel(t_camera camera, uint32_t x, uint32_t y)
+{
+	t_vect	res;
+	t_vect	aux1;
+	t_vect	aux2;
+
+	aux1 = vect_simple_mult(camera.pixel_delta_h, x);
+	aux2 = vect_simple_mult(camera.pixel_delta_v, y);
 	res = vect_add(aux1, aux2);
 	res = vect_add(res, camera.viewport_pixel0);
 	return (res);
@@ -619,7 +701,7 @@ void	set_thread(t_thread *thread)
 	if (!thread->state)
 		exit (205);
 	*(thread->state) = mlx_get_time() * (thread->id + 1) * 123456;
-	printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
+	//printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
 }
 
 void	init_render(t_scene *scene)
@@ -662,62 +744,70 @@ t_vect	defocus_sample(t_camera camera, uint32_t *state)
 	return (vect_add(camera.origin, res));	
  }
 
-void	*set_rendering(void *args)
+void	edit_mode(t_thread *thread, uint32_t x, uint32_t y)
 {
-	int			sample_count;
-	uint32_t	x;
-	uint32_t	y;
 	t_ray		ray;
 	t_vect		pixel_offset;
 	t_color		color;
+
+	ray.origin = defocus_sample(thread->scene->camera, thread->state);
+	pixel_offset = set_pixel(thread->scene->camera, x, y);
+	ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+	color = calc_pixel_color_normal(thread->scene, ray);
+	color = clamp_vect(color, 0.0, 1.0);
+	safe_pixel_put(thread->scene, x, y, color);
+}
+
+void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
+{
+	int			sample_count;
+	t_ray		ray;
+	t_vect		pixel_offset;
+	t_color		color;
+
+	sample_count = 0;
+	color = new_color(0, 0, 0);
+	while(sample_count < SPP)
+	{
+		ray.origin = defocus_sample(thread->scene->camera, thread->state);
+		pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
+		ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+		color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
+		sample_count++;
+	}
+	color = vect_simple_mult(color, 1 / (float)sample_count);
+	test_progresive(thread->scene, x, y, color, thread->iterations);
+}
+
+void	*set_rendering(void *args)
+{
+	uint32_t	x;
+	uint32_t	y;
 	t_thread 	*thread;
 
 	thread = args;
-	thread->iterations = 0;
+	thread->iterations = 1;
 	//pthread_mutex_lock(&thread->scene->stop_flag);
 	while (thread->scene->stop == false)
 	{
 		//pthread_mutex_unlock(&thread->scene->stop_flag);
-		thread->iterations++;
-		x = thread->x_start;
 		y = thread->y_start;
 		while (y < thread->y_end && (thread->scene->stop == false))
 		{
 			x = thread->x_start;
 			while (x < thread->x_end)
 			{
-				sample_count = 0;
-				color = new_color(0, 0, 0);
 				if (thread->scene->edit_mode == true)
-					sample_count = SPP - 1;
-				while(sample_count < SPP)
-				{
-					//better offset | stratified offset etc...
-					ray.origin = defocus_sample(thread->scene->camera, thread->state);
-					pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
-					ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-					if (thread->scene->edit_mode)
-						color = calc_pixel_color_normal(thread->scene, ray);
-					else
-						color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
-					sample_count++;
-				}
-				if (thread->scene->edit_mode)
-				{
-					color = clamp_vect(color, 0.0, 1.0);
-					safe_pixel_put(thread->scene, x, y, color);
-				}
+					edit_mode(thread, x, y);
 				else
-				{
-					color = vect_simple_mult(color, 1 / (float)sample_count);
-					test_progresive(thread->scene, x, y, color, thread->iterations);
-				}
+					render_mode(thread, x, y);
 				thread->pix_rendered++;
 				x += thread->x_increment;
 			}
 			y++;
 		}
 		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);\
+		thread->iterations++;
 		//pthread_mutex_lock(&thread->scene->stop_flag);
 	}
 	//pthread_mutex_unlock(&thread->scene->stop_flag);
@@ -737,7 +827,7 @@ void	main_loop(void *sc)
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	scene->time = mlx_get_time();
 	init_render(scene);
-	printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
+	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
 }
 
 bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -874,7 +964,18 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 		draw_file_menu(scene);
 	}
 	else
-		mlx_resize_image(scene->image, scene->width, scene->height);
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		if (scene->cumulative_image)
+			free(scene->cumulative_image);
+		scene->width = width;
+		scene->height = height;
+		recalculate_view(scene);
+		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+		main_loop(scene);
+	}
 }
 
 void	set_new_image(t_scene *scene)
@@ -897,6 +998,8 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 void	recalculate_view(t_scene *scene)
 {
 	t_vect temp;
+
+	scene->camera.orientation = unit_vect(scene->camera.orientation);
 
 	scene->camera.viewport_height = 2.0 * tanf((scene->camera.fov * M_PI / 180) * 0.5) * scene->camera.focus_dist;
 	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
