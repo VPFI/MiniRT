@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 17:45:17 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 01:35:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,8 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_V
 		|| key_data.key == MLX_KEY_T
 		|| key_data.key == MLX_KEY_Q
-		|| key_data.key == MLX_KEY_E)
+		|| key_data.key == MLX_KEY_E
+		|| key_data.key == MLX_KEY_O)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -137,6 +138,19 @@ int		is_camera_key_down(mlx_key_data_t key_data)
 	if (is_arrow_key_down(key_data)
 		|| is_wasd_key_down(key_data)
 		|| is_extra_key_down(key_data))
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int		is_num_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_1
+		|| key_data.key == MLX_KEY_2
+		|| key_data.key == MLX_KEY_3
+		|| key_data.key == MLX_KEY_4)
+		&& (key_data.action == MLX_PRESS))
 	{
 		return (1);
 	}
@@ -183,6 +197,7 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 	}
 	return (0);
 }
+
 int	check_translations(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_UP)
@@ -217,6 +232,7 @@ int	check_translations(t_camera *camera, mlx_key_data_t key_data)
 	}
 	return (0);
 }
+
 int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_F)
@@ -263,7 +279,14 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 
 int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 {
-	if (key_data.key == MLX_KEY_T)
+
+	if (key_data.key == MLX_KEY_O)
+	{
+		camera->origin = new_vect(0.0, 0.0, 0.0);
+		camera->orientation = new_vect(0.0, 0.0, -1.0);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_T)
 	{
 		*camera = *backup;
 		return (1);
@@ -282,6 +305,119 @@ void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 		return ;
 	else if (check_settings(camera, key_data))
 		return ;
+	return ;
+}
+
+int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_UP)
+	{
+		transformation.z += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_DOWN)
+	{
+		transformation.z -= 0.25;
+	}
+	else if (key_data.key == MLX_KEY_RIGHT)
+	{
+		transformation.x += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_LEFT)
+	{
+		transformation.x -= 0.25;
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation.y += 0.25;
+	}
+	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
+	{
+		transformation.y -= 0.25;
+	}
+	if (!zero_vect(transformation))
+	{
+		target_object->edit_origin(target_object, transformation);
+		return (1);
+	}
+	return (0);
+}
+
+t_object	*get_selected_object(t_object *objects)
+{
+	while (objects)
+	{
+		if (objects->selected == true)
+			return(objects);
+		objects = objects->next;	
+	}
+	return (NULL);
+}
+
+void	move_object(t_object *objects,  mlx_key_data_t key_data)
+{
+	//control for infinite moving overflows etc....
+	//reset for objects? just duplicate the init object list like lights etc...
+	t_object	*target_object;
+
+	target_object = get_selected_object(objects);
+	if (!target_object)
+		return ;
+	if (check_object_translations(target_object, key_data))
+		return ;
+	return ;
+}
+
+t_material	new_standard_material(void)
+{
+	t_material	mat;
+
+	mat.color = hexa_to_vect(WHITE);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	return (mat);
+}
+
+void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	if (key_data.key == MLX_KEY_1)
+	{
+		fig.sphere.center = new_vect(0.0, 0.0, -1.0);
+		fig.sphere.radius = 1.0;
+		init_object(scene, fig, mat, SPHERE);
+	}
+	else if (key_data.key == MLX_KEY_2)
+	{
+		fig.plane.center = new_vect(0.0, 0.0, -1.0);
+		fig.plane.normal = new_vect(0.0, 0.0, 1.0);
+		init_object(scene, fig, mat, PLANE);
+	}
+	else if (key_data.key == MLX_KEY_3)
+	{
+		fig.quad.origin = new_vect(0.0, 0.0, -1.0);
+		fig.quad.u_vect = new_vect(2.0, 0.0, 0.0);
+		fig.quad.v_vect = new_vect(0.0, 2.0, 0.0);
+		init_object(scene, fig, mat, QUAD);
+	}
+	else if (key_data.key == MLX_KEY_4)
+	{
+		fig.disk.center = new_vect(0.0, 0.0, -1.0);
+		fig.disk.normal = new_vect(0.0, 0.0, 1.0);
+		fig.disk.radius = 1.0;
+		init_object(scene, fig, mat, DISK);
+	}
 	return ;
 }
 
@@ -315,6 +451,7 @@ void	write_ppm(mlx_image_t *image, int fd, char *filename)
 	}
 	ft_printf(STDOUT_FILENO, "Image exported succesfully to \"%s\"\n\n", filename);
 }
+
 int	export_to_ppm(mlx_image_t *image)
 {
 	int		fd;
@@ -348,6 +485,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 
 	scene = sc;
 	// agrupate scene stop | wait threads | scene stop  |+| specific functionality
+	// make controls based on fov or other dynamic way?
 	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
 	{
 		//pthread_mutex_lock(&scene->stop_flag);
@@ -383,12 +521,24 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
 		main_loop(scene);
 	}
+	else if (scene->edit_mode == true && is_num_key_down(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		add_world_object(scene, key_data);
+		recalculate_view(scene);
+		main_loop(scene);
+	}
 	else if (scene->edit_mode == true && is_camera_key_down(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
 		scene->stop = false;
-		move_camera(&scene->camera, &scene->back_up_camera, key_data);
+		if (scene->object_selected)
+			move_object(scene->objects, key_data);
+		else
+			move_camera(&scene->camera, &scene->back_up_camera, key_data);
 		recalculate_view(scene);
 		main_loop(scene);
 	}
@@ -398,6 +548,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		wait_for_threads(scene);
 		scene->stop = false;
 		scene->edit_mode = false;
+		deselect_objects(scene->objects, &scene->object_selected);
 		main_loop(scene);
 	}
 }
@@ -487,11 +638,14 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 
 	if (ray_hit(scene, ray, &hit_info))
 	{
-		color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
+		if (hit_info.object->selected)
+			color = hexa_to_vect(WHITE);
+		else	
+			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 	}
 	else
 	{
-		color = new_color(0, 0.0, 0.0);
+		color = new_color(0.0, 0.0, 0.0);
 	}
 	return (color);
 }
@@ -830,7 +984,7 @@ t_vect	get_random_disk_sample(uint32_t *state)
 }
 
 t_vect	defocus_sample(t_camera camera, uint32_t *state)
- {
+{
 	t_vect	disk_sample;
 	t_vect	res;
 
@@ -838,8 +992,8 @@ t_vect	defocus_sample(t_camera camera, uint32_t *state)
 		return (camera.origin);
 	disk_sample = get_random_disk_sample(state);
 	res = vect_add(vect_simple_mult(camera.defocus_disk_u, disk_sample.x), vect_simple_mult(camera.defocus_disk_v, disk_sample.y));
-	return (vect_add(camera.origin, res));	
- }
+	return (vect_add(camera.origin, res));
+}
 
 void	edit_mode(t_thread *thread, uint32_t x, uint32_t y)
 {
@@ -901,7 +1055,7 @@ void	*set_rendering(void *args)
 			}
 			thread->current_y++;
 		}
-		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);\
+		//fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);
 		thread->iterations++;
 		//pthread_mutex_lock(&thread->scene->stop_flag);
 	}
@@ -926,6 +1080,12 @@ void	main_loop(void *sc)
 	scene->time = mlx_get_time();
 	init_render(scene);
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
+}
+
+void	translate_disk(t_object *object, t_vect transformation)
+{
+	object->figure.disk.center = vect_add(object->figure.disk.center, transformation);
+	return ;
 }
 
 bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -958,6 +1118,12 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	translate_quad(t_object *object, t_vect transformation)
+{
+	object->figure.quad.origin = vect_add(object->figure.quad.origin, transformation);
+	return ;
 }
 
 bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -997,6 +1163,12 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+void	translate_plane(t_object *object, t_vect transformation)
+{
+	object->figure.plane.center = vect_add(object->figure.plane.center, transformation);
+	return ;
+}
+
 bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	float	denominator;
@@ -1018,6 +1190,12 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = fig.plane.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	translate_sphere(t_object *object, t_vect transformation)
+{
+	object->figure.sphere.center = vect_add(object->figure.sphere.center, transformation);
+	return ;
 }
 
 bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -1083,14 +1261,54 @@ void	set_new_image(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 }
 
+void	deselect_objects(t_object *objects, bool *object_selected)
+{
+	while (objects)
+	{
+		objects->selected = false;
+		objects = objects->next;
+	}
+	*object_selected = false;
+}
+
+void	select_object(t_scene *scene, uint32_t x, uint32_t y)
+{
+	t_ray		ray;
+	t_vect		pixel_offset;
+	t_hit_info	hit_info;
+
+	ray.origin = scene->camera.origin;
+	pixel_offset = set_pixel(scene->camera, x, y);
+	ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+	if (ray_hit(scene, ray, &hit_info))
+	{
+		hit_info.object->selected = true;
+		scene->object_selected = true;
+	}
+}
+
 void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void *sc)
 {
 	t_scene *scene;
+	int32_t	x;
+	int32_t	y;
 
 	scene = sc;
 	(void)mods;
-	if (button == MLX_MOUSE_BUTTON_LEFT && action == MLX_PRESS)
-		scene->choose_file = 1;
+	if (scene->edit_mode == true
+		&& button == MLX_MOUSE_BUTTON_LEFT
+		&& action == MLX_PRESS)
+	{
+		mlx_get_mouse_pos(scene->mlx, &x, &y);
+		deselect_objects(scene->objects, &scene->object_selected);
+		select_object(scene, x, y);
+	}
+	else if (scene->edit_mode == true
+		&& button == MLX_MOUSE_BUTTON_RIGHT
+		&& action == MLX_PRESS)
+	{
+		deselect_objects(scene->objects, &scene->object_selected);
+	}
 }
 
 void	recalculate_view(t_scene *scene)
@@ -1238,6 +1456,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_sphere;
+		new_obj->edit_origin = translate_sphere;
 		new_obj->next = NULL;
 	}
 	if (type == PLANE)
@@ -1253,6 +1472,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_plane;
+		new_obj->edit_origin = translate_plane;
 		new_obj->next = NULL;
 	}
 	if (type == QUAD)
@@ -1269,6 +1489,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_quad;
+		new_obj->edit_origin = translate_quad;
 		new_obj->next = NULL;
 	}
 	if (type == DISK)
@@ -1285,6 +1506,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_disk;
+		new_obj->edit_origin = translate_disk;
 		new_obj->next = NULL;
 	}
 	if (type == LIGHT)
@@ -1299,8 +1521,10 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = NULL;
+		new_obj->edit_origin = NULL;		
 		new_obj->next = NULL;
 	}
+	new_obj->selected = false;
 	if (mat.type == EMISSIVE)
 	{
 		new_light = (t_object *)malloc(sizeof(t_object));
@@ -1415,77 +1639,38 @@ void	init_figures(t_scene *scene)
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
 
-	fig.plane.center = new_vect(0, 0.0, -10.0);
-	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
-	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
+	fig.sphere.center = new_vect(0.0, 1.0, -4);
+	fig.sphere.radius = 1;
+	mat.color = hexa_to_vect(DEF_COLOR);
 	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.plane.center = new_vect(0, -10.0, 0);
-	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
-	mat.color = hexa_to_vect(SILVER);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.plane.center = new_vect(0, 10.0, 0);
-	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 0.9;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.plane.center = new_vect(-10.0, 0.0, 0);
-	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
-	mat.color = hexa_to_vect(GREEN);
-	mat.specular = 0.4;
-	mat.metal_roughness = 0.31;
-	mat.albedo = mat.color;
-	mat.refraction_index = 1.0;
-	mat.type = GLOSSY;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.plane.center = new_vect(10.0, 0.0, 0);
-	fig.plane.normal = unit_vect(new_vect(-1, 0, 0));
-	mat.color = hexa_to_vect(RED);
 	mat.specular = 0.2;
-	mat.metal_roughness = 0.51;
-	mat.albedo = mat.color;
-	mat.refraction_index = 1.0;
-	mat.type = GLOSSY;
-	init_object(scene, fig, mat, PLANE);
-
-	fig.sphere.center = new_vect(0.0, -5.0, -4);
-	fig.sphere.radius = 3;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.4;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.0;
-	mat.albedo = mat.color;
+	mat.metal_roughness = 0.1;
 	mat.refraction_index = 1.5;
-	mat.type = EMISSIVE;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, SPHERE);
 
-	t_vect u = new_vect(1.0, 0.0, 0.0);
-	t_vect v = new_vect(0.0, 1.0, 0.0);
-	t_vect center = new_vect(0.0, -5.0, -4);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.4;
-	mat.metal_roughness = 0.61;
+	fig.sphere.center = new_vect(2.0, 1.0, -4);
+	fig.sphere.radius = 1;
+	mat.color = hexa_to_vect(DEF_COLOR);
 	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
 	mat.refraction_index = 1.5;
-	mat.type = DIELECTRIC;
-	create_box(scene, center, u, v, mat, 3.1, 3.1, 3.1);
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
+	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
+	mat.color = hexa_to_vect(CYAN_GULF);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, PLANE);
 
 
 	fig.sphere.center = new_vect(0.0, -0.8, 0.0);
@@ -1517,6 +1702,7 @@ void	init_scene(t_scene *scene)
 	scene->stop = false;
 	scene->edit_mode = false;
 	scene->do_backup = false;
+	scene->object_selected = false;
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
 	init_lights(scene);
@@ -1573,6 +1759,7 @@ void	wait_for_threads_and_backup(t_scene *scene)
 
 int	main(int argc, char **argv)
 {
+	//check exit when clicking x on window
 	(void)argc;
 	(void)argv;
 	t_scene	scene;

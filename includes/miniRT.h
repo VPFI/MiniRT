@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/11 17:01:59 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 00:59:12 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,18 @@
 # define WINW 		632
 # define WINH 		492
 
-# define THREADS 	8
+# define THREADS 	6
 
 # define MAX_DEPTH  8
-# define SPP 		2
+# define SPP 		5
 
-# define DEFOCUS	1.0
-# define FOCUS_DIST	17.26 // 5.15
+# define DEFOCUS	0.0
+# define FOCUS_DIST	5 // 5.15
 # define FOV		70
 
-# define AMB		0
+# define AMB		1
 
-# define AMB_LIGHT	0.1
+# define AMB_LIGHT	0.8
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -246,7 +246,10 @@ typedef struct s_object
 	t_material		material;
 	t_fig_type		type;
 	struct s_object	*next;
+	bool			selected;
 	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
+	void			(*edit_origin)(t_object *object, t_vect transformation);
+	void			(*edit_orientation)(t_object *object, t_vect transformation);
 }					t_object;
 
 typedef struct s_scene
@@ -256,9 +259,10 @@ typedef struct s_scene
 	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
 	t_thread_backup	threads_backup[THREADS];
-	bool			do_backup;
 	bool			stop;
 	bool			edit_mode;
+	bool			do_backup;
+	bool			object_selected;
 	pthread_mutex_t	stop_flag;
 	float			time;
 	t_camera		camera;
@@ -300,6 +304,10 @@ int 		get_a(int rgba);
 
 void		main_loop(void *sc);
 void		recalculate_view(t_scene *scene);
+
+int			init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type);
+
+void		deselect_objects(t_object *objects, bool *object_selected);
 
 void		wait_for_threads(t_scene *scene);
 void		wait_for_threads_and_backup(t_scene *scene);
