@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 00:59:12 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 02:09:38 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,6 +301,8 @@ int 		get_r(int rgba);
 int 		get_g(int rgba);
 int 		get_b(int rgba);
 int 		get_a(int rgba);
+
+void		print_list(t_object *list);
 
 void		main_loop(void *sc);
 void		recalculate_view(t_scene *scene);

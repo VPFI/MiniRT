@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 01:35:16 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 02:36:33 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,8 @@ int		is_num_key_down(mlx_key_data_t key_data)
 	if ((key_data.key == MLX_KEY_1
 		|| key_data.key == MLX_KEY_2
 		|| key_data.key == MLX_KEY_3
-		|| key_data.key == MLX_KEY_4)
+		|| key_data.key == MLX_KEY_4
+		|| key_data.key == MLX_KEY_BACKSPACE)
 		&& (key_data.action == MLX_PRESS))
 	{
 		return (1);
@@ -421,6 +422,33 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	return ;
 }
 
+void	delete_world_object(t_scene *scene)
+{
+	t_object	*obj;
+	t_object	*prev_object;
+	t_object	*next_object;
+
+	obj = scene->objects;
+	prev_object = NULL;
+	next_object = NULL;
+	if (obj && obj->selected)
+		scene->objects = obj->next;
+	while (obj && !obj->selected)
+	{
+		if (obj->next && obj->next->selected)
+		{
+			prev_object = obj;
+			next_object = obj->next->next;
+		}
+		obj = obj->next;
+	}
+	if (prev_object)
+		prev_object->next = next_object;
+	if (obj && obj->selected)
+		free(obj);
+	deselect_objects(scene->objects, &scene->object_selected);
+}
+
 void	write_ppm(mlx_image_t *image, int fd, char *filename)
 {
 	uint32_t	x;
@@ -526,7 +554,10 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		scene->stop = true;
 		wait_for_threads(scene);
 		scene->stop = false;
-		add_world_object(scene, key_data);
+		if (key_data.key == MLX_KEY_BACKSPACE && scene->object_selected)
+			delete_world_object(scene);
+		else
+			add_world_object(scene, key_data);
 		recalculate_view(scene);
 		main_loop(scene);
 	}
