@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 02:36:33 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 15:59:47 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,13 @@ int		is_num_key_down(mlx_key_data_t key_data)
 	{
 		return (1);
 	}
+	return (0);
+}
+
+int	is_press_and_ctrl(mlx_key_data_t key_data)
+{
+	if (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL)
+		return (1);
 	return (0);
 }
 
@@ -507,49 +514,9 @@ int	export_to_ppm(mlx_image_t *image)
 	return (0);
 }
 
-void	key_down(mlx_key_data_t key_data, void *sc)
+void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
-	t_scene	*scene;
-
-	scene = sc;
-	// agrupate scene stop | wait threads | scene stop  |+| specific functionality
-	// make controls based on fov or other dynamic way?
-	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
-	{
-		//pthread_mutex_lock(&scene->stop_flag);
-		scene->stop = true;
-		//pthread_mutex_unlock(&scene->stop_flag);
-		close_all(scene);
-	}
-	else if (!scene->choose_file && is_arrow_key_down(key_data))
-		move_menu(scene, key_data.key);
-	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
-	{
-		scene->choose_file = 1;
-		set_new_image(scene);
-		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
-		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
-	}
-	else if (scene->edit_mode == false && key_data.key == MLX_KEY_X && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
-	{
-		scene->stop = true;
-		wait_for_threads_and_backup(scene);
-		scene->do_backup = true;
-		scene->stop = false;
-		if (export_to_ppm(scene->image))
-			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
-		main_loop(scene);
-	}
-	else if (scene->edit_mode == false && key_data.key == MLX_KEY_E && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
-	{
-		scene->stop = true;
-		wait_for_threads(scene);
-		scene->stop = false;
-		scene->edit_mode = true;
-		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
-		main_loop(scene);
-	}
-	else if (scene->edit_mode == true && is_num_key_down(key_data))
+	if (is_num_key_down(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
@@ -561,7 +528,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		recalculate_view(scene);
 		main_loop(scene);
 	}
-	else if (scene->edit_mode == true && is_camera_key_down(key_data))
+	else if (is_camera_key_down(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
@@ -573,7 +540,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		recalculate_view(scene);
 		main_loop(scene);
 	}
-	else if (scene->edit_mode == true && key_data.key == MLX_KEY_R && (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL))
+	else if (key_data.key == MLX_KEY_R && is_press_and_ctrl(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
@@ -582,6 +549,58 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		deselect_objects(scene->objects, &scene->object_selected);
 		main_loop(scene);
 	}
+}
+
+void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_X && is_press_and_ctrl(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->do_backup = true;
+		scene->stop = false;
+		if (export_to_ppm(scene->image))
+			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
+		main_loop(scene);
+	}
+	else if (key_data.key == MLX_KEY_E && is_press_and_ctrl(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		scene->edit_mode = true;
+		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
+		main_loop(scene);
+	}
+}
+
+void	key_down(mlx_key_data_t key_data, void *sc)
+{
+	t_scene	*scene;
+
+	scene = sc;
+	// agrupate scene stop | wait threads | scene stop  |+| specific functionality
+	// make controls based on fov or other dynamic way?
+	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
+	{
+		//pthread_mutex_lock(&scene->stop_mutex);
+		scene->stop = true;
+		//pthread_mutex_unlock(&scene->stop_mutex);
+		close_all(scene);
+	}
+	else if (!scene->choose_file && is_arrow_key_down(key_data))
+		move_menu(scene, key_data.key);
+	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
+	{
+		scene->choose_file = 1;
+		set_new_image(scene);
+		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
+		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
+	}
+	if (scene->edit_mode == false)
+		render_mode_hooks(scene, key_data);
+	else if (scene->edit_mode == true)
+		edit_mode_hooks(scene, key_data);
 }
 
 t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state)
@@ -946,6 +965,7 @@ void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
 {
 	thread->current_y = back_up->current_y;
 	thread->iterations = back_up->iterations;
+	printf("CREATED || thread: %i Y at: %i with %i iterations\n", thread->id, thread->current_y, thread->iterations);
 }
 
 void	set_thread_default(t_thread *thread)
@@ -1066,13 +1086,11 @@ void	*set_rendering(void *args)
 	t_thread 	*thread;
 
 	thread = args;
-	//pthread_mutex_lock(&thread->scene->stop_flag);
-	while (thread->scene->stop == false)
+	while (get_stop_status(thread->scene) == false)
 	{
-		//pthread_mutex_unlock(&thread->scene->stop_flag);
 		if (thread->current_y >= thread->y_end)
 			thread->current_y = thread->y_start;
-		while (thread->current_y < thread->y_end && (thread->scene->stop == false))
+		while (get_stop_status(thread->scene) == false && thread->current_y < thread->y_end)
 		{
 			thread->current_x = thread->x_start;
 			while (thread->current_x < thread->x_end)
@@ -1088,11 +1106,14 @@ void	*set_rendering(void *args)
 		}
 		//fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);
 		thread->iterations++;
-		//pthread_mutex_lock(&thread->scene->stop_flag);
 	}
-	//pthread_mutex_unlock(&thread->scene->stop_flag);
 	free(thread->state);
 	//printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
+	if (get_stop_status(thread->scene)== true)
+	{
+		thread->scene->threads_backup[thread->id].iterations = thread->iterations - 1;
+		thread->scene->threads_backup[thread->id].current_y = thread->current_y;
+	}
 	return (NULL);
 }
 
@@ -1729,7 +1750,7 @@ void	init_scene(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
-	pthread_mutex_init(&scene->stop_flag, NULL);
+	pthread_mutex_init(&scene->stop_mutex, NULL);
 	scene->stop = false;
 	scene->edit_mode = false;
 	scene->do_backup = false;
@@ -1771,21 +1792,28 @@ void	wait_for_threads(t_scene *scene)
 	}
 }
 
-void	wait_for_threads_and_backup(t_scene *scene)
+void	unset_stop_status(t_scene *scene)
 {
-	int i;
-	
-	i = 0;
-	while (i < THREADS)
-	{
-		scene->threads_backup[i].iterations = scene->threads[i].iterations;
-		scene->threads_backup[i].current_y = scene->threads[i].current_y;
-		if (pthread_join(scene->threads[i].self, NULL))
-		{
-			exit (200);
-		}
-		i++;
-	}
+	pthread_mutex_lock(&scene->stop_mutex);
+	scene->stop = false;
+	pthread_mutex_unlock(&scene->stop_mutex);
+}
+
+void	set_stop_status(t_scene *scene)
+{
+	pthread_mutex_lock(&scene->stop_mutex);
+	scene->stop = true;
+	pthread_mutex_unlock(&scene->stop_mutex);
+}
+
+bool	get_stop_status(t_scene *scene)
+{
+	bool res;
+
+	pthread_mutex_lock(&scene->stop_mutex);
+	res = scene->stop;
+	pthread_mutex_unlock(&scene->stop_mutex);
+	return (res);
 }
 
 int	main(int argc, char **argv)
@@ -1805,7 +1833,7 @@ int	main(int argc, char **argv)
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
-	pthread_mutex_destroy(&scene.stop_flag);
+	pthread_mutex_destroy(&scene.stop_mutex);
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
 	free(scene.cumulative_image);

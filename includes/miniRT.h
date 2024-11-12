@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 02:09:38 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/12 15:46:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,10 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		632
-# define WINH 		492
+# define WINW 		1400
+# define WINH 		800
 
-# define THREADS 	6
+# define THREADS 	8
 
 # define MAX_DEPTH  8
 # define SPP 		5
@@ -263,7 +263,7 @@ typedef struct s_scene
 	bool			edit_mode;
 	bool			do_backup;
 	bool			object_selected;
-	pthread_mutex_t	stop_flag;
+	pthread_mutex_t	stop_mutex;
 	float			time;
 	t_camera		camera;
 	t_camera		back_up_camera;
@@ -303,6 +303,10 @@ int 		get_b(int rgba);
 int 		get_a(int rgba);
 
 void		print_list(t_object *list);
+
+void		unset_stop_status(t_scene *scene);
+void		set_stop_status(t_scene *scene);
+bool		get_stop_status(t_scene *scene);
 
 void		main_loop(void *sc);
 void		recalculate_view(t_scene *scene);
