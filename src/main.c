@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 17:54:33 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 18:38:07 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,8 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_T
 		|| key_data.key == MLX_KEY_Q
 		|| key_data.key == MLX_KEY_E
-		|| key_data.key == MLX_KEY_O)
+		|| key_data.key == MLX_KEY_O
+		|| key_data.key == MLX_KEY_Z)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -291,7 +292,7 @@ int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 
 	if (key_data.key == MLX_KEY_O)
 	{
-		camera->origin = new_vect(0.0, 0.0, 0.0);
+		camera->origin = new_vect(0.0, 0.5, 0.0);
 		camera->orientation = new_vect(0.0, 0.0, -1.0);
 		return (1);
 	}
@@ -393,6 +394,20 @@ int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
+int	check_object_focus(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_vect	obj_origin;
+
+	if (key_data.key == MLX_KEY_Z)
+	{
+		obj_origin = target_object->get_origin(target_object);
+		camera->orientation = unit_vect(vect_subtract(obj_origin, camera->origin));
+		return (1);
+	}
+	return (0);
+}
+
 t_object	*get_selected_object(t_object *objects, t_object *lights)
 {
 	while (objects)
@@ -410,7 +425,7 @@ t_object	*get_selected_object(t_object *objects, t_object *lights)
 	return (NULL);
 }
 
-void	move_object(t_object *objects, t_object *lights,  mlx_key_data_t key_data)
+void	move_object(t_object *objects, t_object *lights, t_camera *camera, mlx_key_data_t key_data)
 {
 	//control for infinite moving overflows etc....
 	//reset for objects? just duplicate the init object list like lights etc...
@@ -422,6 +437,8 @@ void	move_object(t_object *objects, t_object *lights,  mlx_key_data_t key_data)
 	if (check_object_translations(target_object, key_data))
 		return ;
 	else if (check_object_rotations(target_object, key_data))
+		return ;
+	else if (check_object_focus(target_object, camera, key_data))
 		return ;
 	return ;
 }
@@ -636,7 +653,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (scene->object_selected)
-			move_object(scene->objects, scene->lights, key_data);
+			move_object(scene->objects, scene->lights, &scene->camera, key_data);
 		else
 			move_camera(&scene->camera, &scene->back_up_camera, key_data);
 		recalculate_view(scene);
@@ -1264,6 +1281,11 @@ void	main_loop(void *sc)
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
 }
 
+t_vect	get_origin_disk(t_object *object)
+{
+	return (object->figure.disk.center);
+}
+
 void	rotate_disk(t_object *object, t_vect transformation)
 {
 	object->figure.disk.normal = unit_vect(vect_add(object->figure.disk.normal, transformation));
@@ -1306,6 +1328,11 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_origin_quad(t_object *object)
+{
+	return (object->figure.quad.origin);
 }
 
 void	rotate_quad(t_object *object, t_vect transformation)
@@ -1359,6 +1386,11 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+t_vect	get_origin_plane(t_object *object)
+{
+	return (object->figure.plane.center);
+}
+
 void	rotate_plane(t_object *object, t_vect transformation)
 {
 	object->figure.plane.normal = unit_vect(vect_add(object->figure.plane.normal, transformation));
@@ -1392,6 +1424,11 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = fig.plane.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_origin_sphere(t_object *object)
+{
+	return (object->figure.sphere.center);
 }
 
 void	rotate_sphere(t_object *object, t_vect transformation)
@@ -1434,6 +1471,11 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_origin_point_light(t_object *object)
+{
+	return (object->figure.p_light.location);
 }
 
 void	translate_point_light(t_object *object, t_vect transformation)
@@ -1707,6 +1749,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
+		new_obj->get_origin = get_origin_sphere;
 		new_obj->next = NULL;
 	}
 	if (type == PLANE)
@@ -1724,6 +1767,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
+		new_obj->get_origin = get_origin_plane;
 		new_obj->next = NULL;
 	}
 	if (type == QUAD)
@@ -1742,6 +1786,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
+		new_obj->get_origin = get_origin_quad;
 		new_obj->next = NULL;
 	}
 	if (type == DISK)
@@ -1760,6 +1805,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->hit_func = hit_disk;
 		new_obj->edit_origin = translate_disk;
 		new_obj->edit_orientation = rotate_disk;
+		new_obj->get_origin = get_origin_disk;
 		new_obj->next = NULL;
 	}
 	if (type == LIGHT)
@@ -1776,6 +1822,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->hit_func = hit_point_light;
 		new_obj->edit_origin = translate_point_light;
 		new_obj->edit_orientation = rotate_sphere;
+		new_obj->get_origin = get_origin_point_light;
 		new_obj->next = NULL;
 	}
 	new_obj->selected = false;
