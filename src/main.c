@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 17:29:57 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 17:54:33 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -326,34 +326,27 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 	if (key_data.key == MLX_KEY_W)
 	{
 		transformation.y += 0.1;
-		return (1);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
 		transformation.x -= 0.1;
-		return (1);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
 		transformation.y -= 0.1;
-		return (1);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
 		transformation.x += 0.1;
-		return (1);
 	}
 	else if (key_data.key == MLX_KEY_Q)
 	{
 		transformation.z -= 0.1;
-		return (1);
 	}
 	else if (key_data.key == MLX_KEY_E)
 	{
 		transformation.z += 0.1;
-		return (1);
 	}
-	return (0);
 	if (!zero_vect(transformation))
 	{
 		target_object->edit_orientation(target_object, transformation);
@@ -428,7 +421,7 @@ void	move_object(t_object *objects, t_object *lights,  mlx_key_data_t key_data)
 		return ;
 	if (check_object_translations(target_object, key_data))
 		return ;
-	if (check_object_rotations(target_object, key_data))
+	else if (check_object_rotations(target_object, key_data))
 		return ;
 	return ;
 }
@@ -507,7 +500,7 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	return ;
 }
 
-void	delete_world_object(t_scene *scene)
+void	delete_from_objects(t_scene *scene)
 {
 	t_object	*obj;
 	t_object	*prev_object;
@@ -531,7 +524,38 @@ void	delete_world_object(t_scene *scene)
 		prev_object->next = next_object;
 	if (obj && obj->selected)
 		free(obj);
-	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+}
+void	delete_from_lights(t_scene *scene)
+{
+	t_object	*obj;
+	t_object	*prev_object;
+	t_object	*next_object;
+
+	obj = scene->lights;
+	prev_object = NULL;
+	next_object = NULL;
+	if (obj && obj->selected)
+		scene->lights = obj->next;
+	while (obj && !obj->selected)
+	{
+		if (obj->next && obj->next->selected)
+		{
+			prev_object = obj;
+			next_object = obj->next->next;
+		}
+		obj = obj->next;
+	}
+	if (prev_object)
+		prev_object->next = next_object;
+	if (obj && obj->selected)
+		free(obj);
+}
+
+void	delete_world_object(t_scene *scene)
+{
+	delete_from_objects(scene);
+	delete_from_lights(scene);
+	scene->object_selected = false;
 }
 
 void	write_ppm(mlx_image_t *image, int fd, char *filename)
@@ -802,7 +826,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 	}
 	else
 	{
-		color = new_color(0.0, 0.0, 0.0);
+		color = vect_simple_mult(hexa_to_vect(SILVER), scene->amb_light);
 	}
 	return (color);
 }
@@ -1072,7 +1096,6 @@ void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
 {
 	thread->current_y = back_up->current_y;
 	thread->iterations = back_up->iterations;
-	printf("CREATED || thread: %i Y at: %i with %i iterations\n", thread->id, thread->current_y, thread->iterations);
 }
 
 void	set_thread_default(t_thread *thread)
@@ -1287,6 +1310,7 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 
 void	rotate_quad(t_object *object, t_vect transformation)
 {
+	return ;
 	object->figure.quad.u_vect = unit_vect(vect_add(object->figure.quad.u_vect, transformation));
 	object->figure.quad.v_vect = unit_vect(vect_add(object->figure.quad.v_vect, transformation));
 	return ;

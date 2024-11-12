@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 17:29:02 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 17:43:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.3
+# define AMB_LIGHT	0.2
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
