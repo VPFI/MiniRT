@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 18:38:06 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 20:14:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,9 +95,9 @@ typedef enum e_mat_type
 {
 	LAMBERTIAN = 0,
 	METAL = 1,
-	DIELECTRIC = 2,
-	EMISSIVE = 3,
-	GLOSSY = 4,
+	GLOSSY = 2,
+	DIELECTRIC = 3,
+	EMISSIVE = 4,
 }			t_mat_type;
 
 typedef enum e_bounds
@@ -196,8 +196,8 @@ typedef struct s_material
 	t_mat_type	type;
 	float		specular;
 	float		metal_roughness;
-	float		emission_intensity;
 	float		refraction_index;
+	float		emission_intensity;
 }			t_material;
 
 typedef struct s_point_light
@@ -251,6 +251,7 @@ typedef struct s_object
 	t_vect			(*get_origin)(t_object *object);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
 	void			(*edit_orientation)(t_object *object, t_vect transformation);
+	void			(*edit_dimensons)(t_object *object, t_vect transformation);
 }					t_object;
 
 typedef struct s_scene

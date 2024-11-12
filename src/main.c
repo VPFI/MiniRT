@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 18:38:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 20:32:39 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,15 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_Q
 		|| key_data.key == MLX_KEY_E
 		|| key_data.key == MLX_KEY_O
-		|| key_data.key == MLX_KEY_Z)
+		|| key_data.key == MLX_KEY_Z
+		|| key_data.key == MLX_KEY_X
+		|| key_data.key == MLX_KEY_C
+		|| key_data.key == MLX_KEY_B
+		|| key_data.key == MLX_KEY_H
+		|| key_data.key == MLX_KEY_J
+		|| key_data.key == MLX_KEY_K
+		|| key_data.key == MLX_KEY_L
+		|| key_data.key == MLX_KEY_TAB)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -145,7 +153,30 @@ int		is_camera_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
-int		is_num_key_down(mlx_key_data_t key_data)
+int	is_material_key_down(mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_H
+		|| key_data.key == MLX_KEY_J
+		|| key_data.key == MLX_KEY_K
+		|| key_data.key == MLX_KEY_L)
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int	is_rgb_key_down(mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_Z
+		|| key_data.key == MLX_KEY_X
+		|| key_data.key == MLX_KEY_C)
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int	is_num_key_down(mlx_key_data_t key_data)
 {
 	if ((key_data.key == MLX_KEY_1
 		|| key_data.key == MLX_KEY_2
@@ -158,6 +189,17 @@ int		is_num_key_down(mlx_key_data_t key_data)
 		return (1);
 	}
 	return (0);
+}
+
+int	is_scene_settings_key_down(mlx_key_data_t key_data)
+{
+		if ((key_data.key == MLX_KEY_COMMA
+			|| key_data.key == MLX_KEY_PERIOD)
+			&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
+	{
+		return (1);
+	}
+	return (0);	
 }
 
 int	is_press_and_ctrl(mlx_key_data_t key_data)
@@ -394,12 +436,147 @@ int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
+void	increment_material_component(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_H)
+	{
+		target_object->material.specular += 0.05;
+		if (target_object->material.specular > 1.0)
+			target_object->material.specular = 1.0;
+	}
+	else if (key_data.key == MLX_KEY_J)
+	{
+		target_object->material.metal_roughness += 0.05;
+		if (target_object->material.metal_roughness > 1.0)
+			target_object->material.metal_roughness = 1.0;
+	}
+	else if (key_data.key == MLX_KEY_K)
+	{
+		target_object->material.refraction_index += 0.05;
+		if (target_object->material.refraction_index > 10.0)
+			target_object->material.refraction_index = 10.0;
+	}
+	else if (key_data.key == MLX_KEY_L)
+	{
+		target_object->material.emission_intensity += 0.05;
+		if (target_object->material.emission_intensity > 100.0)
+			target_object->material.emission_intensity = 100.0;
+	}
+	return ;
+}
+
+void	decrement_material_component(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_H)
+	{
+		target_object->material.specular -= 0.05;
+		if (target_object->material.specular < 0.0)
+			target_object->material.specular = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_J)
+	{
+		target_object->material.metal_roughness -= 0.05;
+		if (target_object->material.metal_roughness < 0.0)
+			target_object->material.metal_roughness = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_K)
+	{
+		target_object->material.refraction_index -= 0.05;
+		if (target_object->material.refraction_index < 0.0)
+			target_object->material.refraction_index = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_L)
+	{
+		target_object->material.emission_intensity -= 0.05;
+		if (target_object->material.emission_intensity < 0.0)
+			target_object->material.emission_intensity = 0.0;
+	}
+	return ;
+}
+
+void	increment_color(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_Z)
+	{
+		target_object->material.color.x += 0.05;
+		if (target_object->material.color.x > 1.0)
+			target_object->material.color.x = 1.0;
+	}
+	else if (key_data.key == MLX_KEY_X)
+	{
+		target_object->material.color.y += 0.05;
+		if (target_object->material.color.y > 1.0)
+			target_object->material.color.y = 1.0;
+	}
+	else if (key_data.key == MLX_KEY_C)
+	{
+		target_object->material.color.z += 0.05;
+		if (target_object->material.color.z > 1.0)
+			target_object->material.color.z = 1.0;
+	}
+	return ;
+}
+
+void	decrement_color(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_Z)
+	{
+		target_object->material.color.x -= 0.05;
+		if (target_object->material.color.x < 0.0)
+			target_object->material.color.x = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_X)
+	{
+		target_object->material.color.y -= 0.05;
+		if (target_object->material.color.y < 0.0)
+			target_object->material.color.y = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_C)
+	{
+		target_object->material.color.z -= 0.05;
+		if (target_object->material.color.z < 0.0)
+			target_object->material.color.z = 0.0;
+	}
+	return ;
+}
+
+void	cicle_material_type(t_object *target_object)
+{
+	target_object->material.type = (target_object->material.type + 1) % 5;
+	return ;
+}
+
+int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (is_rgb_key_down(key_data))
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			decrement_color(target_object, key_data);
+		else
+			increment_color(target_object, key_data);
+		return (1);
+	}
+	else if (is_material_key_down(key_data))
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			decrement_material_component(target_object, key_data);
+		else
+			increment_material_component(target_object, key_data);
+		return (1);		
+	}
+	else if (key_data.key == MLX_KEY_TAB)
+	{
+		cicle_material_type(target_object);
+	}
+	return (0);
+}
+
 int	check_object_focus(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
 {
 	//Adapt object movements to camer orientation
 	t_vect	obj_origin;
 
-	if (key_data.key == MLX_KEY_Z)
+	if (key_data.key == MLX_KEY_B)
 	{
 		obj_origin = target_object->get_origin(target_object);
 		camera->orientation = unit_vect(vect_subtract(obj_origin, camera->origin));
@@ -425,7 +602,7 @@ t_object	*get_selected_object(t_object *objects, t_object *lights)
 	return (NULL);
 }
 
-void	move_object(t_object *objects, t_object *lights, t_camera *camera, mlx_key_data_t key_data)
+void	transform_object(t_object *objects, t_object *lights, t_camera *camera, mlx_key_data_t key_data)
 {
 	//control for infinite moving overflows etc....
 	//reset for objects? just duplicate the init object list like lights etc...
@@ -438,8 +615,23 @@ void	move_object(t_object *objects, t_object *lights, t_camera *camera, mlx_key_
 		return ;
 	else if (check_object_rotations(target_object, key_data))
 		return ;
+	else if (check_object_aspect(target_object, key_data))
+		return ;
 	else if (check_object_focus(target_object, camera, key_data))
 		return ;
+	return ;
+}
+
+void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
+{
+	if (key_data.key == MLX_KEY_COMMA)
+	{
+		scene->amb_light -= 0.05;
+		if (scene->amb_light < 0.0)
+			scene->amb_light = 0.0;
+	}
+	else if (key_data.key == MLX_KEY_PERIOD)
+		scene->amb_light += 0.05;
 	return ;
 }
 
@@ -635,7 +827,16 @@ int	export_to_ppm(mlx_image_t *image)
 
 void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
-	if (is_num_key_down(key_data))
+	if (key_data.key == MLX_KEY_R && is_press_and_ctrl(key_data))
+	{
+		scene->stop = true;
+		wait_for_threads(scene);
+		scene->stop = false;
+		scene->edit_mode = false;
+		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+		main_loop(scene);
+	}
+	else if (is_num_key_down(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
@@ -644,7 +845,6 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 			delete_world_object(scene);
 		else
 			add_world_object(scene, key_data);
-		recalculate_view(scene);
 		main_loop(scene);
 	}
 	else if (is_camera_key_down(key_data))
@@ -653,19 +853,18 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (scene->object_selected)
-			move_object(scene->objects, scene->lights, &scene->camera, key_data);
+			transform_object(scene->objects, scene->lights, &scene->camera, key_data);
 		else
 			move_camera(&scene->camera, &scene->back_up_camera, key_data);
 		recalculate_view(scene);
 		main_loop(scene);
 	}
-	else if (key_data.key == MLX_KEY_R && is_press_and_ctrl(key_data))
+	else if (is_scene_settings_key_down(key_data))
 	{
 		scene->stop = true;
 		wait_for_threads(scene);
 		scene->stop = false;
-		scene->edit_mode = false;
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+		change_scene_settings(scene, key_data);
 		main_loop(scene);
 	}
 }
@@ -714,7 +913,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
 	}
-	if (scene->edit_mode == false)
+	else if (scene->edit_mode == false)
 		render_mode_hooks(scene, key_data);
 	else if (scene->edit_mode == true)
 		edit_mode_hooks(scene, key_data);
