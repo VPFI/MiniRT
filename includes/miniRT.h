@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 15:46:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 17:29:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 # define THREADS 	8
 
 # define MAX_DEPTH  8
-# define SPP 		5
+# define SPP 		1
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
@@ -40,7 +40,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.8
+# define AMB_LIGHT	0.3
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -313,7 +313,7 @@ void		recalculate_view(t_scene *scene);
 
 int			init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type);
 
-void		deselect_objects(t_object *objects, bool *object_selected);
+void		deselect_objects(t_object *objects, t_object *lights, bool *object_selected);
 
 void		wait_for_threads(t_scene *scene);
 void		wait_for_threads_and_backup(t_scene *scene);

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 15:59:47 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/12 17:29:57 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,6 +150,7 @@ int		is_num_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_2
 		|| key_data.key == MLX_KEY_3
 		|| key_data.key == MLX_KEY_4
+		|| key_data.key == MLX_KEY_5
 		|| key_data.key == MLX_KEY_BACKSPACE)
 		&& (key_data.action == MLX_PRESS))
 	{
@@ -169,37 +170,37 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_W)
 	{
-		camera->orientation.y += 0.25;
+		camera->orientation.y += 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
-		camera->orientation.x -= 0.25;
+		camera->orientation.x -= 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		camera->orientation.y -= 0.25;
+		camera->orientation.y -= 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
-		camera->orientation.x += 0.25;
+		camera->orientation.x += 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_Q)
 	{
-		camera->orientation.z -= 0.25;
+		camera->orientation.z -= 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_E)
 	{
-		camera->orientation.z += 0.25;
+		camera->orientation.z += 0.1;
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
@@ -316,6 +317,51 @@ void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 	return ;
 }
 
+int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_W)
+	{
+		transformation.y += 0.1;
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_A)
+	{
+		transformation.x -= 0.1;
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_S)
+	{
+		transformation.y -= 0.1;
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_D)
+	{
+		transformation.x += 0.1;
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_Q)
+	{
+		transformation.z -= 0.1;
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_E)
+	{
+		transformation.z += 0.1;
+		return (1);
+	}
+	return (0);
+	if (!zero_vect(transformation))
+	{
+		target_object->edit_orientation(target_object, transformation);
+		return (1);
+	}
+	return (0);
+}
+
 int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
 {
 	//Adapt object movements to camer orientation
@@ -354,7 +400,7 @@ int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
-t_object	*get_selected_object(t_object *objects)
+t_object	*get_selected_object(t_object *objects, t_object *lights)
 {
 	while (objects)
 	{
@@ -362,19 +408,27 @@ t_object	*get_selected_object(t_object *objects)
 			return(objects);
 		objects = objects->next;	
 	}
+	while (lights)
+	{
+		if (lights->selected == true)
+			return(lights);
+		lights = lights->next;	
+	}
 	return (NULL);
 }
 
-void	move_object(t_object *objects,  mlx_key_data_t key_data)
+void	move_object(t_object *objects, t_object *lights,  mlx_key_data_t key_data)
 {
 	//control for infinite moving overflows etc....
 	//reset for objects? just duplicate the init object list like lights etc...
 	t_object	*target_object;
 
-	target_object = get_selected_object(objects);
+	target_object = get_selected_object(objects, lights);
 	if (!target_object)
 		return ;
 	if (check_object_translations(target_object, key_data))
+		return ;
+	if (check_object_rotations(target_object, key_data))
 		return ;
 	return ;
 }
@@ -382,14 +436,32 @@ void	move_object(t_object *objects,  mlx_key_data_t key_data)
 t_material	new_standard_material(void)
 {
 	t_material	mat;
+	uint32_t	state;
 
-	mat.color = hexa_to_vect(WHITE);
+	state = (uint32_t)(mlx_get_time() * 10000);
+	mat.color = new_color(fast_rand(&state), fast_rand(&state), fast_rand(&state));
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.0;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
+	return (mat);
+}
+
+t_material	new_standard_plight(void)
+{
+	t_material	mat;
+	uint32_t	state;
+
+	state = (uint32_t)(mlx_get_time() * 10000);
+	mat.color = new_color(fast_rand(&state), fast_rand(&state), fast_rand(&state));
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 1.5;
+	mat.type = EMISSIVE;
 	return (mat);
 }
 
@@ -426,6 +498,12 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 		fig.disk.radius = 1.0;
 		init_object(scene, fig, mat, DISK);
 	}
+	else if (key_data.key == MLX_KEY_5)
+	{
+		fig.p_light.location = new_vect(0.0, 1.0, -1.0);
+		mat = new_standard_plight();
+		init_object(scene, fig, mat, LIGHT);
+	}
 	return ;
 }
 
@@ -453,7 +531,7 @@ void	delete_world_object(t_scene *scene)
 		prev_object->next = next_object;
 	if (obj && obj->selected)
 		free(obj);
-	deselect_objects(scene->objects, &scene->object_selected);
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 }
 
 void	write_ppm(mlx_image_t *image, int fd, char *filename)
@@ -534,7 +612,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (scene->object_selected)
-			move_object(scene->objects, key_data);
+			move_object(scene->objects, scene->lights, key_data);
 		else
 			move_camera(&scene->camera, &scene->back_up_camera, key_data);
 		recalculate_view(scene);
@@ -546,7 +624,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene);
 		scene->stop = false;
 		scene->edit_mode = false;
-		deselect_objects(scene->objects, &scene->object_selected);
+		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 		main_loop(scene);
 	}
 }
@@ -583,9 +661,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 	// make controls based on fov or other dynamic way?
 	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
 	{
-		//pthread_mutex_lock(&scene->stop_mutex);
-		scene->stop = true;
-		//pthread_mutex_unlock(&scene->stop_mutex);
+		set_stop_status(scene);
 		close_all(scene);
 	}
 	else if (!scene->choose_file && is_arrow_key_down(key_data))
@@ -658,25 +734,54 @@ bool	shadow_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info, float max)
 	return (hit);
 }
 
-bool	ray_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info)
+bool	ray_hit(t_object *objects, t_ray ray, t_hit_info *hit_info)
 {
-	t_object	*temp;
 	float		bounds[2];
 	bool		hit;
 
 	hit = false;
 	bounds[MIN] = 0.001;
 	bounds[MAX] = __FLT_MAX__;
-	temp = scene->objects;
-	while (temp)
+	while (objects)
 	{
-		if (temp->hit_func(ray, temp->figure, hit_info, bounds))
+		if (objects->hit_func(ray, objects->figure, hit_info, bounds))
 		{
 			hit = true;
 			bounds[MAX] = hit_info->t;
-			hit_info->object = temp;
+			hit_info->object = objects;
 		}
-		temp = temp->next;
+		objects = objects->next;
+	}
+	return (hit);
+}
+
+bool	ray_hit_plus_lights(t_object *objects, t_object *plights, t_ray ray, t_hit_info *hit_info)
+{
+	float		bounds[2];
+	bool		hit;
+
+	hit = false;
+	bounds[MIN] = 0.001;
+	bounds[MAX] = __FLT_MAX__;
+	while (objects)
+	{
+		if (objects->hit_func(ray, objects->figure, hit_info, bounds))
+		{
+			hit = true;
+			bounds[MAX] = hit_info->t;
+			hit_info->object = objects;
+		}
+		objects = objects->next;
+	}
+	while (plights)
+	{
+		if (plights->hit_func(ray, plights->figure, hit_info, bounds))
+		{
+			hit = true;
+			bounds[MAX] = hit_info->t;
+			hit_info->object = plights;
+		}
+		plights = plights->next;
 	}
 	return (hit);
 }
@@ -686,10 +791,12 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 	t_color		color;
 	t_hit_info	hit_info;
 
-	if (ray_hit(scene, ray, &hit_info))
+	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
 		if (hit_info.object->selected)
 			color = hexa_to_vect(WHITE);
+		else if (hit_info.object->type == LIGHT)
+			color = hit_info.object->material.color;
 		else	
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 	}
@@ -937,7 +1044,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	ft_bzero(&hit_info, sizeof(hit_info));
 	emittance = new_color(0, 0, 0);
 	time_aux = mlx_get_time();
-	if (ray_hit(thread->scene, ray, &hit_info))
+	if (ray_hit(thread->scene->objects, ray, &hit_info))
 	{
 		thread->time_hit += mlx_get_time() - time_aux;
 		if (hit_info.object->material.type == EMISSIVE)
@@ -1134,6 +1241,12 @@ void	main_loop(void *sc)
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
 }
 
+void	rotate_disk(t_object *object, t_vect transformation)
+{
+	object->figure.disk.normal = unit_vect(vect_add(object->figure.disk.normal, transformation));
+	return ;
+}
+
 void	translate_disk(t_object *object, t_vect transformation)
 {
 	object->figure.disk.center = vect_add(object->figure.disk.center, transformation);
@@ -1170,6 +1283,13 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	rotate_quad(t_object *object, t_vect transformation)
+{
+	object->figure.quad.u_vect = unit_vect(vect_add(object->figure.quad.u_vect, transformation));
+	object->figure.quad.v_vect = unit_vect(vect_add(object->figure.quad.v_vect, transformation));
+	return ;
 }
 
 void	translate_quad(t_object *object, t_vect transformation)
@@ -1215,6 +1335,12 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+void	rotate_plane(t_object *object, t_vect transformation)
+{
+	object->figure.plane.normal = unit_vect(vect_add(object->figure.plane.normal, transformation));
+	return ;
+}
+
 void	translate_plane(t_object *object, t_vect transformation)
 {
 	object->figure.plane.center = vect_add(object->figure.plane.center, transformation);
@@ -1242,6 +1368,13 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = fig.plane.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	rotate_sphere(t_object *object, t_vect transformation)
+{
+	(void)object;
+	(void)transformation;
+	return ;
 }
 
 void	translate_sphere(t_object *object, t_vect transformation)
@@ -1275,6 +1408,41 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->t = root;
 	hit_info->point = ray_at(ray, root);
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
+	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
+	return (true);	
+}
+
+void	translate_point_light(t_object *object, t_vect transformation)
+{
+	object->figure.p_light.location = vect_add(object->figure.p_light.location, transformation);
+	return ;
+}
+
+bool	hit_point_light(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+{
+	t_vect	oc;
+	float	var[4];
+	float	sqrt_disc;
+	float	root;
+
+	oc = vect_subtract(fig.p_light.location, ray.origin);
+	var[a] = vect_dot(ray.dir, ray.dir);
+	var[h] = vect_dot(ray.dir, oc);
+	var[c] = vect_dot(oc, oc) - (0.2 * 0.2);
+	var[discr] = (var[h] * var[h]) - (var[a] * var[c]);
+	if (var[discr] < 0)
+		return (false);
+	sqrt_disc = sqrtf(var[discr]); 
+	root = (var[h] - sqrt_disc) / var[a];
+	if (root <= bounds[MIN] || bounds[MAX] <= root)
+	{
+		root = (var[h] + sqrt_disc) / var[a];
+		if (root <= bounds[MIN] || bounds[MAX] <= root)
+			return (false);
+	}
+	hit_info->t = root;
+	hit_info->point = ray_at(ray, root);
+	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.p_light.location), 0.2);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
 }
@@ -1313,12 +1481,17 @@ void	set_new_image(t_scene *scene)
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 }
 
-void	deselect_objects(t_object *objects, bool *object_selected)
+void	deselect_objects(t_object *objects, t_object *lights, bool *object_selected)
 {
 	while (objects)
 	{
 		objects->selected = false;
 		objects = objects->next;
+	}
+	while (lights)
+	{
+		lights->selected = false;
+		lights = lights->next;
 	}
 	*object_selected = false;
 }
@@ -1332,7 +1505,7 @@ void	select_object(t_scene *scene, uint32_t x, uint32_t y)
 	ray.origin = scene->camera.origin;
 	pixel_offset = set_pixel(scene->camera, x, y);
 	ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-	if (ray_hit(scene, ray, &hit_info))
+	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
 		hit_info.object->selected = true;
 		scene->object_selected = true;
@@ -1352,14 +1525,14 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 		&& action == MLX_PRESS)
 	{
 		mlx_get_mouse_pos(scene->mlx, &x, &y);
-		deselect_objects(scene->objects, &scene->object_selected);
+		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 		select_object(scene, x, y);
 	}
 	else if (scene->edit_mode == true
 		&& button == MLX_MOUSE_BUTTON_RIGHT
 		&& action == MLX_PRESS)
 	{
-		deselect_objects(scene->objects, &scene->object_selected);
+		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	}
 }
 
@@ -1509,6 +1682,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
+		new_obj->edit_orientation = rotate_sphere;
 		new_obj->next = NULL;
 	}
 	if (type == PLANE)
@@ -1525,6 +1699,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
+		new_obj->edit_orientation = rotate_plane;
 		new_obj->next = NULL;
 	}
 	if (type == QUAD)
@@ -1542,6 +1717,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
+		new_obj->edit_orientation = rotate_quad;
 		new_obj->next = NULL;
 	}
 	if (type == DISK)
@@ -1559,6 +1735,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_disk;
 		new_obj->edit_origin = translate_disk;
+		new_obj->edit_orientation = rotate_disk;
 		new_obj->next = NULL;
 	}
 	if (type == LIGHT)
@@ -1572,12 +1749,13 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.metal_roughness = mat.metal_roughness;
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
-		new_obj->hit_func = NULL;
-		new_obj->edit_origin = NULL;		
+		new_obj->hit_func = hit_point_light;
+		new_obj->edit_origin = translate_point_light;
+		new_obj->edit_orientation = rotate_sphere;
 		new_obj->next = NULL;
 	}
 	new_obj->selected = false;
-	if (mat.type == EMISSIVE)
+	if (mat.type == EMISSIVE && type == LIGHT)
 	{
 		new_light = (t_object *)malloc(sizeof(t_object));
 		new_light = ft_memcpy(new_light, new_obj, sizeof(t_object));
@@ -1819,6 +1997,7 @@ bool	get_stop_status(t_scene *scene)
 int	main(int argc, char **argv)
 {
 	//check exit when clicking x on window
+	//TEST MUTEX PERFOMANCE ETC...
 	(void)argc;
 	(void)argv;
 	t_scene	scene;
