@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 20:32:39 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/13 13:44:50 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,8 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_J
 		|| key_data.key == MLX_KEY_K
 		|| key_data.key == MLX_KEY_L
+		|| key_data.key == MLX_KEY_EQUAL
+		|| key_data.key == MLX_KEY_MINUS
 		|| key_data.key == MLX_KEY_TAB)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
@@ -571,6 +573,26 @@ int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
+int	check_object_resize(t_object *target_object, mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_EQUAL)
+	{
+		transformation.x = 1.15;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_MINUS)
+	{
+		transformation.x = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	return (0);
+}
+
 int	check_object_focus(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
 {
 	//Adapt object movements to camer orientation
@@ -616,6 +638,8 @@ void	transform_object(t_object *objects, t_object *lights, t_camera *camera, mlx
 	else if (check_object_rotations(target_object, key_data))
 		return ;
 	else if (check_object_aspect(target_object, key_data))
+		return ;
+	else if (check_object_resize(target_object, key_data))
 		return ;
 	else if (check_object_focus(target_object, camera, key_data))
 		return ;
@@ -1480,6 +1504,12 @@ void	main_loop(void *sc)
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
 }
 
+void	resize_disk(t_object *object, t_vect transformation)
+{
+	object->figure.disk.radius *= transformation.x;
+	return ;
+}
+
 t_vect	get_origin_disk(t_object *object)
 {
 	return (object->figure.disk.center);
@@ -1529,6 +1559,13 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+void	resize_quad(t_object *object, t_vect transformation)
+{
+	object->figure.quad.u_vect = vect_simple_mult(object->figure.quad.u_vect, transformation.x);
+	object->figure.quad.v_vect = vect_simple_mult(object->figure.quad.v_vect, transformation.x);
+	return ;
+}
+
 t_vect	get_origin_quad(t_object *object)
 {
 	return (object->figure.quad.origin);
@@ -1536,9 +1573,8 @@ t_vect	get_origin_quad(t_object *object)
 
 void	rotate_quad(t_object *object, t_vect transformation)
 {
-	return ;
-	object->figure.quad.u_vect = unit_vect(vect_add(object->figure.quad.u_vect, transformation));
-	object->figure.quad.v_vect = unit_vect(vect_add(object->figure.quad.v_vect, transformation));
+	object->figure.quad.u_vect = vect_simple_mult(unit_vect(vect_add(object->figure.quad.u_vect, transformation)), vect_length(object->figure.quad.u_vect));
+	object->figure.quad.v_vect = vect_simple_mult(unit_vect(vect_subtract(object->figure.quad.v_vect, transformation)), vect_length(object->figure.quad.v_vect));
 	return ;
 }
 
@@ -1582,7 +1618,14 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->point = ray_at(ray, root);
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
-	return (true);	
+	return (true);
+}
+
+void	resize_plane(t_object *object, t_vect transformation)
+{
+	(void)object;
+	(void)transformation;
+	return ;
 }
 
 t_vect	get_origin_plane(t_object *object)
@@ -1623,6 +1666,12 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = fig.plane.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	resize_sphere(t_object *object, t_vect transformation)
+{
+	object->figure.sphere.radius *= transformation.x;
+	return ;
 }
 
 t_vect	get_origin_sphere(t_object *object)
@@ -1670,6 +1719,13 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+void	resize_point_light(t_object *object, t_vect transformation)
+{
+	(void)object;
+	(void)transformation;
+	return ;
 }
 
 t_vect	get_origin_point_light(t_object *object)
@@ -1949,6 +2005,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
 		new_obj->get_origin = get_origin_sphere;
+		new_obj->edit_dimensions = resize_sphere;
 		new_obj->next = NULL;
 	}
 	if (type == PLANE)
@@ -1967,6 +2024,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
 		new_obj->get_origin = get_origin_plane;
+		new_obj->edit_dimensions = resize_plane;
 		new_obj->next = NULL;
 	}
 	if (type == QUAD)
@@ -1986,6 +2044,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
 		new_obj->get_origin = get_origin_quad;
+		new_obj->edit_dimensions = resize_quad;
 		new_obj->next = NULL;
 	}
 	if (type == DISK)
@@ -2005,6 +2064,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_origin = translate_disk;
 		new_obj->edit_orientation = rotate_disk;
 		new_obj->get_origin = get_origin_disk;
+		new_obj->edit_dimensions = resize_disk;
 		new_obj->next = NULL;
 	}
 	if (type == LIGHT)
@@ -2022,6 +2082,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_origin = translate_point_light;
 		new_obj->edit_orientation = rotate_sphere;
 		new_obj->get_origin = get_origin_point_light;
+		new_obj->edit_dimensions = resize_point_light;
 		new_obj->next = NULL;
 	}
 	new_obj->selected = false;

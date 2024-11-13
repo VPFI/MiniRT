@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/12 20:14:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/13 12:55:54 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,7 +251,7 @@ typedef struct s_object
 	t_vect			(*get_origin)(t_object *object);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
 	void			(*edit_orientation)(t_object *object, t_vect transformation);
-	void			(*edit_dimensons)(t_object *object, t_vect transformation);
+	void			(*edit_dimensions)(t_object *object, t_vect transformation);
 }					t_object;
 
 typedef struct s_scene
