@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/13 12:55:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/14 02:56:15 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ typedef struct s_vect	t_color;
 
 typedef struct s_object t_object;
 
+typedef union s_figure	t_figure;
+
 typedef struct s_thread
 {
 	int				id;
@@ -119,8 +121,9 @@ typedef enum e_fig_type
 	SPHERE = 0,
 	PLANE = 1,
 	QUAD = 2,
-	DISK = 3,
-	LIGHT = 4,
+	BOX = 3,
+	DISK = 4,
+	LIGHT = 5,
 }			t_fig_type;
 
 typedef struct s_2dpoint

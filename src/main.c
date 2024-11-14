@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/13 13:44:50 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/14 03:04:34 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,41 +211,80 @@ int	is_press_and_ctrl(mlx_key_data_t key_data)
 	return (0);
 }
 
+void	rotate_x(t_vect *pt, float angle)
+{
+	float	temp_y;
+	float	temp_z;
+
+	if (!angle)
+		return ;
+	temp_y = pt->y;
+	temp_z = pt->z;
+	pt->y = (temp_y * cos(angle)) + (temp_z * (-sin(angle)));
+	pt->z = (temp_y * sin(angle)) + (temp_z * cos(angle));
+}
+
+void	rotate_y(t_vect *pt, float angle)
+{
+	float	temp_x;
+	float	temp_z;
+
+	if (!angle)
+		return ;
+	temp_x = pt->x;
+	temp_z = pt->z;
+	pt->x = (temp_x * cos(angle)) + (temp_z * sin(angle));
+	pt->z = (temp_x * (-sin(angle))) + (temp_z * cos(angle));
+}
+
+void	rotate_z(t_vect *pt, float angle)
+{
+	float	temp_x;
+	float	temp_y;
+
+	if (!angle)
+		return ;
+	temp_x = pt->x;
+	temp_y = pt->y;
+	pt->x = (temp_x * cos(angle)) + (temp_y * (-sin(angle)));
+	pt->y = (temp_x * sin(angle)) + (temp_y * cos(angle));
+}
+
 int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_W)
 	{
-		camera->orientation.y += 0.1;
+		rotate_x(&camera->orientation, 0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
-		camera->orientation.x -= 0.1;
+		rotate_y(&camera->orientation, 0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		camera->orientation.y -= 0.1;
+		rotate_x(&camera->orientation, -0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
-		camera->orientation.x += 0.1;
+		rotate_y(&camera->orientation, -0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_Q)
 	{
-		camera->orientation.z -= 0.1;
+		rotate_z(&camera->orientation, 0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_E)
 	{
-		camera->orientation.z += 0.1;
+		rotate_z(&camera->orientation, -0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
@@ -370,27 +409,27 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 	transformation = new_vect(0.0, 0.0, 0.0);
 	if (key_data.key == MLX_KEY_W)
 	{
-		transformation.y += 0.1;
+		transformation.x += 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
-		transformation.x -= 0.1;
+		transformation.y -= 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		transformation.y -= 0.1;
+		transformation.x -= 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
-		transformation.x += 0.1;
+		transformation.y += 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_Q)
 	{
-		transformation.z -= 0.1;
+		transformation.z -= 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_E)
 	{
-		transformation.z += 0.1;
+		transformation.z += 0.0873;
 	}
 	if (!zero_vect(transformation))
 	{
@@ -1517,7 +1556,13 @@ t_vect	get_origin_disk(t_object *object)
 
 void	rotate_disk(t_object *object, t_vect transformation)
 {
-	object->figure.disk.normal = unit_vect(vect_add(object->figure.disk.normal, transformation));
+	if (transformation.x)
+		rotate_x(&object->figure.disk.normal, transformation.x);
+	else if (transformation.y)
+		rotate_y(&object->figure.disk.normal, transformation.y);
+	else if (transformation.z)
+		rotate_z(&object->figure.disk.normal, transformation.z);
+	object->figure.disk.normal = unit_vect(object->figure.disk.normal);
 	return ;
 }
 
@@ -1573,8 +1618,21 @@ t_vect	get_origin_quad(t_object *object)
 
 void	rotate_quad(t_object *object, t_vect transformation)
 {
-	object->figure.quad.u_vect = vect_simple_mult(unit_vect(vect_add(object->figure.quad.u_vect, transformation)), vect_length(object->figure.quad.u_vect));
-	object->figure.quad.v_vect = vect_simple_mult(unit_vect(vect_subtract(object->figure.quad.v_vect, transformation)), vect_length(object->figure.quad.v_vect));
+	if (transformation.x)
+	{
+		rotate_x(&object->figure.quad.u_vect, transformation.x);
+		rotate_x(&object->figure.quad.v_vect, transformation.x);
+	}
+	else if (transformation.y)
+	{
+		rotate_y(&object->figure.quad.u_vect, transformation.y);
+		rotate_y(&object->figure.quad.v_vect, transformation.y);
+	}
+	else if (transformation.z)
+	{
+		rotate_z(&object->figure.quad.u_vect, transformation.z);
+		rotate_z(&object->figure.quad.v_vect, transformation.z);
+	}
 	return ;
 }
 
@@ -1590,13 +1648,17 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	float	root;
 	float	q;
 	t_vect	hit_origin;
-	t_vect	hit_u;
-	t_vect	hit_v;
 	t_vect	point;
 	t_vect	normal;
+	t_vect	n;
+	t_vect	w;
+	float	a;
+	float	b;
 
 	//careful with dot products close to 0 || floating point etc...
-	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect)); // cache normal
+	n = vect_cross(fig.quad.u_vect, fig.quad.v_vect);
+	w = vect_simple_div(n, vect_dot(n, n));
+	normal = unit_vect(n); // cache normal
 	denominator = vect_dot(normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
 		return (false);
@@ -1608,9 +1670,9 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		return (false);
 	}
 	hit_origin = vect_subtract(ray_at(ray, root), fig.quad.origin);
-	hit_u = vect_simple_mult(fig.quad.u_vect, vect_dot(hit_origin, vect_div(new_vect(1.0, 1.0, 1.0), fig.quad.u_vect)));
-	hit_v = vect_simple_mult(fig.quad.v_vect, vect_dot(hit_origin, vect_div(new_vect(1.0, 1.0, 1.0), fig.quad.v_vect)));
-	if (vect_length(hit_u) > vect_length(fig.quad.u_vect) || vect_length(hit_v) > vect_length(fig.quad.v_vect))
+	a = vect_dot(w, vect_cross(hit_origin, fig.quad.v_vect));
+	b = vect_dot(w, vect_cross(fig.quad.u_vect, hit_origin));
+	if ((a > 0.5 || a < -0.5) || (b > 0.5 || b < -0.5))
 	{
 		return (false);
 	}
@@ -1635,7 +1697,13 @@ t_vect	get_origin_plane(t_object *object)
 
 void	rotate_plane(t_object *object, t_vect transformation)
 {
-	object->figure.plane.normal = unit_vect(vect_add(object->figure.plane.normal, transformation));
+	if (transformation.x)
+		rotate_x(&object->figure.plane.normal, transformation.x);
+	else if (transformation.y)
+		rotate_y(&object->figure.plane.normal, transformation.y);
+	else if (transformation.z)
+		rotate_z(&object->figure.plane.normal, transformation.z);
+	object->figure.plane.normal = unit_vect(object->figure.plane.normal);
 	return ;
 }
 
@@ -2008,7 +2076,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_sphere;
 		new_obj->next = NULL;
 	}
-	if (type == PLANE)
+	else if (type == PLANE)
 	{
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
@@ -2027,7 +2095,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_plane;
 		new_obj->next = NULL;
 	}
-	if (type == QUAD)
+	else if (type == QUAD)
 	{
 		new_obj->type = type;
 		new_obj->figure.quad.origin = fig.quad.origin;
@@ -2047,7 +2115,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_quad;
 		new_obj->next = NULL;
 	}
-	if (type == DISK)
+	else if (type == DISK)
 	{
 		new_obj->type = type;
 		new_obj->figure.disk.center = fig.disk.center;
@@ -2067,7 +2135,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_disk;
 		new_obj->next = NULL;
 	}
-	if (type == LIGHT)
+	else if (type == LIGHT)
 	{
 		new_obj->type = type;
 		new_obj->figure.p_light.location = fig.p_light.location;
@@ -2138,7 +2206,7 @@ void	create_box(t_scene *scene, t_vect center, t_vect u, t_vect v, t_material ma
 	fig.quad.u_vect = vect_simple_mult(anti_normal, depth);
 	fig.quad.v_vect = vect_simple_mult(u, width);
 	fig.quad.origin = vect_add(center, vect_simple_mult(v, -1 * height));
-	init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);	
 }
 
 void	init_lights(t_scene *scene)
@@ -2209,7 +2277,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
+	//init_object(scene, fig, mat, SPHERE);
 
 	fig.sphere.center = new_vect(2.0, 1.0, -4);
 	fig.sphere.radius = 1;
@@ -2220,7 +2288,19 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
+	//init_object(scene, fig, mat, SPHERE);
+
+	t_vect u = new_vect(1.0, 0.0, 0.0);
+	t_vect v = new_vect(0.0, 1.0, 0.0);
+	t_vect center = new_vect(0.0, 0.25, 0.0);
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 0.4;
+	mat.metal_roughness = 0.2;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 2.0;
+	mat.refraction_index = 1.5;
+	mat.type = LAMBERTIAN;
+	create_box(scene, center, u, v, mat, 2, 2, 0.25);
 
 	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
 	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
