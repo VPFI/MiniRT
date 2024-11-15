@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/14 02:56:15 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/15 02:11:59 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,15 @@ typedef struct s_quad
 	t_vect		origin;
 }				t_quad;
 
+typedef struct s_box
+{
+	t_vect		u_vect;
+	t_vect		v_vect;
+	t_vect		dimensions;
+	t_vect		origin;
+	t_object	*faces;
+}				t_box;
+
 typedef struct s_disk
 {
 	t_vect		center;
@@ -239,6 +248,7 @@ typedef union s_figure
 	t_sphere		sphere;
 	t_plane			plane;
 	t_quad			quad;
+	t_box			box;
 	t_disk			disk;
 	t_point_light	p_light;
 }				t_figure;
@@ -317,6 +327,7 @@ void		main_loop(void *sc);
 void		recalculate_view(t_scene *scene);
 
 int			init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type);
+void		init_faces(t_object *box, t_material mat, t_vect dimensions);
 
 void		deselect_objects(t_object *objects, t_object *lights, bool *object_selected);
 

@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/14 03:04:34 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/15 02:31:46 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,13 @@ float fast_rand(uint32_t *state)
     x ^= x << 5;
     *state = x;
     return (x / (float)UINT32_MAX);
+}
+
+void	print_vec_s(t_vect vect, char*msg)
+{
+	printf("%s X: %f\n", msg, vect.x);
+	printf("%s Y: %f\n", msg, vect.y);
+	printf("%s Z: %f\n", msg, vect.z);
 }
 
 void	print_vec(t_vect vect)
@@ -375,7 +382,7 @@ int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 
 	if (key_data.key == MLX_KEY_O)
 	{
-		camera->origin = new_vect(0.0, 0.5, 0.0);
+		camera->origin = new_vect(0.0, 0.5, 1.0);
 		camera->orientation = new_vect(0.0, 0.0, -1.0);
 		return (1);
 	}
@@ -500,8 +507,8 @@ void	increment_material_component(t_object *target_object, mlx_key_data_t key_da
 	else if (key_data.key == MLX_KEY_L)
 	{
 		target_object->material.emission_intensity += 0.05;
-		if (target_object->material.emission_intensity > 100.0)
-			target_object->material.emission_intensity = 100.0;
+		if (target_object->material.emission_intensity > 10000.0)
+			target_object->material.emission_intensity = 10000.0;
 	}
 	return ;
 }
@@ -584,6 +591,7 @@ void	decrement_color(t_object *target_object, mlx_key_data_t key_data)
 void	cicle_material_type(t_object *target_object)
 {
 	target_object->material.type = (target_object->material.type + 1) % 5;
+	printf("Material is now: %i\n", target_object->material.type);
 	return ;
 }
 
@@ -595,6 +603,7 @@ int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
 			decrement_color(target_object, key_data);
 		else
 			increment_color(target_object, key_data);
+		print_vec_s(target_object->material.color, "NEW COLOR:");
 		return (1);
 	}
 	else if (is_material_key_down(key_data))
@@ -707,7 +716,7 @@ t_material	new_standard_material(void)
 	mat.color = new_color(fast_rand(&state), fast_rand(&state), fast_rand(&state));
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
+	mat.metal_roughness = 0.1;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
@@ -739,7 +748,7 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	mat = new_standard_material();
 	if (key_data.key == MLX_KEY_1)
 	{
-		fig.sphere.center = new_vect(0.0, 0.0, -1.0);
+		fig.sphere.center = new_vect(0.0, 1.0, -1.0);
 		fig.sphere.radius = 1.0;
 		init_object(scene, fig, mat, SPHERE);
 	}
@@ -751,21 +760,21 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_3)
 	{
-		fig.quad.origin = new_vect(0.0, 0.0, -1.0);
-		fig.quad.u_vect = new_vect(2.0, 0.0, 0.0);
-		fig.quad.v_vect = new_vect(0.0, 2.0, 0.0);
+		fig.quad.origin = new_vect(0.0, 1.0, -1.0);
+		fig.quad.u_vect = new_vect(1.0, 0.0, 0.0);
+		fig.quad.v_vect = new_vect(0.0, 1.0, 0.0);
 		init_object(scene, fig, mat, QUAD);
 	}
 	else if (key_data.key == MLX_KEY_4)
 	{
-		fig.disk.center = new_vect(0.0, 0.0, -1.0);
+		fig.disk.center = new_vect(0.0, 1.0, -1.0);
 		fig.disk.normal = new_vect(0.0, 0.0, 1.0);
 		fig.disk.radius = 1.0;
 		init_object(scene, fig, mat, DISK);
 	}
 	else if (key_data.key == MLX_KEY_5)
 	{
-		fig.p_light.location = new_vect(0.0, 1.0, -1.0);
+		fig.p_light.location = new_vect(0.0, 2.0, -1.0);
 		mat = new_standard_plight();
 		init_object(scene, fig, mat, LIGHT);
 	}
@@ -1683,6 +1692,66 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);
 }
 
+void	resize_box(t_object *object, t_vect transformation)
+{
+	t_object	*face;
+
+	face = object->figure.box.faces;
+	while (face)
+	{
+		resize_quad(face, transformation);
+		face = face->next;
+	}
+	return ;
+}
+
+t_vect	get_origin_box(t_object *object)
+{
+	return (object->figure.box.origin);
+}
+
+void	rotate_box(t_object *object, t_vect transformation)
+{
+	t_object	*face;
+
+	face = object->figure.box.faces;
+	while (face)
+	{
+		rotate_quad(face, transformation);
+		face = face->next;
+	}
+	return ;
+}
+
+void	translate_box(t_object *object, t_vect transformation)
+{
+	t_object	*face;
+
+	face = object->figure.box.faces;
+	while (face)
+	{
+		translate_quad(face, transformation);
+		face = face->next;
+	}
+	return ;
+}
+
+bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+{
+	t_hit_info	internal_hit_info;
+
+	if (ray_hit(fig.box.faces, ray, &internal_hit_info))
+	{
+		if (internal_hit_info.t <= bounds[MIN] || bounds[MAX] <= internal_hit_info.t)
+			return (false);
+		hit_info->t = internal_hit_info.t;
+		hit_info->point = internal_hit_info.point;
+		hit_info->normal = internal_hit_info.normal;
+		return (true);
+	}
+	return (false);
+}
+
 void	resize_plane(t_object *object, t_vect transformation)
 {
 	(void)object;
@@ -2036,6 +2105,7 @@ int	add_object(t_object **objects, t_object *new)
 {
 	t_object 	*last_obj;
 
+	printf("%p  --  %p\n", objects, *objects);
 	if (objects)
 	{
 		if ((*objects))
@@ -2115,6 +2185,29 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_quad;
 		new_obj->next = NULL;
 	}
+	else if (type == BOX)
+	{
+		new_obj->type = type;
+		new_obj->figure.box.origin = fig.box.origin;
+		new_obj->figure.box.u_vect = fig.box.u_vect;
+		new_obj->figure.box.v_vect = fig.box.v_vect;
+		new_obj->figure.box.dimensions = fig.box.dimensions;
+		new_obj->figure.box.faces = NULL;
+		new_obj->material.color = mat.color;
+		new_obj->material.specular = mat.specular;
+		new_obj->material.albedo = mat.albedo;
+		new_obj->material.type = mat.type;
+		new_obj->material.metal_roughness = mat.metal_roughness;
+		new_obj->material.emission_intensity = mat.emission_intensity;
+		new_obj->material.refraction_index = mat.refraction_index;
+		new_obj->hit_func = hit_box;
+		new_obj->edit_origin = translate_box;
+		new_obj->edit_orientation = rotate_box;
+		new_obj->get_origin = get_origin_box;
+		new_obj->edit_dimensions = resize_box;
+		new_obj->next = NULL;
+		init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
+	}
 	else if (type == DISK)
 	{
 		new_obj->type = type;
@@ -2166,47 +2259,69 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	return (0);
 }
 
-void	create_box(t_scene *scene, t_vect center, t_vect u, t_vect v, t_material mat, float depth, float width, float height)
+void	add_box_face(t_object *box, t_figure face, t_material mat)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)malloc(sizeof(t_object));
+	new_obj->type = QUAD;
+	new_obj->figure.quad.origin = face.quad.origin;
+	new_obj->figure.quad.u_vect = face.quad.u_vect;
+	new_obj->figure.quad.v_vect = face.quad.v_vect;
+	new_obj->material.color = mat.color;
+	new_obj->material.specular = mat.specular;
+	new_obj->material.albedo = mat.albedo;
+	new_obj->material.type = mat.type;
+	new_obj->material.metal_roughness = mat.metal_roughness;
+	new_obj->material.emission_intensity = mat.emission_intensity;
+	new_obj->material.refraction_index = mat.refraction_index;
+	new_obj->hit_func = hit_quad;
+	new_obj->edit_origin = translate_quad;
+	new_obj->edit_orientation = rotate_quad;
+	new_obj->get_origin = get_origin_quad;
+	new_obj->edit_dimensions = resize_quad;
+	new_obj->next = NULL;
+	add_object(&box->figure.box.faces, new_obj);
+}
+
+void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 {
 	t_figure	fig;
 	t_vect		normal;
 	t_vect		anti_normal;
 
-	u = unit_vect(u);
-	v = unit_vect(v);
-
-	normal = unit_vect(vect_cross(u, v));
+	normal = unit_vect(vect_cross(box->figure.box.u_vect, box->figure.box.v_vect));
 	anti_normal = vect_simple_mult(normal, -1);
 
-	fig.quad.u_vect = vect_simple_mult(u, width);
-	fig.quad.v_vect = vect_simple_mult(v, height);
-	fig.quad.origin = vect_add(center, vect_simple_mult(normal, depth));
-	init_object(scene, fig, mat, QUAD);
+	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(normal, dimensions.z * 0.5));
+	add_box_face(box, fig, mat);
 
-	fig.quad.u_vect = vect_simple_mult(u, width);
-	fig.quad.v_vect = vect_simple_mult(v, -1 * height);
-	fig.quad.origin = vect_add(center, vect_simple_mult(anti_normal, depth));
-	init_object(scene, fig, mat, QUAD);
+	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(anti_normal, dimensions.z * 0.5));
+	add_box_face(box, fig, mat);
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, depth);
-	fig.quad.v_vect = vect_simple_mult(v, height);
-	fig.quad.origin = vect_add(center, vect_simple_mult(u, width));
-	init_object(scene, fig, mat, QUAD);
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
+	add_box_face(box, fig, mat);
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, depth);
-	fig.quad.v_vect = vect_simple_mult(v, -1 * height);
-	fig.quad.origin = vect_add(center, vect_simple_mult(u, -1 * width));
-	init_object(scene, fig, mat, QUAD);
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
+	add_box_face(box, fig, mat);
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, depth);
-	fig.quad.v_vect = vect_simple_mult(u, -1 * width);
-	fig.quad.origin = vect_add(center, vect_simple_mult(v, height));
-	init_object(scene, fig, mat, QUAD);
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
+	add_box_face(box, fig, mat);
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, depth);
-	fig.quad.v_vect = vect_simple_mult(u, width);
-	fig.quad.origin = vect_add(center, vect_simple_mult(v, -1 * height));
-	init_object(scene, fig, mat, QUAD);	
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
+	add_box_face(box, fig, mat);
 }
 
 void	init_lights(t_scene *scene)
@@ -2290,9 +2405,10 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, SPHERE);
 
-	t_vect u = new_vect(1.0, 0.0, 0.0);
-	t_vect v = new_vect(0.0, 1.0, 0.0);
-	t_vect center = new_vect(0.0, 0.25, 0.0);
+	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
+	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
+	fig.box.origin = new_vect(0.0, 6, 0.0);
+	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.4;
 	mat.metal_roughness = 0.2;
@@ -2300,7 +2416,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.0;
 	mat.refraction_index = 1.5;
 	mat.type = LAMBERTIAN;
-	create_box(scene, center, u, v, mat, 2, 2, 0.25);
+	init_object(scene, fig, mat, BOX);
 
 	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
 	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
@@ -2311,7 +2427,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
+	//init_object(scene, fig, mat, PLANE);
 
 
 	fig.sphere.center = new_vect(0.0, -0.8, 0.0);
@@ -2363,6 +2479,16 @@ void	free_objects(t_object **objects)
 			free((*objects));
 			(*objects) = temp;
 		}
+	}
+}
+
+void	free_boxes(t_object *objects)
+{
+	while (objects)
+	{
+		if (objects->type == BOX)
+			free_objects(&objects->figure.box.faces);
+		objects = objects->next;
 	}
 }
 
@@ -2427,6 +2553,7 @@ int	main(int argc, char **argv)
 	if (scene.mlx)
 		mlx_terminate(scene.mlx);
 	free(scene.cumulative_image);
+	free_boxes(scene.objects);
 	free_objects(&scene.objects);
 	free_objects(&scene.lights);
 	//free_buttons(scene.buttons);
