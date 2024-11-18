@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/18 14:59:16 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/18 16:33:04 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,6 +328,7 @@ void		recalculate_view(t_scene *scene);
 
 int			init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type);
 void		init_faces(t_object *box, t_material mat, t_vect dimensions);
+void		recalculate_faces(t_object *box, t_vect dimensions);
 
 void		deselect_objects(t_object *objects, t_object *lights, bool *object_selected);
 

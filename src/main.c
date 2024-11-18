@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/18 15:29:06 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/18 16:54:11 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1141,12 +1141,12 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 
 	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
-		if (hit_info.object->selected)
-			color = hexa_to_vect(WHITE);
-		else if (hit_info.object->type == LIGHT)
+		if (hit_info.object->type == LIGHT)
 			color = hit_info.object->material.color;
 		else	
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
+		if (hit_info.object->selected)
+			color = vect_simple_mult(color, 1.4);
 	}
 	else
 	{
@@ -1734,8 +1734,7 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 void	resize_box(t_object *object, t_vect transformation)
 {
 	object->figure.box.dimensions = vect_mult(object->figure.box.dimensions, transformation);
-	free_objects(&object->figure.box.faces);
-	init_faces(object, object->material, object->figure.box.dimensions);
+	recalculate_faces(object, object->figure.box.dimensions);
 	return ;
 }
 
@@ -1761,8 +1760,7 @@ void	rotate_box(t_object *object, t_vect transformation)
 		rotate_z(&object->figure.box.u_vect, transformation.z);
 		rotate_z(&object->figure.box.v_vect, transformation.z);
 	}
-	free_objects(&object->figure.box.faces);
-	init_faces(object, object->material, object->figure.box.dimensions);
+	recalculate_faces(object, object->figure.box.dimensions);
 	return ;
 }
 
@@ -2325,6 +2323,46 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 	new_obj->edit_dimensions = resize_quad;
 	new_obj->next = NULL;
 	add_object(&box->figure.box.faces, new_obj);
+}
+void	recalculate_faces(t_object *box, t_vect dimensions)
+{
+	t_object	*face;
+	t_vect		normal;
+	t_vect		anti_normal;
+
+	face = box->figure.box.faces;
+	normal = unit_vect(vect_cross(box->figure.box.u_vect, box->figure.box.v_vect));
+	anti_normal = vect_simple_mult(normal, -1);
+
+	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(normal, dimensions.z * 0.5));
+	face = face->next;
+
+	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(anti_normal, dimensions.z * 0.5));
+	face = face->next;
+
+	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
+	face = face->next;
+
+	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
+	face = face->next;
+
+	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
+	face = face->next;
+
+	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
+	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
+	face = face->next;
 }
 
 void	init_faces(t_object *box, t_material mat, t_vect dimensions)
