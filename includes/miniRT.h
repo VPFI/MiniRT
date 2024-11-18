@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/15 02:11:59 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/18 14:59:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
-# define FOV		70
+# define FOV		15
 
 # define AMB		1
 
@@ -380,5 +380,7 @@ float		vect_length(t_vect vec);
 bool		zero_vect(t_vect vect);
 
 t_vect		clamp_vect( t_vect vect, float min, float max);
+
+void		free_objects(t_object **objects);
 
 #endif

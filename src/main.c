@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/15 02:31:46 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/18 15:29:06 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,9 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_L
 		|| key_data.key == MLX_KEY_EQUAL
 		|| key_data.key == MLX_KEY_MINUS
+		|| key_data.key == MLX_KEY_P
+		|| key_data.key == MLX_KEY_LEFT_BRACKET
+		|| key_data.key == MLX_KEY_RIGHT_BRACKET
 		|| key_data.key == MLX_KEY_TAB)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
@@ -203,7 +206,8 @@ int	is_num_key_down(mlx_key_data_t key_data)
 int	is_scene_settings_key_down(mlx_key_data_t key_data)
 {
 		if ((key_data.key == MLX_KEY_COMMA
-			|| key_data.key == MLX_KEY_PERIOD)
+			|| key_data.key == MLX_KEY_PERIOD
+			|| key_data.key == MLX_KEY_RIGHT_SHIFT)
 			&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -223,8 +227,6 @@ void	rotate_x(t_vect *pt, float angle)
 	float	temp_y;
 	float	temp_z;
 
-	if (!angle)
-		return ;
 	temp_y = pt->y;
 	temp_z = pt->z;
 	pt->y = (temp_y * cos(angle)) + (temp_z * (-sin(angle)));
@@ -236,8 +238,6 @@ void	rotate_y(t_vect *pt, float angle)
 	float	temp_x;
 	float	temp_z;
 
-	if (!angle)
-		return ;
 	temp_x = pt->x;
 	temp_z = pt->z;
 	pt->x = (temp_x * cos(angle)) + (temp_z * sin(angle));
@@ -249,8 +249,6 @@ void	rotate_z(t_vect *pt, float angle)
 	float	temp_x;
 	float	temp_y;
 
-	if (!angle)
-		return ;
 	temp_x = pt->x;
 	temp_y = pt->y;
 	pt->x = (temp_x * cos(angle)) + (temp_y * (-sin(angle)));
@@ -261,7 +259,10 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_W)
 	{
-		rotate_x(&camera->orientation, 0.0873);
+		if (camera->orientation.z > 0.0)
+			rotate_x(&camera->orientation, -0.0873);
+		else
+			rotate_x(&camera->orientation, 0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
@@ -273,7 +274,10 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		rotate_x(&camera->orientation, -0.0873);
+		if (camera->orientation.z > 0.0)
+			rotate_x(&camera->orientation, 0.0873);
+		else
+			rotate_x(&camera->orientation, -0.0873);
 		print_vec(unit_vect(camera->orientation));
 		return (1);
 	}
@@ -440,6 +444,10 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 	}
 	if (!zero_vect(transformation))
 	{
+		if (key_data.modifier == MLX_CONTROL)
+		{
+			transformation = vect_simple_mult(transformation, 1 / 0.0873 * M_PI / 2);
+		}
 		target_object->edit_orientation(target_object, transformation);
 		return (1);
 	}
@@ -625,16 +633,40 @@ int	check_object_resize(t_object *target_object, mlx_key_data_t key_data)
 {
 	t_vect	transformation;
 
-	transformation = new_vect(0.0, 0.0, 0.0);
+	
 	if (key_data.key == MLX_KEY_EQUAL)
 	{
-		transformation.x = 1.15;
+		transformation = new_vect(1.15, 1.15, 1.15);
 		target_object->edit_dimensions(target_object, transformation);
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_MINUS)
 	{
-		transformation.x = 0.85;
+		transformation = new_vect(0.85, 0.85, 0.85);
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_P)
+	{
+		transformation = new_vect(1.15, 1.0, 1.0);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.x = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_LEFT_BRACKET)
+	{
+		transformation = new_vect(1.0, 1.15, 1.0);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.y = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_RIGHT_BRACKET)
+	{
+		transformation = new_vect(1.0, 1.0, 1.15);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.z = 0.85;
 		target_object->edit_dimensions(target_object, transformation);
 		return (1);
 	}
@@ -704,6 +736,8 @@ void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_PERIOD)
 		scene->amb_light += 0.05;
+	else if (key_data.key == MLX_KEY_RIGHT_SHIFT)
+		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	return ;
 }
 
@@ -927,8 +961,10 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		if (scene->object_selected)
 			transform_object(scene->objects, scene->lights, &scene->camera, key_data);
 		else
+		{
 			move_camera(&scene->camera, &scene->back_up_camera, key_data);
-		recalculate_view(scene);
+			recalculate_view(scene);
+		}
 		main_loop(scene);
 	}
 	else if (is_scene_settings_key_down(key_data))
@@ -1166,7 +1202,7 @@ float	test_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
 	return (test);
 }
 
-t_color	light_sampling(t_thread *thread, t_hit_info hit_info)
+t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter_type)
 {
 	t_ray		shadow_ray;
 	t_hit_info	test_hit;
@@ -1188,17 +1224,17 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info)
 		}
 		shadow_ray.origin = hit_info.point;
 		shadow_ray.dir = vect_subtract(temp->figure.p_light.location, hit_info.point);
-		if (!shadow_hit(thread->scene, shadow_ray, &test_hit, sqrtf(vect_dot(shadow_ray.dir, shadow_ray.dir))))
+		if (!shadow_hit(thread->scene, shadow_ray, &test_hit, vect_length(shadow_ray.dir)))
 		{
-			mod2 = 1 / sqrtf(vect_dot(shadow_ray.dir, shadow_ray.dir));
-			if (hit_info.object->material.type == LAMBERTIAN)
+			mod2 = 1 / vect_length(shadow_ray.dir);
+			if (scatter_type == LAMBERTIAN)
 			{
 				mod = vect_dot(hit_info.normal, unit_vect(shadow_ray.dir));
 				if (mod < 0)
 					mod = 0;
 				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
 			}
-			else
+			else if (scatter_type == METAL)
 				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
 		}
 		tot_intensity += temp->material.emission_intensity;
@@ -1221,7 +1257,7 @@ t_ray	metal_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_color
 		bounce_dir = vect_add(unit_vect(bounce_dir), vect_simple_mult(get_random_uvect(state), powf(hit_info.object->material.metal_roughness, 2)));
 	bounce_ray = new_ray(bounce_dir, hit_info.point);
 	hit_info.object->material.albedo = hit_info.object->material.color;
-	*emittance = light_sampling(thread, hit_info);
+	*emittance = light_sampling(thread, hit_info, METAL);
 	return (bounce_ray);
 }
 
@@ -1238,7 +1274,7 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info, t_color *emittanc
 	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
 	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
 	hit_info.object->material.albedo = hit_info.object->material.color;
-	*emittance = light_sampling(thread, hit_info);
+	*emittance = light_sampling(thread, hit_info, LAMBERTIAN);
 	return (bounce_ray);
 }
 
@@ -1304,6 +1340,9 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 {
 	//change emmitance in-funciton etc...
 	//tweak intensity || light sampling etc...
+	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
+		&& !(hit_info.object->material.type == DIELECTRIC))
+			hit_info.normal = vect_simple_mult(hit_info.normal, -1.0);
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
 		//refactor wiht 1/pi etc...
@@ -1694,14 +1733,9 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 
 void	resize_box(t_object *object, t_vect transformation)
 {
-	t_object	*face;
-
-	face = object->figure.box.faces;
-	while (face)
-	{
-		resize_quad(face, transformation);
-		face = face->next;
-	}
+	object->figure.box.dimensions = vect_mult(object->figure.box.dimensions, transformation);
+	free_objects(&object->figure.box.faces);
+	init_faces(object, object->material, object->figure.box.dimensions);
 	return ;
 }
 
@@ -1712,14 +1746,23 @@ t_vect	get_origin_box(t_object *object)
 
 void	rotate_box(t_object *object, t_vect transformation)
 {
-	t_object	*face;
-
-	face = object->figure.box.faces;
-	while (face)
+	if (transformation.x)
 	{
-		rotate_quad(face, transformation);
-		face = face->next;
+		rotate_x(&object->figure.box.u_vect, transformation.x);
+		rotate_x(&object->figure.box.v_vect, transformation.x);
 	}
+	else if (transformation.y)
+	{
+		rotate_y(&object->figure.box.u_vect, transformation.y);
+		rotate_y(&object->figure.box.v_vect, transformation.y);
+	}
+	else if (transformation.z)
+	{
+		rotate_z(&object->figure.box.u_vect, transformation.z);
+		rotate_z(&object->figure.box.v_vect, transformation.z);
+	}
+	free_objects(&object->figure.box.faces);
+	init_faces(object, object->material, object->figure.box.dimensions);
 	return ;
 }
 
@@ -1728,6 +1771,7 @@ void	translate_box(t_object *object, t_vect transformation)
 	t_object	*face;
 
 	face = object->figure.box.faces;
+	object->figure.box.origin = vect_add(object->figure.box.origin, transformation);
 	while (face)
 	{
 		translate_quad(face, transformation);
@@ -2031,8 +2075,8 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	t_vect temp;
 
 
-	camera->origin = new_vect(0.0, 6.0, 10);
-	camera->orientation = unit_vect(new_vect(0, 0.0, -1));
+	camera->origin = new_vect(10.0, 10.0, 10);
+	camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
 	//camera->origin = new_vect(0, 0, 10);
 	//camera->orientation = unit_vect(new_vect(0, 0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
@@ -2105,7 +2149,6 @@ int	add_object(t_object **objects, t_object *new)
 {
 	t_object 	*last_obj;
 
-	printf("%p  --  %p\n", objects, *objects);
 	if (objects)
 	{
 		if ((*objects))
@@ -2348,14 +2391,14 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(8, 0.0, -8.0);
+	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
+	init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(-8.0, 0.0, -8.0);
 	mat.color = hexa_to_vect(BLUE);
 	mat.specular = 0.0;
