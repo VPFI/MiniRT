@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/19 18:58:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/19 21:46:32 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1386,7 +1386,8 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	else if (hit_info.object->material.type == GLOSSY)
 	{
 		float	cos = fminf(vect_dot(vect_simple_mult(ray.dir, -1.0), hit_info.normal), 1.0);
-		if (hit_info.object->material.specular > fast_rand(thread->state) || reflectance(1.5, cos) > fast_rand(thread->state))
+		if (hit_info.object->material.specular > fast_rand(thread->state) 
+			|| (reflectance(1.0, cos) > fast_rand(thread->state) && hit_info.object->material.specular))
 		{
 			(*bounce_ray) = metal_scatter(thread->state, hit_info, ray, emittance, thread);
 			if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
@@ -2681,8 +2682,22 @@ void	init_figures(t_scene *scene)
 	mat.type = GLOSSY;
 	//init_object(scene, fig, mat, PLANE);
 
+	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
+	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
+	fig.box.origin = new_vect(0.0, 6, 0.0);
+	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 0.4;
+	mat.metal_roughness = 0.2;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 2.0;
+	mat.refraction_index = 1.5;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, BOX);
+	print_list(scene->objects);
+
 	fig.cylinder.center = new_vect(0.0, 0.0, -5);
-	fig.cylinder.normal = new_vect(0.0, 0.0, -1.0);
+	fig.cylinder.normal = new_vect(1.0, 0.0, 0.0);
 	fig.cylinder.radius = 2;
 	fig.cylinder.height = 6;
 	mat.color = hexa_to_vect(RED);
@@ -2691,7 +2706,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 4.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, CYLINDER);
+	//init_object(scene, fig, mat, CYLINDER);
 }
 
 void	init_scene(t_scene *scene)
