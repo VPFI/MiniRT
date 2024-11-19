@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/18 16:54:11 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/19 01:32:57 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,6 +220,24 @@ int	is_press_and_ctrl(mlx_key_data_t key_data)
 	if (key_data.action == MLX_PRESS && key_data.modifier == MLX_CONTROL)
 		return (1);
 	return (0);
+}
+//Euler-Rodrigues rotation formula  || https://en.wikipedia.org/wiki/Rodrigues_rotation_formula
+t_vect	rotate_vector(t_vect vec, t_vect axis, float angle)
+{
+	t_vect		rotated_res;
+	t_vect		aux;
+	float		dot_product;
+	float		cosine;
+	float		sine;
+
+	aux = vect_cross(axis, vec);
+	cosine = cosf(angle);
+	sine = sinf(angle);
+	dot_product = vect_dot(vec, axis);
+	rotated_res = vect_add(
+		vect_add(vect_simple_mult(vec, cosine), vect_simple_mult(aux, sine)),
+		vect_simple_mult(axis, dot_product * (1 - cosine)));
+	return (rotated_res);
 }
 
 void	rotate_x(t_vect *pt, float angle)
@@ -1146,7 +1164,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 		else	
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
-			color = vect_simple_mult(color, 1.4);
+			color = vect_simple_mult(color, 1.8);
 	}
 	else
 	{
@@ -1390,7 +1408,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_hit_info	hit_info;
 	t_ray		bounce_ray;
 
-	if (depth <= 0)
+	if (depth <= 0 || (depth <= (MAX_DEPTH / 2) && fast_rand(thread->state) < 0.1))
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
 	emittance = new_color(0, 0, 0);
@@ -1561,7 +1579,7 @@ void	*set_rendering(void *args)
 			}
 			thread->current_y++;
 		}
-		//fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);
+		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);
 		thread->iterations++;
 	}
 	free(thread->state);
@@ -1589,6 +1607,142 @@ void	main_loop(void *sc)
 	scene->time = mlx_get_time();
 	init_render(scene);
 	//printf("TOT PIX %i || %i\n", scene->height * scene->width, scene->height * scene->width / THREADS);
+}
+
+float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
+{
+	t_vect	ideal;
+	t_vect	axis;
+	float	angle;
+
+	angle = 0.0;
+	ideal = new_vect(0.0, 0.0, 1.0);
+	if (vect_dot(normal, ideal) == -1.0)
+		axis = new_vect(0.0, 1.0, 0.0);
+	else
+		axis = vect_cross(normal, ideal);
+	if (zero_vect(axis))
+		return (angle);
+	axis = unit_vect(axis);
+	angle = acosf(vect_dot(normal, ideal));
+	if (!zero_vect(*vec))
+		*vec = rotate_vector(*vec, axis, angle);
+	if (!zero_vect(*point))
+		*point = rotate_vector(*point, axis, angle);
+	return (angle);	
+}
+
+float	get_height(t_vect point, t_vect center, float base)
+{
+	t_vect		center_to_point;
+	float		point_height;
+	float		hypotenuse;
+
+	center_to_point = vect_subtract(point, center);
+	hypotenuse = vect_dot(center_to_point, center_to_point);
+	point_height = sqrt(fabs(hypotenuse - base * base));
+	return (point_height);
+}
+
+bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+{
+	t_figure		fig_disk;
+	t_vect			base_center;
+
+	ft_bzero(&fig_disk, sizeof(t_figure));
+	fig_disk.disk.normal.z = 1.0f;
+	base_center = new_vect(0.0, 0.0, 0.0);
+	base_center.z = ref_sys->center.z + (fig.cylinder.height * 0.5);
+	fig_disk.disk.center = base_center;
+	if (!(hit_disk(ref_sys->ray, fig, internal_hit_info, bounds)))
+		return (false);
+	bounds[MAX] = internal_hit_info->t;
+	return (true);
+}
+
+bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+{
+	t_vect		ray_to_cyl;
+
+	ray_to_cyl = vect_subtract(ref_sys->center, ref_sys->ray.origin);
+	ray_to_cyl.z = 0;
+	params->a = (ref_sys->ray.dir.x * ref_sys->ray.dir.x)
+		+ (ref_sys->ray.dir.y * ref_sys->ray.dir.y);
+	params->b = -2.0 * ((ref_sys->ray.dir.x * ray_to_cyl.x)
+			+ (ref_sys->ray.dir.y * ray_to_cyl.y));
+	params->c = (ray_to_cyl.x * ray_to_cyl.x)
+		+ (ray_to_cyl.y * ray_to_cyl.y) - (pow(fig.cylinder.radius, 2));
+	params->discr = (params->b * params->b)	- (4.0 * params->a * params->c);
+	if (params->discr < 0.0)
+		return (false);
+	params->root = (-params->b - sqrtf(params->discr)) / (2.0 * params->a);
+	return (true);
+}
+
+bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+{
+	t_eq_params			params;
+	t_vect				point;
+	float				point_height;
+
+	ft_bzero(&params, sizeof(t_eq_params));
+	if (cylinder_body_intersections(ref_sys, fig, &params))
+		return (false);
+	point = vect_add(ref_sys->ray.origin, vect_simple_mult(ref_sys->ray.dir, params.root));
+	point_height = get_height(point, ref_sys->center, fig.cylinder.radius);
+	if (params.root <= bounds[MIN] || params.root >= bounds[MAX]
+		|| point_height > fig.cylinder.height / 2.0)
+	{
+		params.root = (-params.b + sqrtf(params.discr)) / (2.0 * params.a);
+		point = ray_at(ref_sys->ray, params.root);
+		point_height = get_height(point, ref_sys->center, fig.cylinder.radius);
+		if (params.root <= bounds[MIN] || params.root >= bounds[MAX]
+			|| point_height > fig.cylinder.height / 2.0)
+		{
+			return (false);
+		}
+	}
+	internal_hit_info->t = params.root;
+	internal_hit_info->normal = new_vect(1.0, 0.0, 0.0);
+	internal_hit_info->point = ray_at(ref_sys->ray, internal_hit_info->t);
+	bounds[MAX] = internal_hit_info->t;
+	return (true);
+}
+
+t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info *hit_info)
+{
+	t_hit_info res;
+
+	ft_bzero(&res, sizeof(t_hit_info));
+	res.normal = unit_vect(new_vect(1.0, 1.0, 0.0));
+	res.t = hit_info->t;
+	res.point = ray_at(ray, res.t);	
+	return (res);
+}
+
+bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+{
+	t_reference_system 	ref_sys;
+	t_hit_info 			internal_hit_info;
+	float 				internal_bounds[2];
+	bool				hit;
+
+	hit = false;
+	internal_bounds[MIN] = bounds[MIN];
+	internal_bounds[MAX] = bounds[MAX];	
+	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
+	ref_sys.ray.origin = vect_subtract(fig.cylinder.center, ray.origin);
+	ref_sys.ray.dir = ray.dir;
+	ref_sys.center = new_vect(0.0, 0.0, 0.0);
+	rotate_reference_system(fig.cylinder.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
+	hit = hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	hit |= hit_cylinder_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	fig.cylinder.height *= -1.0;
+	hit |= hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	fig.cylinder.height *= -1.0;
+	if (hit)
+		*hit_info = set_cylinder_hit_info(ref_sys.ray, &internal_hit_info);
+	return (hit);
 }
 
 void	resize_disk(t_object *object, t_vect transformation)
@@ -1626,7 +1780,6 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	float	root;
 	float	q;
 	t_vect	hit_origin;
-	t_vect	point;
 	t_vect	normal;
 
 	normal = fig.disk.normal;
@@ -1634,8 +1787,7 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	if (fabs(denominator) < 1e-8)
 		return (false);
 	q = vect_dot(fig.disk.center, normal);
-	point = ray.origin;
-	root = (q - vect_dot(point, normal)) / denominator;
+	root = (q - vect_dot(ray.origin, normal)) / denominator;
 	if (root <= bounds[MIN] || bounds[MAX] <= root)
 	{
 		return (false);
@@ -1692,40 +1844,33 @@ void	translate_quad(t_object *object, t_vect transformation)
 
 bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	float	denominator;
-	float	root;
-	float	q;
-	t_vect	hit_origin;
-	t_vect	point;
-	t_vect	normal;
-	t_vect	n;
-	t_vect	w;
-	float	a;
-	float	b;
+	t_eq_params	params;
+	t_vect		hit_origin;
+	t_vect		normal;
+	t_vect		n;
+	t_vect		w;
 
 	//careful with dot products close to 0 || floating point etc...
 	n = vect_cross(fig.quad.u_vect, fig.quad.v_vect);
 	w = vect_simple_div(n, vect_dot(n, n));
 	normal = unit_vect(n); // cache normal
-	denominator = vect_dot(normal, ray.dir);
-	if (fabs(denominator) < 1e-8)
+	params.c = vect_dot(normal, ray.dir);
+	if (fabs(params.c) < 1e-8)
 		return (false);
-	q = vect_dot(normal, fig.quad.origin);
-	point = ray.origin;
-	root = (q - vect_dot(point, normal)) / denominator;
-	if (root <= bounds[MIN] || bounds[MAX] <= root)
+	params.root = ((vect_dot(normal, fig.quad.origin)) - vect_dot(ray.origin, normal)) / params.c;
+	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
 		return (false);
 	}
-	hit_origin = vect_subtract(ray_at(ray, root), fig.quad.origin);
-	a = vect_dot(w, vect_cross(hit_origin, fig.quad.v_vect));
-	b = vect_dot(w, vect_cross(fig.quad.u_vect, hit_origin));
-	if ((a > 0.5 || a < -0.5) || (b > 0.5 || b < -0.5))
+	hit_origin = vect_subtract(ray_at(ray, params.root), fig.quad.origin);
+	params.a = vect_dot(w, vect_cross(hit_origin, fig.quad.v_vect));
+	params.b = vect_dot(w, vect_cross(fig.quad.u_vect, hit_origin));
+	if ((params.a > 0.5 || params.a < -0.5) || (params.b > 0.5 || params.b < -0.5))
 	{
 		return (false);
 	}
-	hit_info->t = root;
-	hit_info->point = ray_at(ray, root);
+	hit_info->t = params.root;
+	hit_info->point = ray_at(ray, params.root);
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);
@@ -1873,28 +2018,27 @@ void	translate_sphere(t_object *object, t_vect transformation)
 
 bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	t_vect	oc;
-	float	var[4];
-	float	sqrt_disc;
-	float	root;
+	t_vect		oc;
+	t_eq_params	params;
+	float		sqrt_disc;
 
 	oc = vect_subtract(fig.sphere.center, ray.origin);
-	var[a] = vect_dot(ray.dir, ray.dir);
-	var[h] = vect_dot(ray.dir, oc);
-	var[c] = vect_dot(oc, oc) - (fig.sphere.radius * fig.sphere.radius);
-	var[discr] = (var[h] * var[h]) - (var[a] * var[c]);
-	if (var[discr] < 0)
+	params.a = vect_dot(ray.dir, ray.dir);
+	params.b = vect_dot(ray.dir, oc);
+	params.c = vect_dot(oc, oc) - (fig.sphere.radius * fig.sphere.radius);
+	params.discr = (params.b * params.b) - (params.a * params.c);
+	if (params.discr < 0)
 		return (false);
-	sqrt_disc = sqrtf(var[discr]); 
-	root = (var[h] - sqrt_disc) / var[a];
-	if (root <= bounds[MIN] || bounds[MAX] <= root)
+	sqrt_disc = sqrtf(params.discr); 
+	params.root = (params.b - sqrt_disc) / params.a;
+	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
-		root = (var[h] + sqrt_disc) / var[a];
-		if (root <= bounds[MIN] || bounds[MAX] <= root)
+		params.root = (params.b + sqrt_disc) / params.a;
+		if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 			return (false);
 	}
-	hit_info->t = root;
-	hit_info->point = ray_at(ray, root);
+	hit_info->t = params.root;
+	hit_info->point = ray_at(ray, params.root);
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
@@ -1920,28 +2064,27 @@ void	translate_point_light(t_object *object, t_vect transformation)
 
 bool	hit_point_light(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	t_vect	oc;
-	float	var[4];
-	float	sqrt_disc;
-	float	root;
+	t_eq_params	params;
+	t_vect		oc;
+	float		sqrt_disc;
 
 	oc = vect_subtract(fig.p_light.location, ray.origin);
-	var[a] = vect_dot(ray.dir, ray.dir);
-	var[h] = vect_dot(ray.dir, oc);
-	var[c] = vect_dot(oc, oc) - (0.2 * 0.2);
-	var[discr] = (var[h] * var[h]) - (var[a] * var[c]);
-	if (var[discr] < 0)
+	params.a = vect_dot(ray.dir, ray.dir);
+	params.b = vect_dot(ray.dir, oc);
+	params.c = vect_dot(oc, oc) - (0.2 * 0.2);
+	params.discr = (params.b * params.b) - (params.a * params.c);
+	if (params.discr < 0)
 		return (false);
-	sqrt_disc = sqrtf(var[discr]); 
-	root = (var[h] - sqrt_disc) / var[a];
-	if (root <= bounds[MIN] || bounds[MAX] <= root)
+	sqrt_disc = sqrtf(params.discr); 
+	params.root = (params.b - sqrt_disc) / params.a;
+	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
-		root = (var[h] + sqrt_disc) / var[a];
-		if (root <= bounds[MIN] || bounds[MAX] <= root)
+		params.root = (params.b + sqrt_disc) / params.a;
+		if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 			return (false);
 	}
-	hit_info->t = root;
-	hit_info->point = ray_at(ray, root);
+	hit_info->t = params.root;
+	hit_info->point = ray_at(ray, params.root);
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.p_light.location), 0.2);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
@@ -2073,10 +2216,10 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	t_vect temp;
 
 
-	camera->origin = new_vect(10.0, 10.0, 10);
-	camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	//camera->origin = new_vect(0, 0, 10);
-	//camera->orientation = unit_vect(new_vect(0, 0, -1));
+	//camera->origin = new_vect(10.0, 10.0, 10);
+	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
+	camera->origin = new_vect(0, 0, 10);
+	camera->orientation = unit_vect(new_vect(0, 0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//camera->origin = new_vect(20.0, 3.0, -0.0);
@@ -2269,6 +2412,27 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_disk;
 		new_obj->next = NULL;
 	}
+	else if (type == CYLINDER)
+	{
+		new_obj->type = type;
+		new_obj->figure.cylinder.center = fig.cylinder.center;
+		new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
+		new_obj->figure.cylinder.radius = fig.cylinder.radius;
+		new_obj->figure.cylinder.height = fig.cylinder.height;
+		new_obj->material.color = mat.color;
+		new_obj->material.specular = mat.specular;
+		new_obj->material.albedo = mat.albedo;
+		new_obj->material.type = mat.type;
+		new_obj->material.metal_roughness = mat.metal_roughness;
+		new_obj->material.emission_intensity = mat.emission_intensity;
+		new_obj->material.refraction_index = mat.refraction_index;
+		new_obj->hit_func = hit_cylinder;
+		//new_obj->edit_origin = translate_cylinder;
+		//new_obj->edit_orientation = rotate_cylinder;
+		//new_obj->get_origin = get_origin_cylinder;
+		//new_obj->edit_dimensions = resize_cylinder;
+		new_obj->next = NULL;
+	}
 	else if (type == LIGHT)
 	{
 		new_obj->type = type;
@@ -2436,7 +2600,7 @@ void	init_lights(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.5;
 	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, LIGHT);
+	//init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(-8.0, 0.0, -8.0);
 	mat.color = hexa_to_vect(BLUE);
 	mat.specular = 0.0;
@@ -2464,63 +2628,66 @@ void	init_figures(t_scene *scene)
 	ft_bzero(&mat, sizeof(mat));
 	ft_bzero(&fig, sizeof(fig));
 
-	fig.sphere.center = new_vect(0.0, 1.0, -4);
-	fig.sphere.radius = 1;
-	mat.color = hexa_to_vect(DEF_COLOR);
+	fig.plane.center = new_vect(0, 0.0, -10.0);
+	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
+	mat.color = hexa_to_vect(BLACK);
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, SPHERE);
+	init_object(scene, fig, mat, PLANE);
 
-	fig.sphere.center = new_vect(2.0, 1.0, -4);
-	fig.sphere.radius = 1;
-	mat.color = hexa_to_vect(DEF_COLOR);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 0.0;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, SPHERE);
-
-	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
-	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	fig.box.origin = new_vect(0.0, 6, 0.0);
-	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.4;
-	mat.metal_roughness = 0.2;
+	fig.plane.center = new_vect(0, -10.0, 0);
+	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
+	mat.color = hexa_to_vect(SILVER);
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, BOX);
-
-	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
-	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
-	mat.color = hexa_to_vect(CYAN_GULF);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, PLANE);
 
-
-	fig.sphere.center = new_vect(0.0, -0.8, 0.0);
-	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
-	mat.color = hexa_to_vect(BLACK);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
+	fig.plane.center = new_vect(0, 10.0, 0);
+	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 1.5;
-	mat.type = LAMBERTIAN;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 1;
+	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, PLANE);
+
+	fig.plane.center = new_vect(-10.0, 0.0, 0);
+	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
+	mat.color = hexa_to_vect(GREEN);
+	mat.specular = 0.4;
+	mat.metal_roughness = 0.31;
+	mat.albedo = mat.color;
+	mat.refraction_index = 1.0;
+	mat.type = GLOSSY;
+	//init_object(scene, fig, mat, PLANE);
+
+	fig.plane.center = new_vect(10.0, 0.0, 0);
+	fig.plane.normal = unit_vect(new_vect(-1, 0, 0));
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.51;
+	mat.albedo = mat.color;
+	mat.refraction_index = 1.0;
+	mat.type = GLOSSY;
+	//init_object(scene, fig, mat, PLANE);
+
+	fig.cylinder.center = new_vect(0.0, 0.0, -5);
+	fig.cylinder.normal = new_vect(0.0, 0.0, -1.0);
+	fig.cylinder.radius = 2;
+	fig.cylinder.height = 6;
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.1;
+	mat.metal_roughness = 0.2;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 4.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, CYLINDER);
 }
 
 void	init_scene(t_scene *scene)

@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/18 16:33:04 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/19 01:24:35 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,18 @@
 # define WINW 		1400
 # define WINH 		800
 
-# define THREADS 	8
+# define THREADS 	6
 
 # define MAX_DEPTH  8
 # define SPP 		1
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
-# define FOV		15
+# define FOV		60
 
 # define AMB		1
 
-# define AMB_LIGHT	0.3
+# define AMB_LIGHT	0.9
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -108,13 +108,14 @@ typedef enum e_bounds
 	MAX = 1,
 }			t_bounds;
 
-typedef enum e_eq_indx
+typedef struct s_eq_params
 {
-	a = 0,
-	h = 1,
-	c = 2,
-	discr = 3,
-}			t_eq_indx;
+	float	a;
+	float	b;
+	float	c;
+	float	discr;
+	float	root;
+}			t_eq_params;
 
 typedef enum e_fig_type
 {
@@ -123,7 +124,9 @@ typedef enum e_fig_type
 	QUAD = 2,
 	BOX = 3,
 	DISK = 4,
-	LIGHT = 5,
+	CYLINDER = 5,
+	CONE = 6,
+	LIGHT = 7,
 }			t_fig_type;
 
 typedef struct s_2dpoint
@@ -160,6 +163,12 @@ typedef struct s_button
 	char		*text;
 	int 		color;
 }       		t_button;
+
+typedef struct s_reference_system
+{
+	t_ray	ray;
+	t_vect	center;
+}			t_reference_system;
 
 typedef struct s_camera
 {
@@ -208,6 +217,14 @@ typedef struct s_point_light
 	t_vect		location;
 }				t_point_light;
 
+typedef struct s_cylinder
+{
+	t_vect		center;
+	t_vect		normal;
+	float		radius;
+	float		height;
+}				t_cylinder;
+
 typedef struct s_sphere
 {
 	t_vect		center;
@@ -250,6 +267,7 @@ typedef union s_figure
 	t_quad			quad;
 	t_box			box;
 	t_disk			disk;
+	t_cylinder		cylinder;
 	t_point_light	p_light;
 }				t_figure;
 
@@ -331,6 +349,8 @@ void		init_faces(t_object *box, t_material mat, t_vect dimensions);
 void		recalculate_faces(t_object *box, t_vect dimensions);
 
 void		deselect_objects(t_object *objects, t_object *lights, bool *object_selected);
+
+bool		hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
 void		wait_for_threads(t_scene *scene);
 void		wait_for_threads_and_backup(t_scene *scene);
