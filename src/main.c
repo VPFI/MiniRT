@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/19 01:32:57 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/19 18:58:30 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -617,7 +617,7 @@ void	decrement_color(t_object *target_object, mlx_key_data_t key_data)
 void	cicle_material_type(t_object *target_object)
 {
 	target_object->material.type = (target_object->material.type + 1) % 5;
-	printf("Material is now: %i\n", target_object->material.type);
+	ft_printf(STDOUT_FILENO, "Material is now: %i\n\n", target_object->material.type);
 	return ;
 }
 
@@ -630,6 +630,7 @@ int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
 		else
 			increment_color(target_object, key_data);
 		print_vec_s(target_object->material.color, "NEW COLOR:");
+
 		return (1);
 	}
 	else if (is_material_key_down(key_data))
@@ -638,6 +639,9 @@ int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
 			decrement_material_component(target_object, key_data);
 		else
 			increment_material_component(target_object, key_data);
+		printf("Material components:\n Specular: %f Roughness: %f Refraction index: %f Light intensity: %f\n\n",
+			target_object->material.specular, target_object->material.metal_roughness,
+			target_object->material.refraction_index, target_object->material.emission_intensity);
 		return (1);		
 	}
 	else if (key_data.key == MLX_KEY_TAB)
@@ -1216,7 +1220,7 @@ float	test_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
 	test = vect_dot(unit_vect(bounce_dir), cam_orientation);
 	if (test < 0)
 		test = 0;
-	test = pow(test, 256);
+	test = pow(test, (128 * (1.01 - hit_info.object->material.metal_roughness)));
 	return (test);
 }
 
@@ -1287,7 +1291,7 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info, t_color *emittanc
 
 	bounce_dir = get_random_uvect(state);
 	target_on_sphere = vect_add(bounce_dir, hit_info.normal);
-	if (zero_vect(bounce_dir))
+	if (zero_vect(target_on_sphere))
 		target_on_sphere = hit_info.normal;
 	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
 	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
@@ -2585,12 +2589,12 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0, -5.0, -7.0);
+	fig.p_light.location = new_vect(0, 2.0, 0.0);
 	mat.color = hexa_to_vect(TURQUOISE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 5.0;
+	mat.emission_intensity = 2.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
