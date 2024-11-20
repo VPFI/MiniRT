@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/20 03:46:27 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/20 21:23:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -860,7 +860,7 @@ void	delete_from_objects(t_scene *scene)
 	if (prev_object)
 		prev_object->next = next_object;
 	if (obj && obj->selected)
-		free(obj);
+		free_primitive(&obj);
 }
 void	delete_from_lights(t_scene *scene)
 {
@@ -1220,7 +1220,7 @@ float	test_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
 	test = vect_dot(unit_vect(bounce_dir), cam_orientation);
 	if (test < 0)
 		test = 0;
-	test = pow(test, (128 * (1.01 - hit_info.object->material.metal_roughness)));
+	test = pow(test, (128 * (1.1 - hit_info.object->material.metal_roughness)));
 	return (test);
 }
 
@@ -1232,9 +1232,7 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 	float		mod2;
 	t_object	*temp;
 	t_color 	emittance;
-	float		tot_intensity;
 
-	tot_intensity = 0;
 	emittance = new_color(0.0, 0.0, 0.0);
 	temp = thread->scene->lights;
 	while (temp)
@@ -1259,13 +1257,8 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 			else if (scatter_type == METAL)
 				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
 		}
-		tot_intensity += temp->material.emission_intensity;
 		temp = temp->next;
 	}
-	//refactor intensity especially for 1 light
-	//if (tot_intensity)
-		//emittance = vect_simple_div(emittance, tot_intensity);
-
 	return (emittance);	
 }
 
@@ -1358,12 +1351,22 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 	return (bounce_ray);
 }
 
+bool	is_2d_nor_dielectric(t_object *object)
+{
+	if (object->material.type != DIELECTRIC 
+		&& (object->type == PLANE || object->type == QUAD || object->type == DISK))
+	{
+			return (true);
+	}
+	return (false);
+}
+
 bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray, t_color *emittance)
 {
 	//change emmitance in-funciton etc...
 	//tweak intensity || light sampling etc...
 	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
-		&& !(hit_info.object->material.type == DIELECTRIC))
+		&& (is_2d_nor_dielectric(hit_info.object)))
 			hit_info.normal = vect_simple_mult(hit_info.normal, -1.0);
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
@@ -1413,6 +1416,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_hit_info	hit_info;
 	t_ray		bounce_ray;
 
+	// check russian roulette
 	if (depth <= 0 || (depth <= (MAX_DEPTH / 2) && fast_rand(thread->state) < 0.1))
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
@@ -1630,9 +1634,9 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 		return (angle);
 	axis = unit_vect(axis);
 	angle = acosf(vect_dot(normal, ideal));
-	if (!zero_vect(*vec))
+	if (vec && !zero_vect(*vec))
 		*vec = rotate_vector(*vec, axis, angle);
-	if (!zero_vect(*point))
+	if (point && !zero_vect(*point))
 		*point = rotate_vector(*point, axis, angle);
 	return (angle);	
 }
@@ -1709,7 +1713,6 @@ bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *in
 		}
 	}
 	internal_hit_info->t = params.root;
-	internal_hit_info->normal = new_vect(1.0, 0.0, 0.0);
 	internal_hit_info->point = ray_at(ref_sys->ray, internal_hit_info->t);
 	bounds[MAX] = internal_hit_info->t;
 	return (true);
@@ -1830,6 +1833,197 @@ bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	if (hit)
 	{
 		*hit_info = set_cylinder_hit_info(ray, internal_hit_info, fig);
+	}
+	return (hit);
+}
+
+bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+{
+	float		hr_ratio;
+	t_vect		ray_to_cone;
+
+	hr_ratio = fig.cone.height / fig.cone.radius;
+	ray_to_cone = vect_subtract(ref_sys->center, ref_sys->ray.origin);
+	params->a = ((hr_ratio * hr_ratio) * ((ref_sys->ray.dir.x * ref_sys->ray.dir.x)
+				+ (ref_sys->ray.dir.y * ref_sys->ray.dir.y)))
+		- (ref_sys->ray.dir.z * ref_sys->ray.dir.z);
+	params->b = 2.0 * (hr_ratio * ((hr_ratio * ref_sys->ray.origin.x * ref_sys->ray.dir.x)
+				+ (ref_sys->ray.dir.x * ref_sys->center.x)
+				+ (hr_ratio * ref_sys->ray.origin.y * ref_sys->ray.dir.y)
+				+ (ref_sys->ray.dir.y * ref_sys->center.y))
+			- (ref_sys->ray.origin.z * ref_sys->ray.dir.z)
+			- (ref_sys->ray.dir.z * ref_sys->center.z));
+	params->c = pow(ref_sys->center.x - (hr_ratio * ref_sys->ray.origin.x), 2)
+		+ pow(ref_sys->center.y - (hr_ratio * ref_sys->ray.origin.y), 2)
+		- pow(ref_sys->center.z - ref_sys->ray.origin.z, 2);
+	params->discr = (params->b * params->b)
+		- (4.0 * params->a * params->c);
+	if (params->discr < 0.0)
+		return (false);
+	params->root = (-params->b - sqrt(params->discr))
+		/ (2.0 * params->a);
+	return (true);
+}
+
+bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+{
+	t_eq_params			params;
+	t_vect				point;
+	float				point_height;
+
+	ft_bzero(&params, sizeof(t_eq_params));
+	if (!(cone_body_intersections(ref_sys, fig, &params)))
+		return (false);
+	point = ray_at(ref_sys->ray, params.root);
+	point_height = point.z;
+	if (params.root <= bounds[MIN] || params.root >= bounds[MAX]
+		|| fabsf(point_height) > fig.cone.height || point_height < 0.0)
+	{
+		params.root = (-params.b + sqrtf(params.discr)) / (2.0 * params.a);
+		point = ray_at(ref_sys->ray, params.root);
+		point_height = point.z;
+		if (params.root <= bounds[MIN] || params.root >= bounds[MAX]
+			|| fabsf(point_height) > fig.cone.height || point_height < 0.0)
+		{
+			return (false);
+		}
+	}
+	internal_hit_info->t = params.root;
+	internal_hit_info->point = ray_at(ref_sys->ray, internal_hit_info->t);
+	bounds[MAX] = internal_hit_info->t;
+	return (true);
+}
+
+bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+{
+	t_figure		disk_figure;
+	t_vect			base_center;
+
+	ft_bzero(&disk_figure, sizeof(t_figure));
+	disk_figure.disk.normal = new_vect(0.0, 0.0, 1.0);
+	base_center = new_vect(0.0, 0.0, 0.0);
+	base_center.z = ref_sys->center.z + (fig.cone.height);
+	disk_figure.disk.center = base_center;
+	disk_figure.disk.radius = fig.cone.radius;
+	if (!(hit_disk(ref_sys->ray, disk_figure, internal_hit_info, bounds)))
+		return (false);
+	bounds[MAX] = internal_hit_info->t;
+	return (true);
+}
+
+void	resize_cone(t_object *object, t_vect transformation)
+{
+	object->figure.cone.radius *= transformation.x;
+	object->figure.cone.height *= transformation.y;
+	return ;
+}
+
+t_vect	get_origin_cone(t_object *object)
+{
+	return (object->figure.cone.center);
+}
+
+void	rotate_cone(t_object *object, t_vect transformation)
+{
+	if (transformation.x)
+		rotate_x(&object->figure.cone.normal, transformation.x);
+	else if (transformation.y)
+		rotate_y(&object->figure.cone.normal, transformation.y);
+	else if (transformation.z)
+		rotate_z(&object->figure.cone.normal, transformation.z);
+	object->figure.cone.normal = unit_vect(object->figure.cone.normal);
+	return ;
+}
+
+void	translate_cone(t_object *object, t_vect transformation)
+{
+	object->figure.cone.center = vect_add(object->figure.cone.center, transformation);
+	return ;
+}
+
+
+t_vect	calculate_ideal_normal(t_vect point, t_figure fig,
+	float *refsys_angle)
+{
+	float		angle;
+	t_vect		res;
+	t_vect		axis;
+	t_vect		projected;
+	t_vect		center_to_point;
+
+	center_to_point = vect_subtract(point, fig.cone.center);
+	*refsys_angle = rotate_reference_system(fig.cone.normal,
+			NULL, &center_to_point);
+	projected = center_to_point;
+	projected.z = 0;
+	projected = unit_vect(projected);
+	axis = vect_cross(center_to_point, projected);
+	axis = unit_vect(axis);
+	angle = sin(fig.cone.radius
+			/ hypot(fig.cone.radius, fig.cone.height));
+	res = unit_vect(rotate_vector(projected, axis, angle));
+	return (res);
+}
+
+t_vect	get_cone_normal(t_figure fig, t_hit_info hit_info)
+{
+	int			is_base;
+	t_vect		ideal;
+	t_vect		axis;
+	t_vect		res;
+	float		refsys_angle;
+
+	res = new_vect(0.0, 0.0, 0.0);
+	is_base = belongs_to_base(hit_info.point, fig.cone.center,
+			fig.cone.normal, fig.cone.height);
+	if (is_base == 1)
+		res = fig.cone.normal;
+	else
+	{
+		res = calculate_ideal_normal(hit_info.point, fig, &refsys_angle);
+		ideal = new_vect(0.0, 0.0, 1.0);
+		if (vect_dot(fig.cone.normal, ideal) == -1.0)
+			axis = new_vect(0.0, 1.0, 0.0);
+		else
+			axis = vect_cross(fig.cone.normal, ideal);
+		axis = unit_vect(axis);
+		res = rotate_vector(res, axis, -refsys_angle);
+	}
+	return (res);
+}
+
+t_hit_info	set_cone_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
+{
+	t_hit_info res;
+
+	ft_bzero(&res, sizeof(t_hit_info));
+	res.t = hit_info.t;
+	res.point = ray_at(ray, res.t);
+	res.normal = get_cone_normal(fig, res);
+	return (res);
+}
+
+bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+{
+	t_reference_system 	ref_sys;
+	t_hit_info 			internal_hit_info;
+	float 				internal_bounds[2];
+	bool				hit;
+
+	hit = false;
+	internal_bounds[MIN] = bounds[MIN];
+	internal_bounds[MAX] = bounds[MAX];	
+	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
+	internal_hit_info.normal = new_vect(1.0, 0.0, 0.0);
+	ref_sys.ray.origin = vect_subtract(ray.origin, fig.cone.center);
+	ref_sys.ray.dir = ray.dir;
+	ref_sys.center = new_vect(0.0, 0.0, 0.0);
+	rotate_reference_system(fig.cone.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
+	hit = hit_cone_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	hit |= hit_cone_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	if (hit)
+	{
+		*hit_info = set_cone_hit_info(ray, internal_hit_info, fig);
 	}
 	return (hit);
 }
@@ -2308,7 +2502,7 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
 	camera->origin = new_vect(0, 0, 10);
-	camera->orientation = unit_vect(new_vect(0, 0, -1));
+	camera->orientation = unit_vect(new_vect(0, -0.5, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//camera->origin = new_vect(20.0, 3.0, -0.0);
@@ -2522,6 +2716,27 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->edit_dimensions = resize_cylinder;
 		new_obj->next = NULL;
 	}
+	else if (type == CONE)
+	{
+		new_obj->type = type;
+		new_obj->figure.cone.center = vect_add(fig.cone.center, vect_simple_mult(fig.cone.normal, -fig.cone.height / 2));
+		new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
+		new_obj->figure.cone.radius = fig.cone.radius;
+		new_obj->figure.cone.height = fig.cone.height;
+		new_obj->material.color = mat.color;
+		new_obj->material.specular = mat.specular;
+		new_obj->material.albedo = mat.albedo;
+		new_obj->material.type = mat.type;
+		new_obj->material.metal_roughness = mat.metal_roughness;
+		new_obj->material.emission_intensity = mat.emission_intensity;
+		new_obj->material.refraction_index = mat.refraction_index;
+		new_obj->hit_func = hit_cone;
+		new_obj->edit_origin = translate_cone;
+		new_obj->edit_orientation = rotate_cone;
+		new_obj->get_origin = get_origin_cone;
+		new_obj->edit_dimensions = resize_cone;
+		new_obj->next = NULL;
+	}
 	else if (type == LIGHT)
 	{
 		new_obj->type = type;
@@ -2674,14 +2889,14 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0, 2.0, 0.0);
-	mat.color = hexa_to_vect(TURQUOISE);
+	fig.p_light.location = new_vect(0, -2.0, 2.0);
+	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
+	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
+	init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
@@ -2724,17 +2939,17 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
+	//init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(0, -10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
-	mat.color = hexa_to_vect(SILVER);
+	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(0, 10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
@@ -2789,7 +3004,30 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 4.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, CYLINDER);
+	//init_object(scene, fig, mat, CYLINDER);
+
+	fig.sphere.center = new_vect(0.0, -7.0, -5);
+	fig.sphere.radius = 3;
+	mat.color = hexa_to_vect(DEF_COLOR);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.cone.center = new_vect(0.0, -7.0, -5);
+	fig.cone.normal = new_vect(0.0, -1.0, 0.0);
+	fig.cone.radius = 2;
+	fig.cone.height = 5;
+	mat.color = hexa_to_vect(RED);
+	mat.specular = 0.1;
+	mat.metal_roughness = 0.2;
+	mat.albedo = mat.color;
+	mat.emission_intensity = 4.0;
+	mat.type = LAMBERTIAN;
+	//init_object(scene, fig, mat, CONE);
 }
 
 void	init_scene(t_scene *scene)
@@ -2815,6 +3053,15 @@ void	init_scene(t_scene *scene)
 	init_lights(scene);
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
+}
+
+void	free_primitive(t_object **object)
+{
+	if ((*object)->type == BOX)
+	{
+		free_objects(&(*object)->figure.box.faces);
+	}
+	free(*object);
 }
 
 void	free_objects(t_object **objects)

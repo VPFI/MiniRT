@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/19 18:54:43 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/20 19:28:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 # define WINW 		1400
 # define WINH 		800
 
-# define THREADS 	6
+# define THREADS 	8
 
 # define MAX_DEPTH  8
 # define SPP 		1
@@ -40,7 +40,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.9
+# define AMB_LIGHT	0.2
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -225,6 +225,14 @@ typedef struct s_cylinder
 	float		height;
 }				t_cylinder;
 
+typedef struct s_cone
+{
+	t_vect		center;
+	t_vect		normal;
+	float		radius;
+	float		height;
+}				t_cone;
+
 typedef struct s_sphere
 {
 	t_vect		center;
@@ -268,6 +276,7 @@ typedef union s_figure
 	t_box			box;
 	t_disk			disk;
 	t_cylinder		cylinder;
+	t_cone			cone;
 	t_point_light	p_light;
 }				t_figure;
 
@@ -292,6 +301,7 @@ typedef struct s_scene
 	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
 	t_thread_backup	threads_backup[THREADS];
+	uint32_t		state;
 	bool			stop;
 	bool			edit_mode;
 	bool			do_backup;
@@ -403,5 +413,6 @@ bool		zero_vect(t_vect vect);
 t_vect		clamp_vect( t_vect vect, float min, float max);
 
 void		free_objects(t_object **objects);
+void		free_primitive(t_object **object);
 
 #endif
