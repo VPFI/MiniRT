@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/19 21:46:32 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/20 03:46:27 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1651,15 +1651,16 @@ float	get_height(t_vect point, t_vect center, float base)
 
 bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
 {
-	t_figure		fig_disk;
+	t_figure		disk_figure;
 	t_vect			base_center;
 
-	ft_bzero(&fig_disk, sizeof(t_figure));
-	fig_disk.disk.normal.z = 1.0f;
+	ft_bzero(&disk_figure, sizeof(t_figure));
+	disk_figure.disk.normal = new_vect(0.0, 0.0, 1.0);
 	base_center = new_vect(0.0, 0.0, 0.0);
 	base_center.z = ref_sys->center.z + (fig.cylinder.height * 0.5);
-	fig_disk.disk.center = base_center;
-	if (!(hit_disk(ref_sys->ray, fig, internal_hit_info, bounds)))
+	disk_figure.disk.center = base_center;
+	disk_figure.disk.radius = fig.cylinder.radius;
+	if (!(hit_disk(ref_sys->ray, disk_figure, internal_hit_info, bounds)))
 		return (false);
 	bounds[MAX] = internal_hit_info->t;
 	return (true);
@@ -1691,9 +1692,9 @@ bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *in
 	float				point_height;
 
 	ft_bzero(&params, sizeof(t_eq_params));
-	if (cylinder_body_intersections(ref_sys, fig, &params))
+	if (!(cylinder_body_intersections(ref_sys, fig, &params)))
 		return (false);
-	point = vect_add(ref_sys->ray.origin, vect_simple_mult(ref_sys->ray.dir, params.root));
+	point = ray_at(ref_sys->ray, params.root);
 	point_height = get_height(point, ref_sys->center, fig.cylinder.radius);
 	if (params.root <= bounds[MIN] || params.root >= bounds[MAX]
 		|| point_height > fig.cylinder.height / 2.0)
@@ -1714,15 +1715,95 @@ bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *in
 	return (true);
 }
 
-t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info *hit_info)
+int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
+{
+	t_vect		top_to_point;
+	t_vect		bottom_to_point;
+	float		dot_top;
+	float		dot_bottom;
+
+	top_to_point = vect_add(center, vect_simple_mult(normal, height));
+	top_to_point = vect_subtract(point, top_to_point);
+	top_to_point = unit_vect(top_to_point);
+	bottom_to_point = vect_subtract(center, vect_simple_mult(normal, height));
+	bottom_to_point = vect_subtract(point, bottom_to_point);
+	bottom_to_point = unit_vect(bottom_to_point);
+	dot_top = vect_dot(normal, top_to_point);
+	dot_bottom = vect_dot(normal, bottom_to_point);
+	if (fabs(dot_top) > 0.0001 && fabs(dot_bottom) > 0.0001)
+		return (0);
+	if (fabs(dot_top) < 0.0001)
+		return (1);
+	else
+		return (-1);
+}
+
+t_vect	get_cylinder_normal(t_figure fig, t_hit_info hit_info)
+{
+	int			is_base;
+	float		point_height;
+	t_vect		center_offset;
+	t_vect		center_to_point;
+	t_vect		res;
+
+	is_base = belongs_to_base(hit_info.point, fig.cylinder.center,
+			fig.cylinder.normal, fig.cylinder.height * 0.5);
+	if (is_base == 1)
+		res = fig.cylinder.normal;
+	else if (is_base == -1)
+		res = vect_simple_mult(fig.cylinder.normal, -1.0);
+	else
+	{
+		center_to_point = vect_subtract(hit_info.point, fig.cylinder.center);
+		point_height = get_height(hit_info.point, fig.cylinder.center,
+				fig.cylinder.radius);
+		if (vect_dot(center_to_point, fig.cylinder.normal) < 0.0)
+			point_height *= -1;
+		center_offset = vect_add(fig.cylinder.center, vect_simple_mult(fig.cylinder.normal, point_height));
+		res = unit_vect(vect_subtract(hit_info.point, center_offset));
+	}
+	return (res);
+}
+
+t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
 {
 	t_hit_info res;
 
 	ft_bzero(&res, sizeof(t_hit_info));
-	res.normal = unit_vect(new_vect(1.0, 1.0, 0.0));
-	res.t = hit_info->t;
-	res.point = ray_at(ray, res.t);	
+	res.t = hit_info.t;
+	res.point = ray_at(ray, res.t);
+	res.normal = get_cylinder_normal(fig, res);
 	return (res);
+}
+
+void	resize_cylinder(t_object *object, t_vect transformation)
+{
+	object->figure.cylinder.radius *= transformation.x;
+	object->figure.cylinder.height *= transformation.y;
+	return ;
+}
+
+t_vect	get_origin_cylinder(t_object *object)
+{
+	return (object->figure.cylinder.center);
+}
+
+void	rotate_cylinder(t_object *object, t_vect transformation)
+{
+	if (transformation.x)
+		rotate_x(&object->figure.cylinder.normal, transformation.x);
+	else if (transformation.y)
+		rotate_y(&object->figure.cylinder.normal, transformation.y);
+	else if (transformation.z)
+		rotate_z(&object->figure.cylinder.normal, transformation.z);
+	object->figure.cylinder.normal = unit_vect(object->figure.cylinder.normal);
+	return ;
+}
+
+void	translate_cylinder(t_object *object, t_vect transformation)
+{
+	object->figure.cylinder.center = vect_add(object->figure.cylinder.center, transformation);
+	return ;
 }
 
 bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -1736,7 +1817,8 @@ bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	internal_bounds[MIN] = bounds[MIN];
 	internal_bounds[MAX] = bounds[MAX];	
 	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
-	ref_sys.ray.origin = vect_subtract(fig.cylinder.center, ray.origin);
+	internal_hit_info.normal = new_vect(1.0, 0.0, 0.0);
+	ref_sys.ray.origin = vect_subtract(ray.origin, fig.cylinder.center);
 	ref_sys.ray.dir = ray.dir;
 	ref_sys.center = new_vect(0.0, 0.0, 0.0);
 	rotate_reference_system(fig.cylinder.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
@@ -1746,7 +1828,9 @@ bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit |= hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
 	fig.cylinder.height *= -1.0;
 	if (hit)
-		*hit_info = set_cylinder_hit_info(ref_sys.ray, &internal_hit_info);
+	{
+		*hit_info = set_cylinder_hit_info(ray, internal_hit_info, fig);
+	}
 	return (hit);
 }
 
@@ -2432,10 +2516,10 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->material.emission_intensity = mat.emission_intensity;
 		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_cylinder;
-		//new_obj->edit_origin = translate_cylinder;
-		//new_obj->edit_orientation = rotate_cylinder;
-		//new_obj->get_origin = get_origin_cylinder;
-		//new_obj->edit_dimensions = resize_cylinder;
+		new_obj->edit_origin = translate_cylinder;
+		new_obj->edit_orientation = rotate_cylinder;
+		new_obj->get_origin = get_origin_cylinder;
+		new_obj->edit_dimensions = resize_cylinder;
 		new_obj->next = NULL;
 	}
 	else if (type == LIGHT)
@@ -2693,11 +2777,10 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.0;
 	mat.refraction_index = 1.5;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, BOX);
-	print_list(scene->objects);
+	//init_object(scene, fig, mat, BOX);
 
 	fig.cylinder.center = new_vect(0.0, 0.0, -5);
-	fig.cylinder.normal = new_vect(1.0, 0.0, 0.0);
+	fig.cylinder.normal = new_vect(0.0, 0.0, 1.0);
 	fig.cylinder.radius = 2;
 	fig.cylinder.height = 6;
 	mat.color = hexa_to_vect(RED);
@@ -2706,7 +2789,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 4.0;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, CYLINDER);
+	init_object(scene, fig, mat, CYLINDER);
 }
 
 void	init_scene(t_scene *scene)
