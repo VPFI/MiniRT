@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/20 21:23:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/21 02:44:04 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1252,10 +1252,10 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 				mod = vect_dot(hit_info.normal, unit_vect(shadow_ray.dir));
 				if (mod < 0)
 					mod = 0;
-				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
+				emittance = vect_add(emittance, vect_simple_mult(get_obj_color(&test_hit), (temp->material.emission_intensity * mod * mod2)));
 			}
 			else if (scatter_type == METAL)
-				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
+				emittance = vect_add(emittance, vect_simple_mult(get_obj_color(&test_hit), (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
 		}
 		temp = temp->next;
 	}
@@ -1271,7 +1271,7 @@ t_ray	metal_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_color
 	if (hit_info.object->material.metal_roughness)
 		bounce_dir = vect_add(unit_vect(bounce_dir), vect_simple_mult(get_random_uvect(state), powf(hit_info.object->material.metal_roughness, 2)));
 	bounce_ray = new_ray(bounce_dir, hit_info.point);
-	hit_info.object->material.albedo = hit_info.object->material.color;
+	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	*emittance = light_sampling(thread, hit_info, METAL);
 	return (bounce_ray);
 }
@@ -1288,7 +1288,7 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info, t_color *emittanc
 		target_on_sphere = hit_info.normal;
 	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
 	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
-	hit_info.object->material.albedo = hit_info.object->material.color;
+	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	*emittance = light_sampling(thread, hit_info, LAMBERTIAN);
 	return (bounce_ray);
 }
@@ -1347,7 +1347,7 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 		if (hit_info.object->material.metal_roughness)
 			bounce_ray.dir = vect_add(unit_vect(bounce_ray.dir), vect_simple_mult(get_random_uvect(state), powf(hit_info.object->material.metal_roughness, 2)));
 	}
-	hit_info.object->material.albedo = hit_info.object->material.color;
+	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	return (bounce_ray);
 }
 
@@ -1367,7 +1367,9 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	//tweak intensity || light sampling etc...
 	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
 		&& (is_2d_nor_dielectric(hit_info.object)))
+	{
 			hit_info.normal = vect_simple_mult(hit_info.normal, -1.0);
+	}
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
 		//refactor wiht 1/pi etc...
@@ -1427,14 +1429,14 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		thread->time_hit += mlx_get_time() - time_aux;
 		if (hit_info.object->material.type == EMISSIVE)
 		{
-			emittance = vect_simple_mult(hit_info.object->material.color, hit_info.object->material.emission_intensity);
+			emittance = vect_simple_mult(get_obj_color(&hit_info), hit_info.object->material.emission_intensity);
 			return (emittance);
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray, &emittance))
 		{
 			return (emittance);
 		}
-		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance));
+		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), get_obj_color(&hit_info)), emittance));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
@@ -1779,6 +1781,11 @@ t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
 	return (res);
 }
 
+t_vect	get_cylinder_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
+}
+
 void	resize_cylinder(t_object *object, t_vect transformation)
 {
 	object->figure.cylinder.radius *= transformation.x;
@@ -1840,10 +1847,8 @@ bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
 {
 	float		hr_ratio;
-	t_vect		ray_to_cone;
 
 	hr_ratio = fig.cone.height / fig.cone.radius;
-	ray_to_cone = vect_subtract(ref_sys->center, ref_sys->ray.origin);
 	params->a = ((hr_ratio * hr_ratio) * ((ref_sys->ray.dir.x * ref_sys->ray.dir.x)
 				+ (ref_sys->ray.dir.y * ref_sys->ray.dir.y)))
 		- (ref_sys->ray.dir.z * ref_sys->ray.dir.z);
@@ -1909,6 +1914,11 @@ bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *intern
 		return (false);
 	bounds[MAX] = internal_hit_info->t;
 	return (true);
+}
+
+t_vect	get_cone_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
 }
 
 void	resize_cone(t_object *object, t_vect transformation)
@@ -2028,6 +2038,11 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (hit);
 }
 
+t_vect	get_disk_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
+}
+
 void	resize_disk(t_object *object, t_vect transformation)
 {
 	object->figure.disk.radius *= transformation.x;
@@ -2085,6 +2100,11 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_quad_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
 }
 
 void	resize_quad(t_object *object, t_vect transformation)
@@ -2159,6 +2179,11 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);
 }
 
+t_vect	get_box_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
+}
+
 void	resize_box(t_object *object, t_vect transformation)
 {
 	object->figure.box.dimensions = vect_mult(object->figure.box.dimensions, transformation);
@@ -2222,6 +2247,38 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (false);
 }
 
+t_vect	get_plane_pattern(t_hit_info *hit_info)
+{
+	t_vect	rotated_point;
+	int		x_index_square;
+	int		y_index_square;
+	int		pattern_index;
+
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.plane.center);
+	rotate_reference_system(hit_info->object->figure.plane.normal, NULL, &rotated_point);
+	x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
+	y_index_square = (int)(fabs(rotated_point.y) / 1);
+	if (rotated_point.x < 0.0)
+		x_index_square++;
+	if (rotated_point.y < 0.0)
+		y_index_square++;
+	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
+	if (pattern_index == 0)
+		return(new_color(0.8, 0.4, 0.4));
+	else
+		return(new_color(0.4, 0.2, 0.2));
+}
+
+t_vect	get_obj_color(t_hit_info *hit_info)
+{
+	if (hit_info->object->material.pattern)
+	{
+		return (hit_info->object->get_visual(hit_info));
+	}
+	else
+		return (hit_info->object->material.color);
+}
+
 void	resize_plane(t_object *object, t_vect transformation)
 {
 	(void)object;
@@ -2275,6 +2332,11 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+t_vect	get_sphere_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
+}
+
 void	resize_sphere(t_object *object, t_vect transformation)
 {
 	object->figure.sphere.radius *= transformation.x;
@@ -2325,6 +2387,11 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_light_pattern(t_hit_info *hit_info)
+{
+	return (hit_info->object->material.color);
 }
 
 void	resize_point_light(t_object *object, t_vect transformation)
@@ -2594,23 +2661,18 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	new_obj = (t_object *)malloc(sizeof(t_object));
 	if (!new_obj)
 		return (-1);
+	new_obj->material = mat;
 	if (type == SPHERE)
 	{
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
 		new_obj->get_origin = get_origin_sphere;
 		new_obj->edit_dimensions = resize_sphere;
+		new_obj->get_visual = get_sphere_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == PLANE)
@@ -2618,18 +2680,12 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
 		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
 		new_obj->get_origin = get_origin_plane;
 		new_obj->edit_dimensions = resize_plane;
+		new_obj->get_visual = get_plane_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == QUAD)
@@ -2638,18 +2694,12 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.quad.origin = fig.quad.origin;
 		new_obj->figure.quad.u_vect = fig.quad.u_vect;
 		new_obj->figure.quad.v_vect = fig.quad.v_vect;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
 		new_obj->get_origin = get_origin_quad;
 		new_obj->edit_dimensions = resize_quad;
+		new_obj->get_visual = get_quad_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == BOX)
@@ -2660,18 +2710,12 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.box.v_vect = fig.box.v_vect;
 		new_obj->figure.box.dimensions = fig.box.dimensions;
 		new_obj->figure.box.faces = NULL;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_box;
 		new_obj->edit_origin = translate_box;
 		new_obj->edit_orientation = rotate_box;
 		new_obj->get_origin = get_origin_box;
 		new_obj->edit_dimensions = resize_box;
+		new_obj->get_visual = get_box_pattern;
 		new_obj->next = NULL;
 		init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
 	}
@@ -2681,18 +2725,12 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.disk.center = fig.disk.center;
 		new_obj->figure.disk.normal = unit_vect(fig.disk.normal);
 		new_obj->figure.disk.radius = fig.disk.radius;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_disk;
 		new_obj->edit_origin = translate_disk;
 		new_obj->edit_orientation = rotate_disk;
 		new_obj->get_origin = get_origin_disk;
 		new_obj->edit_dimensions = resize_disk;
+		new_obj->get_visual = get_disk_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == CYLINDER)
@@ -2702,18 +2740,12 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
 		new_obj->figure.cylinder.radius = fig.cylinder.radius;
 		new_obj->figure.cylinder.height = fig.cylinder.height;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_cylinder;
 		new_obj->edit_origin = translate_cylinder;
 		new_obj->edit_orientation = rotate_cylinder;
 		new_obj->get_origin = get_origin_cylinder;
 		new_obj->edit_dimensions = resize_cylinder;
+		new_obj->get_visual = get_cylinder_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == CONE)
@@ -2723,36 +2755,24 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
 		new_obj->figure.cone.radius = fig.cone.radius;
 		new_obj->figure.cone.height = fig.cone.height;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_cone;
 		new_obj->edit_origin = translate_cone;
 		new_obj->edit_orientation = rotate_cone;
 		new_obj->get_origin = get_origin_cone;
 		new_obj->edit_dimensions = resize_cone;
+		new_obj->get_visual = get_cone_pattern;
 		new_obj->next = NULL;
 	}
 	else if (type == LIGHT)
 	{
 		new_obj->type = type;
 		new_obj->figure.p_light.location = fig.p_light.location;
-		new_obj->material.color = mat.color;
-		new_obj->material.specular = mat.specular;
-		new_obj->material.albedo = mat.albedo;
-		new_obj->material.type = mat.type;
-		new_obj->material.metal_roughness = mat.metal_roughness;
-		new_obj->material.emission_intensity = mat.emission_intensity;
-		new_obj->material.refraction_index = mat.refraction_index;
 		new_obj->hit_func = hit_point_light;
 		new_obj->edit_origin = translate_point_light;
 		new_obj->edit_orientation = rotate_sphere;
 		new_obj->get_origin = get_origin_point_light;
 		new_obj->edit_dimensions = resize_point_light;
+		new_obj->get_visual = get_light_pattern;
 		new_obj->next = NULL;
 	}
 	new_obj->selected = false;
@@ -2777,13 +2797,7 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 	new_obj->figure.quad.origin = face.quad.origin;
 	new_obj->figure.quad.u_vect = face.quad.u_vect;
 	new_obj->figure.quad.v_vect = face.quad.v_vect;
-	new_obj->material.color = mat.color;
-	new_obj->material.specular = mat.specular;
-	new_obj->material.albedo = mat.albedo;
-	new_obj->material.type = mat.type;
-	new_obj->material.metal_roughness = mat.metal_roughness;
-	new_obj->material.emission_intensity = mat.emission_intensity;
-	new_obj->material.refraction_index = mat.refraction_index;
+	new_obj->material = mat;
 	new_obj->hit_func = hit_quad;
 	new_obj->edit_origin = translate_quad;
 	new_obj->edit_orientation = rotate_quad;
@@ -2896,7 +2910,7 @@ void	init_lights(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, LIGHT);
+	//init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
@@ -2934,12 +2948,13 @@ void	init_figures(t_scene *scene)
 
 	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
-	mat.color = hexa_to_vect(BLACK);
+	mat.color = hexa_to_vect(RED);
+	mat.pattern = true;
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(0, -10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
@@ -2949,7 +2964,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
+	//init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(0, 10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
@@ -3015,7 +3030,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, SPHERE);
+	//init_object(scene, fig, mat, SPHERE);
 
 	fig.cone.center = new_vect(0.0, -7.0, -5);
 	fig.cone.normal = new_vect(0.0, -1.0, 0.0);

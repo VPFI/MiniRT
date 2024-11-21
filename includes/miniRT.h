@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/20 19:28:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/21 02:04:00 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.2
+# define AMB_LIGHT	0.75
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -210,7 +210,8 @@ typedef struct s_material
 	float		metal_roughness;
 	float		refraction_index;
 	float		emission_intensity;
-}			t_material;
+	bool		pattern;
+}				t_material;
 
 typedef struct s_point_light
 {
@@ -289,6 +290,7 @@ typedef struct s_object
 	bool			selected;
 	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
 	t_vect			(*get_origin)(t_object *object);
+	t_vect			(*get_visual)(t_hit_info *hit_info);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
 	void			(*edit_orientation)(t_object *object, t_vect transformation);
 	void			(*edit_dimensions)(t_object *object, t_vect transformation);
@@ -378,6 +380,7 @@ void		draw_buttons(t_button *buttons, t_scene *scene);
 void		set_new_image(t_scene *scene);
 
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
+t_vect		get_obj_color(t_hit_info *hit_info);
 
 void		*set_rendering(void *args);
 void		wait_for_threads(t_scene *scene);
