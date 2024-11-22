@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/21 02:04:00 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/22 01:52:25 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
-# define FOV		30
+# define FOV		60
 
 # define AMB		1
 
@@ -250,7 +250,7 @@ typedef struct s_quad
 {
 	t_vect		u_vect;
 	t_vect		v_vect;
-	t_vect		origin;
+	t_vect		center;
 }				t_quad;
 
 typedef struct s_box
@@ -258,7 +258,7 @@ typedef struct s_box
 	t_vect		u_vect;
 	t_vect		v_vect;
 	t_vect		dimensions;
-	t_vect		origin;
+	t_vect		center;
 	t_object	*faces;
 }				t_box;
 
@@ -313,7 +313,6 @@ typedef struct s_scene
 	t_camera		camera;
 	t_camera		back_up_camera;
 	float			amb_light;
-	t_sphere		sphere_test;
 	t_object		*objects;
 	t_object		*lights;
 	uint32_t		height;
@@ -349,12 +348,17 @@ int 		get_a(int rgba);
 
 void		print_list(t_object *list);
 
+t_vect		get_random_uvect(uint32_t *state);
+
 void		unset_stop_status(t_scene *scene);
 void		set_stop_status(t_scene *scene);
 bool		get_stop_status(t_scene *scene);
 
 void		main_loop(void *sc);
 void		recalculate_view(t_scene *scene);
+
+t_vect		relative_translate(t_camera *camera, mlx_key_data_t key_data);
+t_vect		absolute_translate(mlx_key_data_t key_data);
 
 int			init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type);
 void		init_faces(t_object *box, t_material mat, t_vect dimensions);

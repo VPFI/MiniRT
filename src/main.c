@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/21 02:44:04 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/22 02:29:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	print_vec_s(t_vect vect, char*msg)
 {
 	printf("%s X: %f\n", msg, vect.x);
 	printf("%s Y: %f\n", msg, vect.y);
-	printf("%s Z: %f\n", msg, vect.z);
+	printf("%s Z: %f\n\n", msg, vect.z);
 }
 
 void	print_vec(t_vect vect)
@@ -100,10 +100,11 @@ void	move_menu(t_scene *scene, keys_t key)
 	draw_buttons(scene->buttons, scene);
 }
 
-int		is_arrow_key_down(mlx_key_data_t key_data)
+int		is_movement_key_down(mlx_key_data_t key_data)
 {
 	if ((key_data.key == MLX_KEY_UP || key_data.key == MLX_KEY_DOWN
-		|| key_data.key == MLX_KEY_LEFT || key_data.key == MLX_KEY_RIGHT)
+		|| key_data.key == MLX_KEY_LEFT || key_data.key == MLX_KEY_RIGHT
+		||key_data.key == MLX_KEY_LEFT_SHIFT || key_data.key == MLX_KEY_SPACE)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -111,10 +112,11 @@ int		is_arrow_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
-int		is_wasd_key_down(mlx_key_data_t key_data)
+int		is_rotation_key_down(mlx_key_data_t key_data)
 {
 	if ((key_data.key == MLX_KEY_W || key_data.key == MLX_KEY_S
-		|| key_data.key == MLX_KEY_A || key_data.key == MLX_KEY_D)
+		|| key_data.key == MLX_KEY_A || key_data.key == MLX_KEY_D
+		|| key_data.key == MLX_KEY_Q || key_data.key == MLX_KEY_E)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -124,29 +126,27 @@ int		is_wasd_key_down(mlx_key_data_t key_data)
 
 int		is_extra_key_down(mlx_key_data_t key_data)
 {
-	if ((key_data.key == MLX_KEY_LEFT_SHIFT
-		|| key_data.key == MLX_KEY_SPACE
-		|| key_data.key == MLX_KEY_F
+	if ((key_data.key == MLX_KEY_F
 		|| key_data.key == MLX_KEY_G
 		|| key_data.key == MLX_KEY_V
 		|| key_data.key == MLX_KEY_T
-		|| key_data.key == MLX_KEY_Q
-		|| key_data.key == MLX_KEY_E
 		|| key_data.key == MLX_KEY_O
 		|| key_data.key == MLX_KEY_Z
 		|| key_data.key == MLX_KEY_X
 		|| key_data.key == MLX_KEY_C
 		|| key_data.key == MLX_KEY_B
-		|| key_data.key == MLX_KEY_H
 		|| key_data.key == MLX_KEY_J
 		|| key_data.key == MLX_KEY_K
 		|| key_data.key == MLX_KEY_L
+		|| key_data.key == MLX_KEY_P
+		|| key_data.key == MLX_KEY_TAB
 		|| key_data.key == MLX_KEY_EQUAL
 		|| key_data.key == MLX_KEY_MINUS
-		|| key_data.key == MLX_KEY_P
+		|| key_data.key == MLX_KEY_ENTER
+		|| key_data.key == MLX_KEY_SEMICOLON
+		|| key_data.key == MLX_KEY_APOSTROPHE
 		|| key_data.key == MLX_KEY_LEFT_BRACKET
-		|| key_data.key == MLX_KEY_RIGHT_BRACKET
-		|| key_data.key == MLX_KEY_TAB)
+		|| key_data.key == MLX_KEY_RIGHT_BRACKET)
 		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
 	{
 		return (1);
@@ -156,8 +156,8 @@ int		is_extra_key_down(mlx_key_data_t key_data)
 
 int		is_camera_key_down(mlx_key_data_t key_data)
 {
-	if (is_arrow_key_down(key_data)
-		|| is_wasd_key_down(key_data)
+	if (is_movement_key_down(key_data)
+		|| is_rotation_key_down(key_data)
 		|| is_extra_key_down(key_data))
 	{
 		return (1);
@@ -167,10 +167,11 @@ int		is_camera_key_down(mlx_key_data_t key_data)
 
 int	is_material_key_down(mlx_key_data_t key_data)
 {
-	if (key_data.key == MLX_KEY_H
-		|| key_data.key == MLX_KEY_J
+	if (key_data.key == MLX_KEY_J
 		|| key_data.key == MLX_KEY_K
-		|| key_data.key == MLX_KEY_L)
+		|| key_data.key == MLX_KEY_L
+		|| key_data.key == MLX_KEY_SEMICOLON
+		|| key_data.key == MLX_KEY_APOSTROPHE)
 	{
 		return (1);
 	}
@@ -188,6 +189,17 @@ int	is_rgb_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
+int	is_aspect_key_down(mlx_key_data_t key_data)
+{
+	if (is_rgb_key_down(key_data)
+		|| is_material_key_down(key_data)
+		|| key_data.key == MLX_KEY_TAB)
+	{
+		return (1);
+	}
+	return (0);
+}
+
 int	is_num_key_down(mlx_key_data_t key_data)
 {
 	if ((key_data.key == MLX_KEY_1
@@ -195,6 +207,9 @@ int	is_num_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_3
 		|| key_data.key == MLX_KEY_4
 		|| key_data.key == MLX_KEY_5
+		|| key_data.key == MLX_KEY_6
+		|| key_data.key == MLX_KEY_7
+		|| key_data.key == MLX_KEY_8
 		|| key_data.key == MLX_KEY_BACKSPACE)
 		&& (key_data.action == MLX_PRESS))
 	{
@@ -273,86 +288,89 @@ void	rotate_z(t_vect *pt, float angle)
 	pt->y = (temp_x * sin(angle)) + (temp_y * cos(angle));
 }
 
-int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
+t_vect	align_camera_to_axis(mlx_key_data_t key_data)
 {
+	t_vect	res;
+
+	res = new_vect(0.0, 0.0, -1.0);
 	if (key_data.key == MLX_KEY_W)
 	{
-		if (camera->orientation.z > 0.0)
-			rotate_x(&camera->orientation, -0.0873);
-		else
-			rotate_x(&camera->orientation, 0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+		res = new_vect(0.0, 0.99, 0.0);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
-		rotate_y(&camera->orientation, 0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+		res = new_vect(-1.0, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_S)
+	{
+		res = new_vect(0.0, -0.99, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_D)
+	{
+		res = new_vect(1.0, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_Q)
+	{
+		res = new_vect(0.0, 0.0, 1.0);
+	}
+	else if (key_data.key == MLX_KEY_E)
+	{
+		res = new_vect(0.0, 0.0, -1.0);
+	}
+	return (res);
+}
+
+int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
+{
+	if (key_data.modifier == MLX_CONTROL)
+	{
+		camera->orientation = align_camera_to_axis(key_data);
+	}
+	else if (key_data.key == MLX_KEY_W)
+	{
+		if (camera->orientation.z > 0.0)
+			rotate_x(&camera->orientation, -0.05);
+		else
+			rotate_x(&camera->orientation, 0.05);
+	}
+	else if (key_data.key == MLX_KEY_A)
+	{
+		rotate_y(&camera->orientation, 0.05);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
 		if (camera->orientation.z > 0.0)
-			rotate_x(&camera->orientation, 0.0873);
+			rotate_x(&camera->orientation, 0.05);
 		else
-			rotate_x(&camera->orientation, -0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+			rotate_x(&camera->orientation, -0.05);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
-		rotate_y(&camera->orientation, -0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+		rotate_y(&camera->orientation, -0.05);
 	}
 	else if (key_data.key == MLX_KEY_Q)
 	{
-		rotate_z(&camera->orientation, 0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+		rotate_z(&camera->orientation, 0.05);
 	}
 	else if (key_data.key == MLX_KEY_E)
 	{
-		rotate_z(&camera->orientation, -0.0873);
-		print_vec(unit_vect(camera->orientation));
-		return (1);
+		rotate_z(&camera->orientation, -0.05);
 	}
-	return (0);
+	print_vec_s(unit_vect(camera->orientation), "New camera orientation");
+	return (1);
 }
 
 int	check_translations(t_camera *camera, mlx_key_data_t key_data)
 {
-	if (key_data.key == MLX_KEY_UP)
-	{
-		camera->origin = vect_add(camera->origin, vect_simple_mult(camera->orientation, 0.5));
-		return (1);
-	}
-	else if (key_data.key == MLX_KEY_DOWN)
-	{
-		camera->origin = vect_subtract(camera->origin, vect_simple_mult(camera->orientation, 0.5));
-		return (1);
-	}
-	else if (key_data.key == MLX_KEY_RIGHT)
-	{
-		camera->origin = vect_add(camera->origin, vect_simple_mult(camera->u, 0.5));
-		return (1);
-	}
-	else if (key_data.key == MLX_KEY_LEFT)
-	{
-		camera->origin = vect_subtract(camera->origin, vect_simple_mult(camera->u, 0.5));
-		return (1);
-	}
-	else if (key_data.key == MLX_KEY_SPACE)
-	{
-		camera->origin.y += 0.5;
-		return (1);
-	}
-	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
-	{
-		camera->origin.y -= 0.5;
-		return (1);
-	}
-	return (0);
+	t_vect	transformation;
+
+	if (key_data.modifier == MLX_CONTROL)
+		transformation = absolute_translate(key_data);
+	else
+		transformation = relative_translate(camera, key_data);
+	camera->origin = vect_add(camera->origin, transformation);
+	print_vec_s(camera->origin, "New camera origin: ");
+	return (1);
 }
 
 int	check_settings(t_camera *camera, mlx_key_data_t key_data)
@@ -389,7 +407,7 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 		{
 			camera->focus_dist -= 0.5;
 			if (camera->focus_dist < 0)
-				camera->focus_dist = 0.1;
+				camera->focus_dist = 0.5;
 		}
 		else
 			camera->focus_dist += 0.5;
@@ -416,17 +434,39 @@ int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 	return (0);
 }
 
+int	is_reset_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_O || key_data.key == MLX_KEY_T)
+		&& (key_data.action == MLX_PRESS))
+	{
+		return (1);
+	}
+	return (0);
+}
+
+int	is_settings_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_F
+		|| key_data.key == MLX_KEY_G
+		|| key_data.key == MLX_KEY_V)
+		&& (key_data.action == MLX_PRESS || key_data.action == MLX_REPEAT))
+	{
+		return (1);
+	}
+	return (0);
+}
+
 void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 {
 	//control for infinite moving overflows etc....
-	if (check_reset(camera, backup, key_data))
-		return ;
-	else if (check_rotations(camera, key_data))
-		return ;
-	else if (check_translations(camera, key_data))
-		return ;
-	else if (check_settings(camera, key_data))
-		return ;
+	if (is_reset_key_down(key_data))
+		check_reset(camera, backup, key_data);
+	else if (is_rotation_key_down(key_data))
+		check_rotations(camera, key_data);
+	else if (is_movement_key_down(key_data))
+		check_translations(camera, key_data);
+	else if (is_settings_key_down(key_data))
+		check_settings(camera, key_data);
 	return ;
 }
 
@@ -472,36 +512,95 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
-int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
+t_vect	relative_translate(t_camera *camera, mlx_key_data_t key_data)
 {
-	//Adapt object movements to camer orientation
 	t_vect	transformation;
 
 	transformation = new_vect(0.0, 0.0, 0.0);
 	if (key_data.key == MLX_KEY_UP)
 	{
-		transformation.z += 0.25;
+		transformation = vect_simple_mult(camera->orientation, 0.1);
 	}
 	else if (key_data.key == MLX_KEY_DOWN)
 	{
-		transformation.z -= 0.25;
+		transformation = vect_simple_mult(camera->orientation, -0.1);
 	}
 	else if (key_data.key == MLX_KEY_RIGHT)
 	{
-		transformation.x += 0.25;
+		transformation = vect_simple_mult(camera->u, 0.1);
 	}
 	else if (key_data.key == MLX_KEY_LEFT)
 	{
-		transformation.x -= 0.25;
+		transformation = vect_simple_mult(camera->u, -0.1);
 	}
 	else if (key_data.key == MLX_KEY_SPACE)
 	{
-		transformation.y += 0.25;
+		transformation = vect_simple_mult(camera->v, 0.1);
 	}
 	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
 	{
-		transformation.y -= 0.25;
+		transformation = vect_simple_mult(camera->v, -0.1);
 	}
+	return (transformation);
+}
+
+t_vect	absolute_translate(mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_UP)
+	{
+		transformation = new_vect(0.0, 0.0, 0.1);
+	}
+	else if (key_data.key == MLX_KEY_DOWN)
+	{
+		transformation = new_vect(0.0, 0.0, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_RIGHT)
+	{
+		transformation = new_vect(0.1, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_LEFT)
+	{
+		transformation = new_vect(-0.1, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation = new_vect(0.0, 0.1, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
+	{
+		transformation = new_vect(0.0, -0.1, 0.0);
+	}
+	return (transformation);
+}
+
+t_vect	clamp_object_coords(t_object *target_object)
+{
+	t_vect	transformation;
+	t_vect	obj_origin;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	obj_origin = target_object->get_origin(target_object);
+	transformation.x = roundf(obj_origin.x);
+	transformation.y = roundf(obj_origin.y);
+	transformation.z = roundf(obj_origin.z);
+	transformation = vect_subtract(transformation, obj_origin);
+	return (transformation);
+}
+
+int	check_object_translations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_vect	transformation;
+
+	if (key_data.key == MLX_KEY_ENTER)
+		transformation = clamp_object_coords(target_object);
+	else if (key_data.modifier == MLX_CONTROL)
+		transformation = absolute_translate(key_data);
+	else
+		transformation = relative_translate(camera, key_data);
 	if (!zero_vect(transformation))
 	{
 		target_object->edit_origin(target_object, transformation);
@@ -512,59 +611,63 @@ int	check_object_translations(t_object *target_object, mlx_key_data_t key_data)
 
 void	increment_material_component(t_object *target_object, mlx_key_data_t key_data)
 {
-	if (key_data.key == MLX_KEY_H)
+	if (key_data.key == MLX_KEY_J)
 	{
 		target_object->material.specular += 0.05;
 		if (target_object->material.specular > 1.0)
 			target_object->material.specular = 1.0;
 	}
-	else if (key_data.key == MLX_KEY_J)
+	else if (key_data.key == MLX_KEY_K)
 	{
 		target_object->material.metal_roughness += 0.05;
 		if (target_object->material.metal_roughness > 1.0)
 			target_object->material.metal_roughness = 1.0;
 	}
-	else if (key_data.key == MLX_KEY_K)
+	else if (key_data.key == MLX_KEY_L)
 	{
 		target_object->material.refraction_index += 0.05;
 		if (target_object->material.refraction_index > 10.0)
 			target_object->material.refraction_index = 10.0;
 	}
-	else if (key_data.key == MLX_KEY_L)
+	else if (key_data.key == MLX_KEY_SEMICOLON)
 	{
 		target_object->material.emission_intensity += 0.05;
 		if (target_object->material.emission_intensity > 10000.0)
 			target_object->material.emission_intensity = 10000.0;
 	}
+	else if (key_data.key == MLX_KEY_APOSTROPHE)
+		target_object->material.pattern = true;
 	return ;
 }
 
 void	decrement_material_component(t_object *target_object, mlx_key_data_t key_data)
 {
-	if (key_data.key == MLX_KEY_H)
+	if (key_data.key == MLX_KEY_J)
 	{
 		target_object->material.specular -= 0.05;
 		if (target_object->material.specular < 0.0)
 			target_object->material.specular = 0.0;
 	}
-	else if (key_data.key == MLX_KEY_J)
+	else if (key_data.key == MLX_KEY_K)
 	{
 		target_object->material.metal_roughness -= 0.05;
 		if (target_object->material.metal_roughness < 0.0)
 			target_object->material.metal_roughness = 0.0;
 	}
-	else if (key_data.key == MLX_KEY_K)
+	else if (key_data.key == MLX_KEY_L)
 	{
 		target_object->material.refraction_index -= 0.05;
 		if (target_object->material.refraction_index < 0.0)
 			target_object->material.refraction_index = 0.0;
 	}
-	else if (key_data.key == MLX_KEY_L)
+	else if (key_data.key == MLX_KEY_SEMICOLON)
 	{
 		target_object->material.emission_intensity -= 0.05;
 		if (target_object->material.emission_intensity < 0.0)
 			target_object->material.emission_intensity = 0.0;
 	}
+	else if (key_data.key == MLX_KEY_APOSTROPHE)
+		target_object->material.pattern = false;
 	return ;
 }
 
@@ -695,15 +798,15 @@ int	check_object_resize(t_object *target_object, mlx_key_data_t key_data)
 	return (0);
 }
 
-int	check_object_focus(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
+int	check_object_focus(t_object *target_object, t_scene *scene, mlx_key_data_t key_data)
 {
-	//Adapt object movements to camer orientation
 	t_vect	obj_origin;
 
 	if (key_data.key == MLX_KEY_B)
 	{
 		obj_origin = target_object->get_origin(target_object);
-		camera->orientation = unit_vect(vect_subtract(obj_origin, camera->origin));
+		scene->camera.orientation = unit_vect(vect_subtract(obj_origin, scene->camera.origin));
+		recalculate_view(scene);
 		return (1);
 	}
 	return (0);
@@ -726,24 +829,23 @@ t_object	*get_selected_object(t_object *objects, t_object *lights)
 	return (NULL);
 }
 
-void	transform_object(t_object *objects, t_object *lights, t_camera *camera, mlx_key_data_t key_data)
+void	transform_object(t_object *objects, t_object *lights, t_scene *scene, mlx_key_data_t key_data)
 {
 	//control for infinite moving overflows etc....
-	//reset for objects? just duplicate the init object list like lights etc...
 	t_object	*target_object;
 
 	target_object = get_selected_object(objects, lights);
 	if (!target_object)
 		return ;
-	if (check_object_translations(target_object, key_data))
-		return ;
-	else if (check_object_rotations(target_object, key_data))
-		return ;
-	else if (check_object_aspect(target_object, key_data))
+	if (is_movement_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
+		check_object_translations(target_object, &scene->camera, key_data);
+	else if (is_rotation_key_down(key_data))
+		check_object_rotations(target_object, key_data);
+	else if (is_aspect_key_down(key_data))
+		check_object_aspect(target_object, key_data);
+	else if (check_object_focus(target_object, scene, key_data))
 		return ;
 	else if (check_object_resize(target_object, key_data))
-		return ;
-	else if (check_object_focus(target_object, camera, key_data))
 		return ;
 	return ;
 }
@@ -774,7 +876,7 @@ t_material	new_standard_material(void)
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.1;
 	mat.refraction_index = 1.5;
-	mat.emission_intensity = 0.0;
+	mat.emission_intensity = 1.0;
 	mat.type = LAMBERTIAN;
 	return (mat);
 }
@@ -800,37 +902,65 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	//Adapt object movements to camer orientation
 	t_figure	fig;
 	t_material	mat;
+	t_ray		camera_ray;
+	t_vect		offset_origin;
 
 	mat = new_standard_material();
+	camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
+	offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
 	if (key_data.key == MLX_KEY_1)
 	{
-		fig.sphere.center = new_vect(0.0, 1.0, -1.0);
-		fig.sphere.radius = 1.0;
+		fig.sphere.center = offset_origin;
+		fig.sphere.radius = 0.5;
 		init_object(scene, fig, mat, SPHERE);
 	}
 	else if (key_data.key == MLX_KEY_2)
 	{
-		fig.plane.center = new_vect(0.0, 0.0, -1.0);
-		fig.plane.normal = new_vect(0.0, 0.0, 1.0);
+		fig.plane.center = offset_origin;
+		fig.plane.normal = vect_simple_mult(scene->camera.orientation, -1.0);
 		init_object(scene, fig, mat, PLANE);
 	}
 	else if (key_data.key == MLX_KEY_3)
 	{
-		fig.quad.origin = new_vect(0.0, 1.0, -1.0);
-		fig.quad.u_vect = new_vect(1.0, 0.0, 0.0);
-		fig.quad.v_vect = new_vect(0.0, 1.0, 0.0);
+		fig.quad.center = offset_origin;
+		fig.quad.u_vect = scene->camera.u;
+		fig.quad.v_vect = scene->camera.v;
 		init_object(scene, fig, mat, QUAD);
 	}
 	else if (key_data.key == MLX_KEY_4)
 	{
-		fig.disk.center = new_vect(0.0, 1.0, -1.0);
-		fig.disk.normal = new_vect(0.0, 0.0, 1.0);
-		fig.disk.radius = 1.0;
-		init_object(scene, fig, mat, DISK);
+		fig.box.center = offset_origin;
+		fig.box.u_vect = scene->camera.u;
+		fig.box.v_vect = scene->camera.v;
+		fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
+		init_object(scene, fig, mat, BOX);
 	}
 	else if (key_data.key == MLX_KEY_5)
 	{
-		fig.p_light.location = new_vect(0.0, 2.0, -1.0);
+		fig.disk.center = offset_origin;
+		fig.disk.normal = vect_simple_mult(scene->camera.orientation, -1.0);
+		fig.disk.radius = 0.5;
+		init_object(scene, fig, mat, DISK);
+	}
+	else if (key_data.key == MLX_KEY_6)
+	{
+		fig.cylinder.center = offset_origin;
+		fig.cylinder.normal = scene->camera.v;
+		fig.cylinder.radius = 0.5;
+		fig.cylinder.height = 2.0;
+		init_object(scene, fig, mat, CYLINDER);
+	}
+	else if (key_data.key == MLX_KEY_7)
+	{
+		fig.cone.center = offset_origin;
+		fig.cone.normal = scene->camera.v;
+		fig.cone.radius = 0.5;
+		fig.cone.height = 2.0;
+		init_object(scene, fig, mat, CONE);
+	}
+	else if (key_data.key == MLX_KEY_8)
+	{
+		fig.p_light.location = offset_origin;
 		mat = new_standard_plight();
 		init_object(scene, fig, mat, LIGHT);
 	}
@@ -932,7 +1062,7 @@ int	export_to_ppm(mlx_image_t *image)
 	char	*filename;
 
 	fd = 0;
-	filename = ft_itoa((int)(mlx_get_time() * mlx_get_time() * 1000));
+	filename = ft_itoa((int)(mlx_get_time() * 1000));
 	filename = ft_strattach("img/exported/", &filename);
 	filename = ft_strappend(&filename, ".ppm");
 	fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0644);
@@ -981,7 +1111,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (scene->object_selected)
-			transform_object(scene->objects, scene->lights, &scene->camera, key_data);
+			transform_object(scene->objects, scene->lights, scene, key_data);
 		else
 		{
 			move_camera(&scene->camera, &scene->back_up_camera, key_data);
@@ -1034,7 +1164,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		set_stop_status(scene);
 		close_all(scene);
 	}
-	else if (!scene->choose_file && is_arrow_key_down(key_data))
+	else if (!scene->choose_file && is_movement_key_down(key_data))
 		move_menu(scene, key_data.key);
 	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
 	{
@@ -1252,10 +1382,10 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 				mod = vect_dot(hit_info.normal, unit_vect(shadow_ray.dir));
 				if (mod < 0)
 					mod = 0;
-				emittance = vect_add(emittance, vect_simple_mult(get_obj_color(&test_hit), (temp->material.emission_intensity * mod * mod2)));
+				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (temp->material.emission_intensity * mod * mod2)));
 			}
 			else if (scatter_type == METAL)
-				emittance = vect_add(emittance, vect_simple_mult(get_obj_color(&test_hit), (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
+				emittance = vect_add(emittance, vect_simple_mult(temp->material.color, (test_specular(hit_info, shadow_ray, thread->scene->camera.orientation) * temp->material.emission_intensity) * mod2 * 10));
 		}
 		temp = temp->next;
 	}
@@ -1337,7 +1467,7 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 		index = AIR_REF_INDEX / index;
 	else
 		adj_hit.normal = vect_simple_mult(hit_info.normal, -1); //if not inverted + normal in point inception material
-	cos = fminf(vect_dot(vect_simple_mult(udir, -1.0), adj_hit.normal), 1.0);
+	cos = vect_dot(vect_simple_mult(udir, -1.0), adj_hit.normal);
 	sin = sqrtf(1.0 - (cos * cos));
 	if (((index * sin) > 1.0) || (reflectance(index, cos) > fast_rand(state)))
 		bounce_ray = metal_scatter(state, adj_hit, inc_ray, emittance, thread);
@@ -1363,8 +1493,6 @@ bool	is_2d_nor_dielectric(t_object *object)
 
 bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray, t_color *emittance)
 {
-	//change emmitance in-funciton etc...
-	//tweak intensity || light sampling etc...
 	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
 		&& (is_2d_nor_dielectric(hit_info.object)))
 	{
@@ -1372,25 +1500,21 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	}
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
-		//refactor wiht 1/pi etc...
 		(*bounce_ray) = lambertian_scatter(thread->state, hit_info, emittance, thread);
-		return(true);
 	}
 	else if (hit_info.object->material.type == METAL)
 	{
 		(*bounce_ray) = metal_scatter(thread->state, hit_info, ray, emittance, thread);
-		//refine for roughness
 		if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
 			return (false);
 	}
 	else if (hit_info.object->material.type == DIELECTRIC)
 	{
 		(*bounce_ray) = dielectric_scatter(thread->state, hit_info, ray, emittance, thread);
-		return (true);
 	}
 	else if (hit_info.object->material.type == GLOSSY)
 	{
-		float	cos = fminf(vect_dot(vect_simple_mult(ray.dir, -1.0), hit_info.normal), 1.0);
+		float	cos = vect_dot(vect_simple_mult(ray.dir, -1.0), hit_info.normal);
 		if (hit_info.object->material.specular > fast_rand(thread->state) 
 			|| (reflectance(1.0, cos) > fast_rand(thread->state) && hit_info.object->material.specular))
 		{
@@ -1398,12 +1522,10 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 			if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
 				return (false);
 			hit_info.object->material.albedo = new_color(1.0, 1.0, 1.0);
-			return (true);
 		}
 		else
 		{
 			(*bounce_ray) = lambertian_scatter(thread->state, hit_info, emittance, thread);
-			return(true);
 		}
 	}
 	return (true);
@@ -1430,13 +1552,15 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		if (hit_info.object->material.type == EMISSIVE)
 		{
 			emittance = vect_simple_mult(get_obj_color(&hit_info), hit_info.object->material.emission_intensity);
+			emittance = vect_mult(emittance, hit_info.object->material.albedo);
 			return (emittance);
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray, &emittance))
 		{
 			return (emittance);
 		}
-		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), get_obj_color(&hit_info)), emittance));
+		emittance = vect_mult(emittance, hit_info.object->material.albedo);
+		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
@@ -1807,6 +1931,7 @@ void	rotate_cylinder(t_object *object, t_vect transformation)
 	else if (transformation.z)
 		rotate_z(&object->figure.cylinder.normal, transformation.z);
 	object->figure.cylinder.normal = unit_vect(object->figure.cylinder.normal);
+	print_vec_s(object->figure.cylinder.normal, "New Cylinder orientation: ");
 	return ;
 }
 
@@ -1942,6 +2067,7 @@ void	rotate_cone(t_object *object, t_vect transformation)
 	else if (transformation.z)
 		rotate_z(&object->figure.cone.normal, transformation.z);
 	object->figure.cone.normal = unit_vect(object->figure.cone.normal);
+	print_vec_s(object->figure.cone.normal, "New Cone orientation: ");
 	return ;
 }
 
@@ -2063,6 +2189,7 @@ void	rotate_disk(t_object *object, t_vect transformation)
 	else if (transformation.z)
 		rotate_z(&object->figure.disk.normal, transformation.z);
 	object->figure.disk.normal = unit_vect(object->figure.disk.normal);
+	print_vec_s(object->figure.disk.normal, "New Disk orientation: ");
 	return ;
 }
 
@@ -2104,7 +2231,26 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 
 t_vect	get_quad_pattern(t_hit_info *hit_info)
 {
-	return (hit_info->object->material.color);
+	t_vect	rotated_point;
+	t_vect	normal;
+	int		x_index_square;
+	int		y_index_square;
+	int		pattern_index;
+
+	normal = unit_vect(vect_cross(hit_info->object->figure.quad.u_vect, hit_info->object->figure.quad.u_vect));
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.quad.center);
+	rotate_reference_system(normal, NULL, &rotated_point);
+	x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
+	y_index_square = (int)(fabs(rotated_point.y) / 1);
+	if (rotated_point.x < 0.0)
+		x_index_square++;
+	if (rotated_point.y < 0.0)
+		y_index_square++;
+	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
+	if (pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));
 }
 
 void	resize_quad(t_object *object, t_vect transformation)
@@ -2116,7 +2262,7 @@ void	resize_quad(t_object *object, t_vect transformation)
 
 t_vect	get_origin_quad(t_object *object)
 {
-	return (object->figure.quad.origin);
+	return (object->figure.quad.center);
 }
 
 void	rotate_quad(t_object *object, t_vect transformation)
@@ -2136,12 +2282,13 @@ void	rotate_quad(t_object *object, t_vect transformation)
 		rotate_z(&object->figure.quad.u_vect, transformation.z);
 		rotate_z(&object->figure.quad.v_vect, transformation.z);
 	}
+	print_vec_s(vect_cross(object->figure.quad.u_vect, object->figure.quad.v_vect), "New Quad orientation: ");
 	return ;
 }
 
 void	translate_quad(t_object *object, t_vect transformation)
 {
-	object->figure.quad.origin = vect_add(object->figure.quad.origin, transformation);
+	object->figure.quad.center = vect_add(object->figure.quad.center, transformation);
 	return ;
 }
 
@@ -2160,12 +2307,12 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	params.c = vect_dot(normal, ray.dir);
 	if (fabs(params.c) < 1e-8)
 		return (false);
-	params.root = ((vect_dot(normal, fig.quad.origin)) - vect_dot(ray.origin, normal)) / params.c;
+	params.root = ((vect_dot(normal, fig.quad.center)) - vect_dot(ray.origin, normal)) / params.c;
 	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
 		return (false);
 	}
-	hit_origin = vect_subtract(ray_at(ray, params.root), fig.quad.origin);
+	hit_origin = vect_subtract(ray_at(ray, params.root), fig.quad.center);
 	params.a = vect_dot(w, vect_cross(hit_origin, fig.quad.v_vect));
 	params.b = vect_dot(w, vect_cross(fig.quad.u_vect, hit_origin));
 	if ((params.a > 0.5 || params.a < -0.5) || (params.b > 0.5 || params.b < -0.5))
@@ -2193,7 +2340,7 @@ void	resize_box(t_object *object, t_vect transformation)
 
 t_vect	get_origin_box(t_object *object)
 {
-	return (object->figure.box.origin);
+	return (object->figure.box.center);
 }
 
 void	rotate_box(t_object *object, t_vect transformation)
@@ -2214,6 +2361,7 @@ void	rotate_box(t_object *object, t_vect transformation)
 		rotate_z(&object->figure.box.v_vect, transformation.z);
 	}
 	recalculate_faces(object, object->figure.box.dimensions);
+	print_vec_s(vect_cross(object->figure.box.u_vect, object->figure.box.v_vect), "New Box orientation: ");
 	return ;
 }
 
@@ -2222,7 +2370,7 @@ void	translate_box(t_object *object, t_vect transformation)
 	t_object	*face;
 
 	face = object->figure.box.faces;
-	object->figure.box.origin = vect_add(object->figure.box.origin, transformation);
+	object->figure.box.center = vect_add(object->figure.box.center, transformation);
 	while (face)
 	{
 		translate_quad(face, transformation);
@@ -2264,9 +2412,9 @@ t_vect	get_plane_pattern(t_hit_info *hit_info)
 		y_index_square++;
 	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
 	if (pattern_index == 0)
-		return(new_color(0.8, 0.4, 0.4));
+		return(new_color(0.8, 0.2, 0.2));
 	else
-		return(new_color(0.4, 0.2, 0.2));
+		return(new_color(0.4, 0.1, 0.1));
 }
 
 t_vect	get_obj_color(t_hit_info *hit_info)
@@ -2300,6 +2448,7 @@ void	rotate_plane(t_object *object, t_vect transformation)
 	else if (transformation.z)
 		rotate_z(&object->figure.plane.normal, transformation.z);
 	object->figure.plane.normal = unit_vect(object->figure.plane.normal);
+	print_vec_s(object->figure.plane.normal, "New Plane orientation: ");
 	return ;
 }
 
@@ -2532,6 +2681,9 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 void	recalculate_view(t_scene *scene)
 {
 	t_vect temp;
+	t_vect world_axis;
+
+	world_axis = new_vect(0.0, 1.0, 0.0);
 
 	scene->camera.orientation = unit_vect(scene->camera.orientation);
 
@@ -2539,7 +2691,12 @@ void	recalculate_view(t_scene *scene)
 	scene->camera.viewport_width = scene->camera.viewport_height * (scene->width / (float)scene->height);
 
 	scene->camera.w = scene->camera.orientation;
-	scene->camera.u = unit_vect(vect_cross(scene->camera.w, new_vect(0, 1, 0)));
+	if (vect_dot(scene->camera.w, world_axis) == 1.0
+		|| vect_dot(scene->camera.w, world_axis) == -1.0)
+	{
+		world_axis = new_vect(0.0, 0.0, 1.0);
+	}
+	scene->camera.u = unit_vect(vect_cross(scene->camera.w, world_axis));
 	scene->camera.v = unit_vect(vect_cross(scene->camera.u, scene->camera.w));
 
 	scene->camera.defocus_radius = scene->camera.focus_dist * (tanf((scene->camera.defocus_angle * M_PI / 180) * 0.5));
@@ -2564,12 +2721,14 @@ void	recalculate_view(t_scene *scene)
 void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 {
 	t_vect temp;
+	t_vect world_axis;
 
-
+	world_axis = new_vect(0.0, 1.0, 0.0);
+	
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	camera->origin = new_vect(0, 0, 10);
-	camera->orientation = unit_vect(new_vect(0, -0.5, -1));
+	camera->origin = new_vect(0, 1, 10);
+	camera->orientation = unit_vect(new_vect(0, 0.0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//camera->origin = new_vect(20.0, 3.0, -0.0);
@@ -2581,6 +2740,11 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	camera->viewport_width = camera->viewport_height * (width / (float)height);
 
 	camera->w = camera->orientation;
+	if (vect_dot(camera->w, world_axis) == 1.0
+		|| vect_dot(camera->w, world_axis) == -1.0)
+	{
+		world_axis = new_vect(0.0, 0.0, 1.0);
+	}
 	camera->u = unit_vect(vect_cross(camera->w, new_vect(0, 1, 0)));
 	camera->v = unit_vect(vect_cross(camera->u, camera->w));
 
@@ -2691,7 +2855,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	else if (type == QUAD)
 	{
 		new_obj->type = type;
-		new_obj->figure.quad.origin = fig.quad.origin;
+		new_obj->figure.quad.center = fig.quad.center;
 		new_obj->figure.quad.u_vect = fig.quad.u_vect;
 		new_obj->figure.quad.v_vect = fig.quad.v_vect;
 		new_obj->hit_func = hit_quad;
@@ -2705,7 +2869,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	else if (type == BOX)
 	{
 		new_obj->type = type;
-		new_obj->figure.box.origin = fig.box.origin;
+		new_obj->figure.box.center = fig.box.center;
 		new_obj->figure.box.u_vect = fig.box.u_vect;
 		new_obj->figure.box.v_vect = fig.box.v_vect;
 		new_obj->figure.box.dimensions = fig.box.dimensions;
@@ -2794,7 +2958,7 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 
 	new_obj = (t_object *)malloc(sizeof(t_object));
 	new_obj->type = QUAD;
-	new_obj->figure.quad.origin = face.quad.origin;
+	new_obj->figure.quad.center = face.quad.center;
 	new_obj->figure.quad.u_vect = face.quad.u_vect;
 	new_obj->figure.quad.v_vect = face.quad.v_vect;
 	new_obj->material = mat;
@@ -2818,32 +2982,32 @@ void	recalculate_faces(t_object *box, t_vect dimensions)
 
 	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(normal, dimensions.z * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(normal, dimensions.z * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(anti_normal, dimensions.z * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(anti_normal, dimensions.z * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	face->figure.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
+	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
 	face = face->next;
 }
 
@@ -2858,32 +3022,32 @@ void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 
 	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(normal, dimensions.z * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(normal, dimensions.z * 0.5));
 	add_box_face(box, fig, mat);
 
 	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(anti_normal, dimensions.z * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(anti_normal, dimensions.z * 0.5));
 	add_box_face(box, fig, mat);
 
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
 	add_box_face(box, fig, mat);
 
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
 	add_box_face(box, fig, mat);
 
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
 	add_box_face(box, fig, mat);
 
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	fig.quad.origin = vect_add(box->figure.box.origin, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
+	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
 	add_box_face(box, fig, mat);
 }
 
@@ -2954,9 +3118,9 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
+	//init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(0, -10.0, 0);
+	fig.plane.center = new_vect(0, -2.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 1.0;
@@ -2964,7 +3128,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(0, 10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, -1, 0));
@@ -2998,7 +3162,7 @@ void	init_figures(t_scene *scene)
 
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	fig.box.origin = new_vect(0.0, 6, 0.0);
+	fig.box.center = new_vect(0.0, 6, 0.0);
 	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.4;
@@ -3057,6 +3221,7 @@ void	init_scene(t_scene *scene)
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	scene->state = (uint32_t)(scene->height * scene->width * mlx_get_time());
 	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	pthread_mutex_init(&scene->stop_mutex, NULL);
 	scene->stop = false;
@@ -3157,7 +3322,6 @@ int	main(int argc, char **argv)
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
 	mlx_resize_hook(scene.mlx, resize_minirt, &scene);
-	//mlx_loop_hook(scene.mlx, main_loop, &scene);
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
