@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/22 02:29:16 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/22 14:54:33 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -2077,7 +2077,6 @@ void	translate_cone(t_object *object, t_vect transformation)
 	return ;
 }
 
-
 t_vect	calculate_ideal_normal(t_vect point, t_figure fig,
 	float *refsys_angle)
 {
@@ -2165,8 +2164,36 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 }
 
 t_vect	get_disk_pattern(t_hit_info *hit_info)
-{
-	return (hit_info->object->material.color);
+{	
+	t_vect	rotated_point;
+	int		x_index_square;
+	int		y_index_square;
+	int		pattern_index;
+	t_vect	point_to_base;
+
+	float	point_radius;
+	float	point_pattern_dim;
+
+
+
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.disk.center);
+	rotate_reference_system(hit_info->object->figure.disk.normal, NULL, &rotated_point);
+	point_to_base = rotated_point;
+	point_to_base.z = 0.0;
+	point_radius = vect_length(point_to_base);
+	point_to_base = unit_vect(point_to_base);
+	point_pattern_dim = point_radius * ((M_PI / 4) / hit_info->object->figure.disk.radius);
+	x_index_square = (int)(fabs(acos(point_to_base.x) * point_radius)/ point_pattern_dim);
+	y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 4));
+	if (rotated_point.x < 0.0)
+		x_index_square++;
+	if (rotated_point.y < 0.0)
+		y_index_square++;
+	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
+	if (pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));
 }
 
 void	resize_disk(t_object *object, t_vect transformation)
@@ -2237,11 +2264,11 @@ t_vect	get_quad_pattern(t_hit_info *hit_info)
 	int		y_index_square;
 	int		pattern_index;
 
-	normal = unit_vect(vect_cross(hit_info->object->figure.quad.u_vect, hit_info->object->figure.quad.u_vect));
+	normal = unit_vect(vect_cross(hit_info->object->figure.quad.u_vect, hit_info->object->figure.quad.v_vect));
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.quad.center);
 	rotate_reference_system(normal, NULL, &rotated_point);
-	x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
-	y_index_square = (int)(fabs(rotated_point.y) / 1);
+	x_index_square = (int)(fabs(rotated_point.x) / 0.5); // (/ figure->pattern.dimension)
+	y_index_square = (int)(fabs(rotated_point.y) / 0.5);
 	if (rotated_point.x < 0.0)
 		x_index_square++;
 	if (rotated_point.y < 0.0)
