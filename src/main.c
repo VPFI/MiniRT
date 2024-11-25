@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/22 14:54:33 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/11/25 02:25:35 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1469,7 +1469,7 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 		adj_hit.normal = vect_simple_mult(hit_info.normal, -1); //if not inverted + normal in point inception material
 	cos = vect_dot(vect_simple_mult(udir, -1.0), adj_hit.normal);
 	sin = sqrtf(1.0 - (cos * cos));
-	if (((index * sin) > 1.0) || (reflectance(index, cos) > fast_rand(state)))
+	if (((index * sin) > 1.0 || reflectance(index, cos) > fast_rand(state)) && front_face)
 		bounce_ray = metal_scatter(state, adj_hit, inc_ray, emittance, thread);
 	else
 	{
@@ -1481,12 +1481,11 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 	return (bounce_ray);
 }
 
-bool	is_2d_nor_dielectric(t_object *object)
+bool	is_2d(t_object *object)
 {
-	if (object->material.type != DIELECTRIC 
-		&& (object->type == PLANE || object->type == QUAD || object->type == DISK))
+	if (object->type == PLANE || object->type == QUAD || object->type == DISK)
 	{
-			return (true);
+		return (true);
 	}
 	return (false);
 }
@@ -1494,7 +1493,7 @@ bool	is_2d_nor_dielectric(t_object *object)
 bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray, t_color *emittance)
 {
 	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
-		&& (is_2d_nor_dielectric(hit_info.object)))
+		&& (is_2d(hit_info.object)))
 	{
 			hit_info.normal = vect_simple_mult(hit_info.normal, -1.0);
 	}
@@ -1552,7 +1551,6 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		if (hit_info.object->material.type == EMISSIVE)
 		{
 			emittance = vect_simple_mult(get_obj_color(&hit_info), hit_info.object->material.emission_intensity);
-			emittance = vect_mult(emittance, hit_info.object->material.albedo);
 			return (emittance);
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray, &emittance))
@@ -2174,20 +2172,19 @@ t_vect	get_disk_pattern(t_hit_info *hit_info)
 	float	point_radius;
 	float	point_pattern_dim;
 
-
-
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.disk.center);
 	rotate_reference_system(hit_info->object->figure.disk.normal, NULL, &rotated_point);
 	point_to_base = rotated_point;
 	point_to_base.z = 0.0;
 	point_radius = vect_length(point_to_base);
 	point_to_base = unit_vect(point_to_base);
-	point_pattern_dim = point_radius * ((M_PI / 4) / hit_info->object->figure.disk.radius);
-	x_index_square = (int)(fabs(acos(point_to_base.x) * point_radius)/ point_pattern_dim);
-	y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 4));
-	if (rotated_point.x < 0.0)
+	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
+	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.disk.radius);
+	x_index_square = (int)(fabs(acos(point_to_base.y) * point_radius)/ point_pattern_dim);
+	y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 3));
+	if (rotated_point.x > 0.0)
 		x_index_square++;
-	if (rotated_point.y < 0.0)
+	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
 		y_index_square++;
 	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
 	if (pattern_index == 0)
@@ -2355,7 +2352,22 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 
 t_vect	get_box_pattern(t_hit_info *hit_info)
 {
-	return (hit_info->object->material.color);
+	t_object	*face;
+	t_hit_info	face_hit_info;
+
+	face = hit_info->object->figure.box.faces;
+	face_hit_info = *hit_info;
+	while (face)
+	{
+		if (face->figure.quad.box_face_hit)
+		{
+			face_hit_info.object = face;
+			face_hit_info.object->material.color = hit_info->object->material.color;
+			return (get_quad_pattern(&face_hit_info));
+		}
+		face = face->next;
+	}
+	return (face_hit_info.object->material.color);
 }
 
 void	resize_box(t_object *object, t_vect transformation)
@@ -2409,7 +2421,14 @@ void	translate_box(t_object *object, t_vect transformation)
 bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_hit_info	internal_hit_info;
+	t_object	*temp;
 
+	temp = fig.box.faces;
+	while (temp)
+	{
+		temp->figure.quad.box_face_hit = false;
+		temp = temp->next;
+	}
 	if (ray_hit(fig.box.faces, ray, &internal_hit_info))
 	{
 		if (internal_hit_info.t <= bounds[MIN] || bounds[MAX] <= internal_hit_info.t)
@@ -2417,6 +2436,7 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		hit_info->t = internal_hit_info.t;
 		hit_info->point = internal_hit_info.point;
 		hit_info->normal = internal_hit_info.normal;
+		internal_hit_info.object->figure.quad.box_face_hit = true;
 		return (true);
 	}
 	return (false);
@@ -2439,9 +2459,9 @@ t_vect	get_plane_pattern(t_hit_info *hit_info)
 		y_index_square++;
 	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
 	if (pattern_index == 0)
-		return(new_color(0.8, 0.2, 0.2));
+		return(hit_info->object->material.color);
 	else
-		return(new_color(0.4, 0.1, 0.1));
+		return(vect_simple_div(hit_info->object->material.color, 3.0));
 }
 
 t_vect	get_obj_color(t_hit_info *hit_info)
@@ -2754,7 +2774,7 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	camera->origin = new_vect(0, 1, 10);
+	camera->origin = new_vect(0, 2, 10);
 	camera->orientation = unit_vect(new_vect(0, 0.0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
@@ -3094,7 +3114,7 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0, -2.0, 2.0);
+	fig.p_light.location = new_vect(0, 3.0, -7.0);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
@@ -3147,12 +3167,13 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(0, -2.0, 0);
+	fig.plane.center = new_vect(0, -1.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(BLACK);
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
+	mat.pattern = false;
 	mat.emission_intensity = 2.0;
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
@@ -3191,7 +3212,7 @@ void	init_figures(t_scene *scene)
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
 	fig.box.center = new_vect(0.0, 6, 0.0);
 	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-	mat.color = hexa_to_vect(WHITE);
+	mat.color = hexa_to_vect(BLACK);
 	mat.specular = 0.4;
 	mat.metal_roughness = 0.2;
 	mat.albedo = mat.color;
@@ -3199,6 +3220,17 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, BOX);
+
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			fig.box.center = new_vect(-2 + (1 * i), -1.0, -5 + j);
+			fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
+			init_object(scene, fig, mat, BOX);
+		}
+	}
 
 	fig.cylinder.center = new_vect(0.0, 0.0, -5);
 	fig.cylinder.normal = new_vect(0.0, 0.0, 1.0);
@@ -3212,16 +3244,44 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, CYLINDER);
 
-	fig.sphere.center = new_vect(0.0, -7.0, -5);
-	fig.sphere.radius = 3;
-	mat.color = hexa_to_vect(DEF_COLOR);
+	fig.sphere.center = new_vect(0.0, 0.0, -4);
+	fig.sphere.radius = 1;
+	mat.color = hexa_to_vect(WHITE);
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 2.5;
+	mat.emission_intensity = 2.5;
+	mat.type = EMISSIVE;
+	//init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(-1.0, 0.0, -5);
+	fig.sphere.radius = 0.3;
+	mat.color = hexa_to_vect(WHITE);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 2.5;
+	mat.emission_intensity = 2.5;
+	mat.type = EMISSIVE;
+	//init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(-12.0, 0.0, -5);
+	fig.sphere.radius = 3;
+	mat.color = hexa_to_vect(WHITE);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 0.0;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, SPHERE);
+	mat.type = DIELECTRIC;
+
+	// for (int i = 0; i < 5; i++)
+	// {
+	// 	fig.sphere.center = new_vect(-12 + (6 * i), 0.0, -5);
+	// 	mat.metal_roughness = 0.0 + (0.2 * i);
+	// 	init_object(scene, fig, mat, SPHERE);
+	// }
 
 	fig.cone.center = new_vect(0.0, -7.0, -5);
 	fig.cone.normal = new_vect(0.0, -1.0, 0.0);
@@ -3234,6 +3294,19 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 4.0;
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, CONE);
+
+	fig.disk.center = new_vect(0.0, 0.0, 0);
+	fig.disk.normal = new_vect(0.0, 0.0, 1);
+	fig.disk.radius = 4;
+	mat.color = hexa_to_vect(WHITE);
+	mat.albedo = mat.color;
+	mat.pattern = true;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 2.5;
+	mat.emission_intensity = 2.5;
+	mat.type = LAMBERTIAN;
+	//init_object(scene, fig, mat, DISK);
 }
 
 void	init_scene(t_scene *scene)

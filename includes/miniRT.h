@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/22 01:52:25 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/24 23:53:39 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		1000
+# define WINH 		600
 
 # define THREADS 	8
 
@@ -40,7 +40,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.75
+# define AMB_LIGHT	0.8
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -251,6 +251,7 @@ typedef struct s_quad
 	t_vect		u_vect;
 	t_vect		v_vect;
 	t_vect		center;
+	bool		box_face_hit;
 }				t_quad;
 
 typedef struct s_box
@@ -385,6 +386,7 @@ void		set_new_image(t_scene *scene);
 
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 t_vect		get_obj_color(t_hit_info *hit_info);
+t_ray		dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_color *emittance, t_thread *thread);
 
 void		*set_rendering(void *args);
 void		wait_for_threads(t_scene *scene);
