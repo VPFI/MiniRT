@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/26 09:37:52 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/26 21:10:37 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1541,12 +1541,11 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 
 	float		rr_coef_test;
 
-	// check russian roulette
 	if (depth <= (MAX_DEPTH / 2))
 		rr_coef_test = 0.9;
 	else
 		rr_coef_test = 1.0;
-	if (depth <= 0 || (rr_coef_test != 1.0 && fast_rand(thread->state) < 0.1))
+	if (depth <= 0 || (rr_coef_test != 1.0 && fast_rand(thread->state) > rr_coef_test))
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
 	emittance = new_color(0, 0, 0);
@@ -1564,7 +1563,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 			return (emittance);
 		}
 		emittance = vect_mult(emittance, hit_info.object->material.albedo);
-		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance), rr_coef_test));
+		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance), 1 / rr_coef_test));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
@@ -1763,6 +1762,7 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 	if (zero_vect(axis))
 		return (angle);
 	axis = unit_vect(axis);
+	//fdsfdsfdfdfdfdfdfdfd
 	angle = acosf(vect_dot(normal, ideal));
 	if (vec && !zero_vect(*vec))
 		*vec = rotate_vector(*vec, axis, angle);
@@ -2090,8 +2090,7 @@ void	translate_cone(t_object *object, t_vect transformation)
 	return ;
 }
 
-t_vect	calculate_ideal_normal(t_vect point, t_figure fig,
-	float *refsys_angle)
+t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
 {
 	float		angle;
 	t_vect		res;
@@ -2195,7 +2194,7 @@ t_vect	get_disk_pattern(t_hit_info *hit_info)
 	point_to_base = unit_vect(point_to_base);
 	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
 	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.disk.radius);
-	x_index_square = (int)(fabs(acos(point_to_base.y) * point_radius)/ point_pattern_dim);
+	x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
 	y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 3));
 	if (rotated_point.x > 0.0)
 		x_index_square++;
@@ -2790,7 +2789,7 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
 	camera->origin = new_vect(0, 2, 10);
-	camera->orientation = unit_vect(new_vect(0, 0.0, -1));
+	camera->orientation = unit_vect(new_vect(0, -0.5, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//camera->origin = new_vect(20.0, 3.0, -0.0);
@@ -3129,14 +3128,14 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0, 3.0, -7.0);
+	fig.p_light.location = new_vect(0, 6.0, -8.0);
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
+	init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	mat.color = hexa_to_vect(GREEN);
 	mat.specular = 0.0;
@@ -3174,10 +3173,11 @@ void	init_figures(t_scene *scene)
 
 	fig.plane.center = new_vect(0, 0.0, -10.0);
 	fig.plane.normal = unit_vect(new_vect(0, 0, 1));
-	mat.color = hexa_to_vect(RED);
+	mat.color = hexa_to_vect(WHITE);
 	mat.pattern = true;
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
+	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
@@ -3200,7 +3200,7 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 1;
-	mat.type = EMISSIVE;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(-10.0, 0.0, 0);
@@ -3225,11 +3225,11 @@ void	init_figures(t_scene *scene)
 
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	fig.box.center = new_vect(0.0, 6, 0.0);
-	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-	mat.color = hexa_to_vect(BLACK);
-	mat.specular = 0.4;
-	mat.metal_roughness = 0.2;
+	fig.box.center = new_vect(0.0, 0, 0.0);
+	fig.box.dimensions = new_vect(4.0, 4.0, 4.0);
+	mat.color = hexa_to_vect(WHITE);
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.refraction_index = 1.5;
@@ -3284,16 +3284,16 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, CYLINDER);
 
-	fig.sphere.center = new_vect(0.0, 0.0, -4);
-	fig.sphere.radius = 1;
+	fig.sphere.center = new_vect(0.0, -5, -4);
+	fig.sphere.radius = 5;
 	mat.color = hexa_to_vect(WHITE);
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.0;
 	mat.refraction_index = 2.5;
 	mat.emission_intensity = 2.5;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, SPHERE);
+	mat.type = DIELECTRIC;
+	init_object(scene, fig, mat, SPHERE);
 
 	fig.sphere.center = new_vect(-1.0, 0.0, -5);
 	fig.sphere.radius = 0.3;
@@ -3451,7 +3451,6 @@ bool	get_stop_status(t_scene *scene)
 int	main(int argc, char **argv)
 {
 	//check exit when clicking x on window
-	//TEST MUTEX PERFOMANCE ETC...
 	(void)argc;
 	(void)argv;
 	t_scene	scene;
