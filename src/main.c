@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/25 02:25:35 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/26 09:37:52 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1539,8 +1539,14 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	t_hit_info	hit_info;
 	t_ray		bounce_ray;
 
+	float		rr_coef_test;
+
 	// check russian roulette
-	if (depth <= 0 || (depth <= (MAX_DEPTH / 2) && fast_rand(thread->state) < 0.1))
+	if (depth <= (MAX_DEPTH / 2))
+		rr_coef_test = 0.9;
+	else
+		rr_coef_test = 1.0;
+	if (depth <= 0 || (rr_coef_test != 1.0 && fast_rand(thread->state) < 0.1))
 		return (new_color(0, 0, 0));
 	ft_bzero(&hit_info, sizeof(hit_info));
 	emittance = new_color(0, 0, 0);
@@ -1558,7 +1564,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 			return (emittance);
 		}
 		emittance = vect_mult(emittance, hit_info.object->material.albedo);
-		return (vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance));
+		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), hit_info.object->material.albedo), emittance), rr_coef_test));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	t_vect	unit_dir = unit_vect(ray.dir);
@@ -2039,8 +2045,17 @@ bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *intern
 	return (true);
 }
 
+// t_vect	get_cone_body_pattern(t_hit_info *hit_info)
+// {
+	
+// }
+
 t_vect	get_cone_pattern(t_hit_info *hit_info)
 {
+	// if (belongs_to_base(hit_info->point, hit_info->object->figure.cone.center, hit_info->object->figure.cone.normal, hit_info->object->figure.cone.height))
+	// 	return (hit_info->object->material.color);
+	// else
+	// 	return (get_cone_body_pattern())
 	return (hit_info->object->material.color);
 }
 
@@ -3165,9 +3180,9 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
-	fig.plane.center = new_vect(0, -1.0, 0);
+	fig.plane.center = new_vect(0, -10.0, 0);
 	fig.plane.normal = unit_vect(new_vect(0, 1, 0));
 	mat.color = hexa_to_vect(BLACK);
 	mat.specular = 1.0;
@@ -3186,7 +3201,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 1;
 	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(-10.0, 0.0, 0);
 	fig.plane.normal = unit_vect(new_vect(1, 0, 0));
@@ -3196,7 +3211,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
 	mat.type = GLOSSY;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.plane.center = new_vect(10.0, 0.0, 0);
 	fig.plane.normal = unit_vect(new_vect(-1, 0, 0));
@@ -3206,7 +3221,7 @@ void	init_figures(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.refraction_index = 1.0;
 	mat.type = GLOSSY;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
@@ -3222,15 +3237,40 @@ void	init_figures(t_scene *scene)
 	//init_object(scene, fig, mat, BOX);
 
 
-	for (int i = 0; i < 5; i++)
-	{
-		for (int j = 0; j < 5; j++)
-		{
-			fig.box.center = new_vect(-2 + (1 * i), -1.0, -5 + j);
-			fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
-			init_object(scene, fig, mat, BOX);
-		}
-	}
+	// for (int i = 0; i < 5; i++)
+	// {
+	// 	for (int j = 0; j < 5; j++)
+	// 	{
+	// 		if ((i == 0 || i == 4) && (j == 0 || j == 4))
+	// 		{
+	// 			fig.sphere.center = new_vect(-2 + (1 * i), 2, -5 + j);
+	// 			fig.sphere.radius = 0.15;
+	// 			mat.color = hexa_to_vect(WHITE);
+	// 			mat.albedo = mat.color;
+	// 			mat.emission_intensity = 6.5;
+	// 			mat.type = EMISSIVE;
+	// 			init_object(scene, fig, mat, SPHERE);
+	// 		}
+	// 		if (i == 2 && j == 2)
+	// 		{
+	// 			fig.sphere.center = new_vect(-2 + (1 * i), 2, -5 + j);
+	// 			fig.sphere.radius = 1;
+	// 			mat.color = hexa_to_vect(WHITE);
+	// 			mat.albedo = mat.color;
+	// 			mat.emission_intensity = 10.0;
+	// 			mat.type = EMISSIVE;
+	// 			init_object(scene, fig, mat, SPHERE);
+	// 		}
+	// 		mat.color = hexa_to_vect(BLACK);
+	// 		mat.albedo = mat.color;
+	// 		mat.type = LAMBERTIAN;
+	// 		fig.box.center = new_vect(-2 + (1 * i), -1.0, -5 + j);
+	// 		fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
+	// 		fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
+	// 		fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
+	// 		init_object(scene, fig, mat, BOX);
+	// 	}
+	// }
 
 	fig.cylinder.center = new_vect(0.0, 0.0, -5);
 	fig.cylinder.normal = new_vect(0.0, 0.0, 1.0);
