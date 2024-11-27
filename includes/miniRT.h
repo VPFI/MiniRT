@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/24 23:53:39 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/27 02:49:41 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ typedef struct s_thread
 	uint32_t		current_y;
 	uint32_t		y_start;
 	uint32_t		y_end;
+	bool			sampled;
 }					t_thread;
 
 typedef struct s_thread_backup
