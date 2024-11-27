@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/27 02:55:38 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/27 22:30:04 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1370,6 +1370,8 @@ t_color	sample_area_light(t_thread *thread, t_object *light, t_hit_info hit_info
 	t_vect		sample_area;
 
 	emittance = new_color(0.0, 0.0, 0.0);
+	if (light->type != SPHERE)
+		return (emittance);
 	shadow_ray.origin = hit_info.point;
 	sample_area = test_sample_area(thread->state, light);
 	shadow_ray.dir = vect_subtract(sample_area, hit_info.point); //get_light_sample() for everything // no need of 2 fucntions
@@ -1388,7 +1390,9 @@ t_color	sample_area_light(t_thread *thread, t_object *light, t_hit_info hit_info
 		thread->sampled = true;
 	}
 	else
+	{
 		thread->sampled = false;
+	}
 	return (vect_simple_div(emittance, 1));
 }
 
@@ -1589,7 +1593,6 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 
 	float		rr_coef_test;
 
-	thread->sampled = false;
 	if (depth <= (MAX_DEPTH / 2))
 		rr_coef_test = 0.9;
 	else
@@ -1604,10 +1607,11 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		thread->time_hit += mlx_get_time() - time_aux;
 		if (hit_info.object->material.type == EMISSIVE)
 		{
-			if (thread->sampled)
+			if (thread->sampled == true)
+			{
 				return (emittance);
+			}
 			emittance = vect_simple_mult(get_obj_color(&hit_info), hit_info.object->material.emission_intensity);
-			emittance = vect_mult(emittance, get_obj_color(&hit_info));
 			return (emittance);
 		}
 		if (!scatter_ray(thread, hit_info, &bounce_ray, ray, &emittance))
@@ -1739,6 +1743,7 @@ void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
 		ray.origin = defocus_sample(thread->scene->camera, thread->state);
 		pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
 		ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
+		thread->sampled = false;
 		color = vect_add(color, calc_pixel_color(thread, ray, MAX_DEPTH));
 		sample_count++;
 	}
