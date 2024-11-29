@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/27 02:49:41 by vpf              ###   ########.fr       */
+/*   Updated: 2024/11/29 22:46:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,21 +26,23 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1000
-# define WINH 		600
+# define WINW 		1600
+# define WINH 		900
 
 # define THREADS 	8
 
-# define MAX_DEPTH  8
+# define MAX_DEPTH  16
 # define SPP 		1
+
+# define TEST 		0
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
-# define FOV		60
+# define FOV		21
 
 # define AMB		1
 
-# define AMB_LIGHT	0.8
+# define AMB_LIGHT	0.7
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -217,6 +219,7 @@ typedef struct s_material
 typedef struct s_point_light
 {
 	t_vect		location;
+	float		radius_shadow;
 }				t_point_light;
 
 typedef struct s_cylinder
@@ -252,7 +255,6 @@ typedef struct s_quad
 	t_vect		u_vect;
 	t_vect		v_vect;
 	t_vect		center;
-	bool		box_face_hit;
 }				t_quad;
 
 typedef struct s_box
