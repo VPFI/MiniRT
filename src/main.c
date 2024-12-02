@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/30 03:59:00 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/02 01:12:02 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1304,6 +1304,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 {
 	t_color		color;
 	t_hit_info	hit_info;
+	float		lenght;
 
 	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
@@ -1313,6 +1314,8 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
 			color = vect_simple_mult(color, 1.8);
+		lenght = vect_length(vect_subtract(hit_info.point, ray.origin));
+		color = vect_simple_div(color, lenght / scene->camera.focus_dist);
 	}
 	else
 	{
@@ -2352,20 +2355,35 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
-t_vect	get_face_pattern(t_hit_info *hit_info, int face_index)
+int	correct_box_pattern_index(t_vect *dimensions, int face_index, int pattern_index)
+{
+	if ((face_index == 2 || face_index == 3) && !((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+	{
+		pattern_index = !pattern_index;
+	}
+	if ((face_index == 4 || face_index == 5) && ((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+	{
+		pattern_index = !pattern_index;
+	}
+	if ((face_index == 4 || face_index == 5) && ((int)(((dimensions->y - 0.0001) / 2) / 0.5) % 2))
+	{
+		pattern_index = !pattern_index;
+	}
+	if ((face_index == 2 || face_index == 3) && ((int)(((dimensions->x - 0.0001) / 2) / 0.5) % 2))
+	{
+		pattern_index = !pattern_index;
+	}
+	return (pattern_index);
+}
+
+t_vect	get_rotated_point_quad(t_hit_info *hit_info)
 {
 	t_vect	rotated_point;
-	t_vect	normal;
-	int		x_index_square;
-	int		y_index_square;
-	int		pattern_index;
-
 	t_vect	u_vect_rotated;
 
 	u_vect_rotated = unit_vect(hit_info->object->figure.quad.u_vect);
-	normal = unit_vect(vect_cross(hit_info->object->figure.quad.u_vect, hit_info->object->figure.quad.v_vect));
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.quad.center);
-	rotate_reference_system(normal, &u_vect_rotated, &rotated_point);
+	rotate_reference_system(hit_info->object->figure.quad.normal, &u_vect_rotated, &rotated_point);
 	u_vect_rotated = clamp_vect(u_vect_rotated, -1.0, 1.0);
 	if (u_vect_rotated.y > 0.0)
 		rotated_point = rotate_vector(rotated_point, new_vect(0.0, 0.0, 1.0), acos(-u_vect_rotated.x));
@@ -2374,6 +2392,17 @@ t_vect	get_face_pattern(t_hit_info *hit_info, int face_index)
 	rotated_point.x = round(rotated_point.x * 10000.0) / 10000.0;
 	rotated_point.y = round(rotated_point.y * 10000.0) / 10000.0;
 	rotated_point.z = round(rotated_point.z * 10000.0) / 10000.0;
+	return (rotated_point);
+}
+
+t_vect	get_face_pattern(t_hit_info *hit_info, t_vect *dimensions, int face_index)
+{
+	t_vect	rotated_point;
+	int		x_index_square;
+	int		y_index_square;
+	int		pattern_index;
+
+	rotated_point = get_rotated_point_quad(hit_info);
 	x_index_square = (int)(fabs(rotated_point.x) / 0.5); // (/ figure->pattern.dimension)
 	y_index_square = (int)(fabs(rotated_point.y) / 0.5);
 	if (rotated_point.x < 0.0)
@@ -2381,8 +2410,7 @@ t_vect	get_face_pattern(t_hit_info *hit_info, int face_index)
 	if (rotated_point.y < 0.0)
 		y_index_square++;
 	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
-	if (face_index == 2 || face_index == 3)
-		pattern_index = !pattern_index;
+	pattern_index = correct_box_pattern_index(dimensions, face_index, pattern_index);
 	if (pattern_index == 0)
 		return(hit_info->object->material.color);
 	else
@@ -2392,25 +2420,11 @@ t_vect	get_face_pattern(t_hit_info *hit_info, int face_index)
 t_vect	get_quad_pattern(t_hit_info *hit_info)
 {
 	t_vect	rotated_point;
-	t_vect	normal;
 	int		x_index_square;
 	int		y_index_square;
 	int		pattern_index;
 
-	t_vect	u_vect_rotated;
-
-	u_vect_rotated = unit_vect(hit_info->object->figure.quad.u_vect);
-	normal = unit_vect(vect_cross(hit_info->object->figure.quad.u_vect, hit_info->object->figure.quad.v_vect));
-	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.quad.center);
-	rotate_reference_system(normal, &u_vect_rotated, &rotated_point);
-	u_vect_rotated = clamp_vect(u_vect_rotated, -1.0, 1.0);
-	if (u_vect_rotated.y > 0.0)
-		rotated_point = rotate_vector(rotated_point, new_vect(0.0, 0.0, 1.0), acos(-u_vect_rotated.x));
-	else if (u_vect_rotated.y < 0.0)
-		rotated_point = rotate_vector(rotated_point, new_vect(0.0, 0.0, 1.0), -acos(-u_vect_rotated.x));
-	rotated_point.x = round(rotated_point.x * 10000.0) / 10000.0;
-	rotated_point.y = round(rotated_point.y * 10000.0) / 10000.0;
-	rotated_point.z = round(rotated_point.z * 10000.0) / 10000.0;
+	rotated_point = get_rotated_point_quad(hit_info);
 	x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
 	y_index_square = (int)(fabs(rotated_point.y) / 1);
 	if (rotated_point.x < 0.0)
@@ -2453,7 +2467,8 @@ void	rotate_quad(t_object *object, t_vect transformation)
 		rotate_z(&object->figure.quad.u_vect, transformation.z);
 		rotate_z(&object->figure.quad.v_vect, transformation.z);
 	}
-	print_vec_s(vect_cross(object->figure.quad.u_vect, object->figure.quad.v_vect), "New Quad orientation: ");
+	object->figure.quad.normal = unit_vect(vect_cross(object->figure.quad.u_vect, object->figure.quad.v_vect));
+	print_vec_s(object->figure.quad.normal, "New Quad orientation: ");
 	return ;
 }
 
@@ -2467,18 +2482,15 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_eq_params	params;
 	t_vect		hit_origin;
-	t_vect		normal;
 	t_vect		n;
 	t_vect		w;
 
-	//careful with dot products close to 0 || floating point etc...
 	n = vect_cross(fig.quad.u_vect, fig.quad.v_vect);
 	w = vect_simple_div(n, vect_dot(n, n));
-	normal = unit_vect(n); // cache normal
-	params.c = vect_dot(normal, ray.dir);
+	params.c = vect_dot(fig.quad.normal, ray.dir);
 	if (fabs(params.c) < 1e-8)
 		return (false);
-	params.root = ((vect_dot(normal, fig.quad.center)) - vect_dot(ray.origin, normal)) / params.c;
+	params.root = ((vect_dot(fig.quad.normal, fig.quad.center)) - vect_dot(ray.origin, fig.quad.normal)) / params.c;
 	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
 		return (false);
@@ -2492,7 +2504,7 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	}
 	hit_info->t = params.root;
 	hit_info->point = ray_at(ray, params.root);
-	hit_info->normal = normal;
+	hit_info->normal = fig.quad.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);
 }
@@ -2529,7 +2541,7 @@ t_vect	get_box_pattern(t_hit_info *hit_info)
 		face_hit_info = *hit_info;
 		face_hit_info.object = get_box_face(hit_info, &face_index);
 		if (face_hit_info.object)
-			return (get_face_pattern(&face_hit_info, face_index));
+			return (get_face_pattern(&face_hit_info, &hit_info->object->figure.box.dimensions, face_index));
 		else
 			return (hit_info->object->material.color);
 	}
@@ -2943,8 +2955,8 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	camera->origin = new_vect(11, 5, 11);
-	camera->orientation = unit_vect(new_vect(-1, -1.2, -1));
+	camera->origin = new_vect(0, 0, 10);
+	camera->orientation = unit_vect(new_vect(0, 0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
 	//camera->origin = new_vect(20.0, 3.0, -0.0);
@@ -3074,6 +3086,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.quad.center = fig.quad.center;
 		new_obj->figure.quad.u_vect = fig.quad.u_vect;
 		new_obj->figure.quad.v_vect = fig.quad.v_vect;
+		new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
@@ -3181,6 +3194,7 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 	new_obj->figure.quad.center = face.quad.center;
 	new_obj->figure.quad.u_vect = face.quad.u_vect;
 	new_obj->figure.quad.v_vect = face.quad.v_vect;
+	new_obj->figure.quad.normal = unit_vect(vect_cross(face.quad.u_vect, face.quad.v_vect));
 	new_obj->material = mat;
 	new_obj->hit_func = hit_quad;
 	new_obj->edit_origin = translate_quad;
@@ -3203,31 +3217,37 @@ void	recalculate_faces(t_object *box, t_vect dimensions)
 
 	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(normal, dimensions.z * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(anti_normal, dimensions.z * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
 	face = face->next;
 
 	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
 	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
+	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
 	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
 	face = face->next;
 }
@@ -3346,7 +3366,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, 10);
@@ -3358,7 +3378,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, -10);
@@ -3370,7 +3390,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
 	fig.quad.v_vect = new_vect(0, -10, 0);
@@ -3382,7 +3402,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
 	fig.quad.v_vect = new_vect(0, 10, 0);
@@ -3394,7 +3414,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
+	init_object(scene, fig, mat, QUAD);
 
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
@@ -3418,7 +3438,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
+	//init_object(scene, fig, mat, PLANE);
 
 
 	// for (int i = 0; i < 5; i++)
@@ -3476,7 +3496,7 @@ void	init_figures(t_scene *scene)
 	fig.box.dimensions = new_vect(1.0, 1, 1.0);
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	init_object(scene, fig, mat, BOX);
+	//init_object(scene, fig, mat, BOX);
 
 	fig.sphere.center = new_vect(-2.5, -3.5, -3);
 	fig.sphere.radius = 1.5;

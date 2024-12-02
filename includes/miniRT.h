@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/30 01:50:11 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/01 22:54:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,6 +254,7 @@ typedef struct s_quad
 {
 	t_vect		u_vect;
 	t_vect		v_vect;
+	t_vect		normal;
 	t_vect		center;
 }				t_quad;
 
