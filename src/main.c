@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/03 11:51:43 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/03 15:23:43 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1357,7 +1357,7 @@ t_vect	get_random_uvect(uint32_t *state)
 		res.y = (fast_rand(state) - 0.5) * 2;
 		res.z = (fast_rand(state) - 0.5) * 2;
 		bound = vect_dot(res, res);
-		if ( 1e-40 < bound && bound <= 1)
+		if (1e-40 < bound && bound <= 1)
 		{
 			res = vect_simple_div(res, sqrtf(bound));
 			return (res);
@@ -2022,16 +2022,13 @@ t_color	get_cylinder_body_pattern(t_hit_info *hit_info)
 t_vect	get_cylinder_pattern(t_hit_info *ht)
 {
 	t_figure	base;
-	t_hit_info	base_ht;
 
-	if (belongs_to_base(ht->point, ht->object->figure.cone.center, ht->object->figure.cone.normal, ht->object->figure.cone.height))
+	if (belongs_to_base(ht->point, ht->object->figure.cylinder.center, ht->object->figure.cylinder.normal, ht->object->figure.cylinder.height / 2))
 	{
-		base_ht.object = ht->object;
-		base.disk.center = ray_at(new_ray(ht->object->figure.cone.normal, ht->object->figure.cone.center), ht->object->figure.cone.height);
-		base.disk.radius = ht->object->figure.cone.radius;
+		base.disk.center = ray_at(new_ray(ht->object->figure.cylinder.normal, ht->object->figure.cylinder.center), ht->object->figure.cylinder.height / 2);
+		base.disk.radius = ht->object->figure.cylinder.radius;
 		base.disk.normal = ht->normal;
-		base_ht.object->figure = base;
-		return (get_disk_pattern(&base_ht));
+		return (get_base_pattern(&ht->point, &base, &ht->object->material.color));
 	}
 	else
 		return (get_cylinder_body_pattern(ht));
@@ -2208,16 +2205,13 @@ t_vect	get_cone_body_pattern(t_hit_info *hit_info)
 t_vect	get_cone_pattern(t_hit_info *ht)
 {
 	t_figure	base;
-	t_hit_info	base_ht;
 
 	if (belongs_to_base(ht->point, ht->object->figure.cone.center, ht->object->figure.cone.normal, ht->object->figure.cone.height))
 	{
-		base_ht.object = ht->object;
 		base.disk.center = ray_at(new_ray(ht->object->figure.cone.normal, ht->object->figure.cone.center), ht->object->figure.cone.height);
 		base.disk.radius = ht->object->figure.cone.radius;
 		base.disk.normal = ht->normal;
-		base_ht.object->figure = base;
-		return (get_disk_pattern(&base_ht));
+		return (get_base_pattern(&ht->point, &base, &ht->object->material.color));
 	}
 	else
 		return (get_cone_body_pattern(ht));
@@ -2342,6 +2336,35 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (hit);
 }
 
+t_vect	get_base_pattern(t_vect *point, t_figure *figure, t_color	*obj_color)
+{	
+	t_vect	rotated_point;
+	t_vect	point_to_base;
+	t_pattern_vars	p_var;
+	float	point_radius;
+	float	point_pattern_dim;
+
+	rotated_point = vect_subtract(*point, figure->disk.center);
+	rotate_reference_system(figure->disk.normal, NULL, &rotated_point);
+	point_to_base = rotated_point;
+	point_to_base.z = 0.0;
+	point_radius = vect_length(point_to_base);
+	point_to_base = unit_vect(point_to_base);
+	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
+	point_pattern_dim = point_radius * ((M_PI / 8) / figure->disk.radius);
+	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
+	p_var.y_index_square = (int)(fabs(figure->disk.radius - point_radius) / (M_PI / 8));
+	if (rotated_point.x > 0.0)
+		p_var.x_index_square++;
+	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
+		return(*obj_color);
+	else
+		return(vect_simple_div(*obj_color, 3.0));
+}
+
 t_vect	get_disk_pattern(t_hit_info *hit_info)
 {	
 	t_vect	rotated_point;
@@ -2357,9 +2380,9 @@ t_vect	get_disk_pattern(t_hit_info *hit_info)
 	point_radius = vect_length(point_to_base);
 	point_to_base = unit_vect(point_to_base);
 	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
-	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.disk.radius);
+	point_pattern_dim = point_radius * ((M_PI / 8) / hit_info->object->figure.disk.radius);
 	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
-	p_var.y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 3));
+	p_var.y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 8));
 	if (rotated_point.x > 0.0)
 		p_var.x_index_square++;
 	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
@@ -2433,21 +2456,19 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 
 int	correct_box_pattern_index(t_vect *dimensions, int face_index, int pattern_index)
 {
-	if ((face_index == 2 || face_index == 3) && !((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+	if ((face_index == 2 || face_index == 3))
 	{
-		pattern_index = !pattern_index;
+		if (!((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+			pattern_index = !pattern_index;
+		if (((int)(((dimensions->x - 0.0001) / 2) / 0.5) % 2))
+			pattern_index = !pattern_index;		
 	}
-	if ((face_index == 4 || face_index == 5) && ((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+	if ((face_index == 4 || face_index == 5))
 	{
-		pattern_index = !pattern_index;
-	}
-	if ((face_index == 4 || face_index == 5) && ((int)(((dimensions->y - 0.0001) / 2) / 0.5) % 2))
-	{
-		pattern_index = !pattern_index;
-	}
-	if ((face_index == 2 || face_index == 3) && ((int)(((dimensions->x - 0.0001) / 2) / 0.5) % 2))
-	{
-		pattern_index = !pattern_index;
+		if (((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+			pattern_index = !pattern_index;
+		if (((int)(((dimensions->y - 0.0001) / 2) / 0.5) % 2))
+			pattern_index = !pattern_index;
 	}
 	return (pattern_index);
 }
@@ -3063,7 +3084,7 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	camera->origin = new_vect(0, 0, 10);
+	camera->origin = new_vect(0, 0, 15);
 	camera->orientation = unit_vect(new_vect(0, 0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));

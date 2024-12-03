@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/03 11:43:16 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/03 15:13:45 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	5 // 5.15
-# define FOV		21
+# define FOV		40
 
 # define AMB		1
 
@@ -410,6 +410,7 @@ void		wait_for_threads(t_scene *scene);
 
 float		get_vector_arc_height(t_vect *point);
 t_vect		get_disk_pattern(t_hit_info *hit_info);
+t_vect		get_base_pattern(t_vect *point, t_figure *figure, t_color	*obj_color);
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
 t_color		hexa_to_vect(int color);
