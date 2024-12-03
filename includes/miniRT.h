@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/01 22:54:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/03 11:43:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@
 
 # define THREADS 	8
 
-# define MAX_DEPTH  16
+# define MAX_DEPTH  8
 # define SPP 		1
 
 # define TEST 		0
@@ -111,6 +111,12 @@ typedef enum e_bounds
 	MAX = 1,
 }			t_bounds;
 
+typedef enum e_polar
+{
+	LONGITUDE = 0,
+	LATITUDE = 1,
+}			t_polar;
+
 typedef struct s_eq_params
 {
 	float	a;
@@ -119,6 +125,13 @@ typedef struct s_eq_params
 	float	discr;
 	float	root;
 }			t_eq_params;
+
+typedef struct s_pattern_vars
+{
+	int		x_index_square;
+	int		y_index_square;
+	int		pattern_index;
+}			t_pattern_vars;
 
 typedef enum e_fig_type
 {
@@ -395,6 +408,8 @@ t_ray		dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t
 void		*set_rendering(void *args);
 void		wait_for_threads(t_scene *scene);
 
+float		get_vector_arc_height(t_vect *point);
+t_vect		get_disk_pattern(t_hit_info *hit_info);
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
 t_color		hexa_to_vect(int color);

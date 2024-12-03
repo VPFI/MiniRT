@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/02 01:12:02 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/03 11:51:43 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,15 @@ float fast_rand(uint32_t *state)
     x ^= x << 5;
     *state = x;
     return (x / (float)UINT32_MAX);
+}
+
+float	f_clamp(float target, float min, float max)
+{
+	if (target < min)
+		return (min);
+	if (target > max)
+		return (max);
+	return (target);
 }
 
 void	print_vec_s(t_vect vect, char*msg)
@@ -51,19 +60,19 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
 	mlx_put_pixel(scene->image, x, y, get_rgba((int)(color.x * 255.9), (int)(color.y * 255.9), (int)(color.z * 255.9), 255));
 }
 
-void	test_progresive(t_scene *scene, uint32_t x, uint32_t y, t_color color, int iterations)
+void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
 {
 	t_vect		*prev_color_index;
 	t_color		final_color;
 
-	if ((x >= scene->width) || y >= scene->height)
+	if ((x >= thread->scene->width) || y >= thread->scene->height)
 		return ;
-	prev_color_index = &scene->cumulative_image[((y * scene->image->width) + x)];
+	prev_color_index = &thread->scene->cumulative_image[((y * thread->scene->image->width) + x)];
 	prev_color_index->x += color.x;
 	prev_color_index->y += color.y;
 	prev_color_index->z += color.z;
-	final_color = clamp_vect(vect_simple_mult(*prev_color_index, 1.0 / (float)iterations), 0.0, 1.0);
-	mlx_put_pixel(scene->image, x, y, get_rgba(
+	final_color = clamp_vect(vect_simple_mult(*prev_color_index, 1.0 / (float)thread->iterations), 0.0, 1.0);
+	mlx_put_pixel(thread->scene->image, x, y, get_rgba(
 		(int)(final_color.x * 255.9),
 		(int)(final_color.y * 255.9),
 		(int)(final_color.z * 255.9),
@@ -879,6 +888,7 @@ t_material	new_standard_material(void)
 	mat.metal_roughness = 0.1;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 1.0;
+	mat.pattern = false;
 	mat.type = LAMBERTIAN;
 	return (mat);
 }
@@ -1304,7 +1314,6 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 {
 	t_color		color;
 	t_hit_info	hit_info;
-	float		lenght;
 
 	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
@@ -1314,8 +1323,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
 			color = vect_simple_mult(color, 1.8);
-		lenght = vect_length(vect_subtract(hit_info.point, ray.origin));
-		color = vect_simple_div(color, lenght / scene->camera.focus_dist);
+		color = vect_simple_div(color, hit_info.t / scene->camera.focus_dist);
 	}
 	else
 	{
@@ -1773,7 +1781,7 @@ void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
 		sample_count++;
 	}
 	color = vect_simple_mult(color, 1 / (float)sample_count);
-	test_progresive(thread->scene, x, y, color, thread->iterations);
+	progressive_render(thread, x, y, color);
 }
 
 void	*set_rendering(void *args)
@@ -1991,9 +1999,42 @@ t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
 	return (res);
 }
 
-t_vect	get_cylinder_pattern(t_hit_info *hit_info)
+t_color	get_cylinder_body_pattern(t_hit_info *hit_info)
 {
-	return (hit_info->object->material.color);
+	t_vect			rotated_point;
+	t_pattern_vars	p_var;
+
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.cylinder.center);
+	rotate_reference_system(hit_info->object->figure.cylinder.normal, NULL, &rotated_point);
+	p_var.x_index_square = (int)(fabs(acos(get_vector_arc_height(&rotated_point)) * hit_info->object->figure.cylinder.radius) / M_PI / 3);
+	p_var.y_index_square = (int)(rotated_point.z / (M_PI / 3));
+	if (rotated_point.x < 0.0)
+		p_var.x_index_square++;
+	if (rotated_point.z < 0.0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));	
+}
+
+t_vect	get_cylinder_pattern(t_hit_info *ht)
+{
+	t_figure	base;
+	t_hit_info	base_ht;
+
+	if (belongs_to_base(ht->point, ht->object->figure.cone.center, ht->object->figure.cone.normal, ht->object->figure.cone.height))
+	{
+		base_ht.object = ht->object;
+		base.disk.center = ray_at(new_ray(ht->object->figure.cone.normal, ht->object->figure.cone.center), ht->object->figure.cone.height);
+		base.disk.radius = ht->object->figure.cone.radius;
+		base.disk.normal = ht->normal;
+		base_ht.object->figure = base;
+		return (get_disk_pattern(&base_ht));
+	}
+	else
+		return (get_cylinder_body_pattern(ht));
 }
 
 void	resize_cylinder(t_object *object, t_vect transformation)
@@ -2130,18 +2171,56 @@ bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *intern
 	return (true);
 }
 
-// t_vect	get_cone_body_pattern(t_hit_info *hit_info)
-// {
-	
-// }
-
-t_vect	get_cone_pattern(t_hit_info *hit_info)
+float	get_vector_arc_height(t_vect *point)
 {
-	// if (belongs_to_base(hit_info->point, hit_info->object->figure.cone.center, hit_info->object->figure.cone.normal, hit_info->object->figure.cone.height))
-	// 	return (hit_info->object->material.color);
-	// else
-	// 	return (get_cone_body_pattern())
-	return (hit_info->object->material.color);
+	t_vect	point_arc_vector;
+
+	point_arc_vector = *point;
+	point_arc_vector.z = 0.0f;
+	point_arc_vector = unit_vect(point_arc_vector);
+	return (f_clamp(point_arc_vector.y, -1.0, 1.0));
+}
+
+t_vect	get_cone_body_pattern(t_hit_info *hit_info)
+{
+	t_vect			rotated_point;
+	float			point_radius;
+	float			point_pattern_dim;
+	t_pattern_vars	p_var;
+
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.cone.center);
+	rotate_reference_system(hit_info->object->figure.cone.normal, NULL, &rotated_point);
+	point_radius = rotated_point.z	* (hit_info->object->figure.cone.radius / hit_info->object->figure.cone.height);
+	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.cone.radius);
+	p_var.x_index_square = (int)(fabs(acos(get_vector_arc_height(&rotated_point)) * point_radius) / point_pattern_dim);
+	p_var.y_index_square = (int)(rotated_point.z / (M_PI / 3));
+	if (rotated_point.x < 0.0)
+		p_var.x_index_square++;
+	if (rotated_point.z < 0.0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));	
+}
+
+t_vect	get_cone_pattern(t_hit_info *ht)
+{
+	t_figure	base;
+	t_hit_info	base_ht;
+
+	if (belongs_to_base(ht->point, ht->object->figure.cone.center, ht->object->figure.cone.normal, ht->object->figure.cone.height))
+	{
+		base_ht.object = ht->object;
+		base.disk.center = ray_at(new_ray(ht->object->figure.cone.normal, ht->object->figure.cone.center), ht->object->figure.cone.height);
+		base.disk.radius = ht->object->figure.cone.radius;
+		base.disk.normal = ht->normal;
+		base_ht.object->figure = base;
+		return (get_disk_pattern(&base_ht));
+	}
+	else
+		return (get_cone_body_pattern(ht));
 }
 
 void	resize_cone(t_object *object, t_vect transformation)
@@ -2266,11 +2345,8 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 t_vect	get_disk_pattern(t_hit_info *hit_info)
 {	
 	t_vect	rotated_point;
-	int		x_index_square;
-	int		y_index_square;
-	int		pattern_index;
 	t_vect	point_to_base;
-
+	t_pattern_vars	p_var;
 	float	point_radius;
 	float	point_pattern_dim;
 
@@ -2282,14 +2358,14 @@ t_vect	get_disk_pattern(t_hit_info *hit_info)
 	point_to_base = unit_vect(point_to_base);
 	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
 	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.disk.radius);
-	x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
-	y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 3));
+	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
+	p_var.y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / (M_PI / 3));
 	if (rotated_point.x > 0.0)
-		x_index_square++;
+		p_var.x_index_square++;
 	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
-		y_index_square++;
-	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
-	if (pattern_index == 0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
 		return(hit_info->object->material.color);
 	else
 		return(vect_simple_div(hit_info->object->material.color, 3.0));
@@ -2398,20 +2474,18 @@ t_vect	get_rotated_point_quad(t_hit_info *hit_info)
 t_vect	get_face_pattern(t_hit_info *hit_info, t_vect *dimensions, int face_index)
 {
 	t_vect	rotated_point;
-	int		x_index_square;
-	int		y_index_square;
-	int		pattern_index;
+	t_pattern_vars	p_var;
 
 	rotated_point = get_rotated_point_quad(hit_info);
-	x_index_square = (int)(fabs(rotated_point.x) / 0.5); // (/ figure->pattern.dimension)
-	y_index_square = (int)(fabs(rotated_point.y) / 0.5);
+	p_var.x_index_square = (int)(fabs(rotated_point.x) / 0.5); // (/ figure->pattern.dimension)
+	p_var.y_index_square = (int)(fabs(rotated_point.y) / 0.5);
 	if (rotated_point.x < 0.0)
-		x_index_square++;
+		p_var.x_index_square++;
 	if (rotated_point.y < 0.0)
-		y_index_square++;
-	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
-	pattern_index = correct_box_pattern_index(dimensions, face_index, pattern_index);
-	if (pattern_index == 0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	p_var.pattern_index = correct_box_pattern_index(dimensions, face_index, p_var.pattern_index);
+	if (p_var.pattern_index == 0)
 		return(hit_info->object->material.color);
 	else
 		return(vect_simple_div(hit_info->object->material.color, 3.0));
@@ -2475,6 +2549,7 @@ void	rotate_quad(t_object *object, t_vect transformation)
 void	translate_quad(t_object *object, t_vect transformation)
 {
 	object->figure.quad.center = vect_add(object->figure.quad.center, transformation);
+	print_vec_s(object->figure.quad.center, "New Quad center: ");
 	return ;
 }
 
@@ -2620,20 +2695,18 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 t_vect	get_plane_pattern(t_hit_info *hit_info)
 {
 	t_vect	rotated_point;
-	int		x_index_square;
-	int		y_index_square;
-	int		pattern_index;
+	t_pattern_vars	p_var;
 
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.plane.center);
 	rotate_reference_system(hit_info->object->figure.plane.normal, NULL, &rotated_point);
-	x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
-	y_index_square = (int)(fabs(rotated_point.y) / 1);
+	p_var.x_index_square = (int)(fabs(rotated_point.x) / 1); // (/ figure->pattern.dimension)
+	p_var.y_index_square = (int)(fabs(rotated_point.y) / 1);
 	if (rotated_point.x < 0.0)
-		x_index_square++;
+		p_var.x_index_square++;
 	if (rotated_point.y < 0.0)
-		y_index_square++;
-	pattern_index = ((x_index_square % 2) + (y_index_square % 2)) % 2;
-	if (pattern_index == 0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
 	{
 		return(new_color(0.93, 0.44, 0.39));
 	}
@@ -2706,9 +2779,44 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
+void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
+{
+	float		projected_radius;
+	t_vect		point_normal;
+	t_vect		latitude_normal;
+
+	point_normal = *point;
+	latitude_normal = *point;
+	latitude_normal.y = 0.0;
+	latitude_normal = unit_vect(latitude_normal);
+	point_normal = unit_vect(point_normal);
+	projected_radius = sqrtf(pow(point->x, 2) + pow(point->z, 2));
+	polar_coords[LONGITUDE] = acosf(f_clamp(vect_dot(point_normal, latitude_normal), -1.0, 1.0))
+		* fig->sphere.radius;
+	polar_coords[LATITUDE] = acosf(f_clamp(-latitude_normal.z, -1.0, 1.0)) * projected_radius;
+}
+
 t_vect	get_sphere_pattern(t_hit_info *hit_info)
 {
-	return (hit_info->object->material.color);
+	t_vect	point;
+	t_pattern_vars	p_var;
+	float	polar_coords[2];
+	float	projected_pattern;
+
+	point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
+	set_polar_coords(&point, &hit_info->object->figure, polar_coords);
+	projected_pattern = sqrtf(pow(point.x, 2) + pow(point.z, 2)) * (1 / hit_info->object->figure.sphere.radius); // Pattern-dim / radius
+	p_var.x_index_square = (int)(fabs(polar_coords[LONGITUDE]) / projected_pattern);
+	p_var.y_index_square = (int)(fabs(polar_coords[LATITUDE]) / 1);
+	if (point.x < 0.0)
+		p_var.x_index_square++;
+	if (point.y < 0.0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));
 }
 
 void	resize_sphere(t_object *object, t_vect transformation)
@@ -3682,7 +3790,7 @@ int	main(int argc, char **argv)
 	t_scene	scene;
 
 	init_scene(&scene);
-	draw_file_menu(&scene);
+	//draw_file_menu(&scene);
 	main_loop(&scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
