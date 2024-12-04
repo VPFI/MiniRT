@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/03 19:40:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/04 21:54:56 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -919,7 +919,9 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 	t_vect		offset_origin;
 	t_object	*selected_obj;
 
-	selected_obj = (t_object *)malloc(sizeof(t_object));
+	selected_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!selected_obj)
+		exit (1);
 	mat = new_standard_material();
 	camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
 	offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
@@ -1318,6 +1320,8 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 
 	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
 	{
+		hit_info.point = ray_at(ray, hit_info.t);
+		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
 		if (hit_info.object->type == LIGHT)
 			color = hit_info.object->material.color;
 		else	
@@ -1325,6 +1329,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 		if (hit_info.object->selected)
 			color = vect_simple_mult(color, 1.8);
 		color = vect_simple_div(color, hit_info.t / scene->camera.focus_dist);
+		// Check min level of darkness so not black...
 	}
 	else
 	{
@@ -1642,6 +1647,8 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	time_aux = mlx_get_time();
 	if (ray_hit(thread->scene->objects, ray, &hit_info))
 	{
+		hit_info.point = ray_at(ray, hit_info.t);
+		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
 		thread->time_hit += mlx_get_time() - time_aux;
 		if (hit_info.object->material.type == EMISSIVE)
 		{
@@ -1962,7 +1969,7 @@ int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 		return (-1);
 }
 
-t_vect	get_cylinder_normal(t_figure fig, t_hit_info hit_info)
+t_vect	compute_cylinder_normal(t_figure *fig, t_hit_info *hit_info)
 {
 	int			is_base;
 	float		point_height;
@@ -1970,34 +1977,28 @@ t_vect	get_cylinder_normal(t_figure fig, t_hit_info hit_info)
 	t_vect		center_to_point;
 	t_vect		res;
 
-	is_base = belongs_to_base(hit_info.point, fig.cylinder.center,
-			fig.cylinder.normal, fig.cylinder.height * 0.5);
+	is_base = belongs_to_base(hit_info->point, fig->cylinder.center,
+			fig->cylinder.normal, fig->cylinder.height * 0.5);
 	if (is_base == 1)
-		res = fig.cylinder.normal;
+		res = fig->cylinder.normal;
 	else if (is_base == -1)
-		res = vect_simple_mult(fig.cylinder.normal, -1.0);
+		res = vect_simple_mult(fig->cylinder.normal, -1.0);
 	else
 	{
-		center_to_point = vect_subtract(hit_info.point, fig.cylinder.center);
-		point_height = get_height(hit_info.point, fig.cylinder.center,
-				fig.cylinder.radius);
-		if (vect_dot(center_to_point, fig.cylinder.normal) < 0.0)
+		center_to_point = vect_subtract(hit_info->point, fig->cylinder.center);
+		point_height = get_height(hit_info->point, fig->cylinder.center,
+				fig->cylinder.radius);
+		if (vect_dot(center_to_point, fig->cylinder.normal) < 0.0)
 			point_height *= -1;
-		center_offset = vect_add(fig.cylinder.center, vect_simple_mult(fig.cylinder.normal, point_height));
-		res = unit_vect(vect_subtract(hit_info.point, center_offset));
+		center_offset = vect_add(fig->cylinder.center, vect_simple_mult(fig->cylinder.normal, point_height));
+		res = unit_vect(vect_subtract(hit_info->point, center_offset));
 	}
 	return (res);
 }
 
-t_hit_info	set_cylinder_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
+t_vect	get_cylinder_normal(t_hit_info *hit_info, t_figure *fig)
 {
-	t_hit_info res;
-
-	ft_bzero(&res, sizeof(t_hit_info));
-	res.t = hit_info.t;
-	res.point = ray_at(ray, res.t);
-	res.normal = get_cylinder_normal(fig, res);
-	return (res);
+	return (compute_cylinder_normal(fig, hit_info));
 }
 
 t_color	get_cylinder_body_pattern(t_hit_info *hit_info)
@@ -2071,10 +2072,10 @@ void	translate_cylinder(t_object *object, t_vect transformation)
 
 bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
+	bool				hit;
 	t_reference_system 	ref_sys;
 	t_hit_info 			internal_hit_info;
 	float 				internal_bounds[2];
-	bool				hit;
 
 	hit = false;
 	internal_bounds[MIN] = bounds[MIN];
@@ -2087,12 +2088,12 @@ bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	rotate_reference_system(fig.cylinder.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
 	hit = hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
 	hit |= hit_cylinder_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
-	fig.cylinder.height *= -1.0;
+	fig.cylinder.height *= -1.0; // change this || figure pointer
 	hit |= hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
 	fig.cylinder.height *= -1.0;
 	if (hit)
 	{
-		*hit_info = set_cylinder_hit_info(ray, internal_hit_info, fig);
+		hit_info->t = internal_hit_info.t;
 	}
 	return (hit);
 }
@@ -2274,7 +2275,7 @@ t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
 	return (res);
 }
 
-t_vect	get_cone_normal(t_figure fig, t_hit_info hit_info)
+t_vect	compute_cone_normal(t_figure *fig, t_hit_info *hit_info)
 {
 	int			is_base;
 	t_vect		ideal;
@@ -2283,33 +2284,27 @@ t_vect	get_cone_normal(t_figure fig, t_hit_info hit_info)
 	float		refsys_angle;
 
 	res = new_vect(0.0, 0.0, 0.0);
-	is_base = belongs_to_base(hit_info.point, fig.cone.center,
-			fig.cone.normal, fig.cone.height);
+	is_base = belongs_to_base(hit_info->point, fig->cone.center,
+			fig->cone.normal, fig->cone.height);
 	if (is_base == 1)
-		res = fig.cone.normal;
+		res = fig->cone.normal;
 	else
 	{
-		res = calculate_ideal_normal(hit_info.point, fig, &refsys_angle);
+		res = calculate_ideal_normal(hit_info->point, *fig, &refsys_angle);
 		ideal = new_vect(0.0, 0.0, 1.0);
-		if (vect_dot(fig.cone.normal, ideal) == -1.0)
+		if (vect_dot(fig->cone.normal, ideal) == -1.0)
 			axis = new_vect(0.0, 1.0, 0.0);
 		else
-			axis = vect_cross(fig.cone.normal, ideal);
+			axis = vect_cross(fig->cone.normal, ideal);
 		axis = unit_vect(axis);
 		res = rotate_vector(res, axis, -refsys_angle);
 	}
 	return (res);
 }
 
-t_hit_info	set_cone_hit_info(t_ray ray, t_hit_info hit_info, t_figure fig)
+t_vect	get_cone_normal(t_hit_info *hit_info, t_figure *fig)
 {
-	t_hit_info res;
-
-	ft_bzero(&res, sizeof(t_hit_info));
-	res.t = hit_info.t;
-	res.point = ray_at(ray, res.t);
-	res.normal = get_cone_normal(fig, res);
-	return (res);
+	return (compute_cone_normal(fig, hit_info));
 }
 
 bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -2332,7 +2327,7 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	hit |= hit_cone_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
 	if (hit)
 	{
-		*hit_info = set_cone_hit_info(ray, internal_hit_info, fig);
+		hit_info->t = internal_hit_info.t;
 	}
 	return (hit);
 }
@@ -2425,20 +2420,24 @@ void	translate_disk(t_object *object, t_vect transformation)
 	return ;
 }
 
+t_vect	get_disk_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	(void)hit_info;
+	return (fig->disk.normal);
+}
+
 bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	float	denominator;
 	float	root;
 	float	q;
 	t_vect	hit_origin;
-	t_vect	normal;
 
-	normal = fig.disk.normal;
-	denominator = vect_dot(normal, ray.dir);
+	denominator = vect_dot(fig.disk.normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
 		return (false);
-	q = vect_dot(fig.disk.center, normal);
-	root = (q - vect_dot(ray.origin, normal)) / denominator;
+	q = vect_dot(fig.disk.center, fig.disk.normal);
+	root = (q - vect_dot(ray.origin, fig.disk.normal)) / denominator;
 	if (root <= bounds[MIN] || bounds[MAX] <= root)
 	{
 		return (false);
@@ -2449,8 +2448,6 @@ bool	hit_disk(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		return (false);
 	}
 	hit_info->t = root;
-	hit_info->point = ray_at(ray, root);
-	hit_info->normal = normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
 }
@@ -2575,6 +2572,12 @@ void	translate_quad(t_object *object, t_vect transformation)
 	return ;
 }
 
+t_vect	get_quad_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	(void)hit_info;
+	return (fig->quad.normal);
+}
+
 bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_eq_params	params;
@@ -2600,8 +2603,6 @@ bool	hit_quad(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		return (false);
 	}
 	hit_info->t = params.root;
-	hit_info->point = ray_at(ray, params.root);
-	hit_info->normal = fig.quad.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);
 }
@@ -2621,7 +2622,8 @@ t_object	*get_box_face(t_hit_info *hit_info, int *face_index)
 		{
 			return (face);
 		}
-		*face_index += 1;
+		if (face_index)
+			(*face_index)++;
 		face = face->next;
 	}
 	return (NULL);
@@ -2698,6 +2700,16 @@ void	translate_box(t_object *object, t_vect transformation)
 	return ;
 }
 
+t_vect	get_box_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	t_hit_info	face_hit_info;
+
+	(void)fig;
+	face_hit_info = *hit_info;
+	face_hit_info.object = get_box_face(hit_info, NULL);
+	return (face_hit_info.object->get_normal(&face_hit_info, &face_hit_info.object->figure));
+}
+
 bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_hit_info	internal_hit_info;
@@ -2707,8 +2719,6 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		if (internal_hit_info.t <= bounds[MIN] || bounds[MAX] <= internal_hit_info.t)
 			return (false);
 		hit_info->t = internal_hit_info.t;
-		hit_info->point = internal_hit_info.point;
-		hit_info->normal = internal_hit_info.normal;
 		return (true);
 	}
 	return (false);
@@ -2739,9 +2749,7 @@ t_vect	get_plane_pattern(t_hit_info *hit_info)
 t_vect	get_obj_color(t_hit_info *hit_info)
 {
 	if (hit_info->object->material.pattern)
-	{
 		return (hit_info->object->get_visual(hit_info));
-	}
 	else
 		return (hit_info->object->material.color);
 }
@@ -2778,6 +2786,12 @@ void	translate_plane(t_object *object, t_vect transformation)
 	return ;
 }
 
+t_vect	get_plane_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	(void)hit_info;
+	return (fig->plane.normal);
+}
+
 bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	float	denominator;
@@ -2795,10 +2809,14 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		return (false);
 	}
 	hit_info->t = root;
-	hit_info->point = ray_at(ray, root);
-	hit_info->normal = fig.plane.normal;
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_sphere_texture(t_texture *texture)
+{
+	(void)texture;
+	return (new_vect(0.0, 1.0, 0.0));
 }
 
 void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
@@ -2867,6 +2885,18 @@ void	translate_sphere(t_object *object, t_vect transformation)
 	return ;
 }
 
+t_vect	get_sphere_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	if (hit_info->object->texture->path)
+	{
+		return (get_sphere_texture(NULL));
+	}
+	else
+	{
+		return (vect_simple_div(vect_subtract(hit_info->point, fig->sphere.center), fig->sphere.radius));
+	}
+}
+
 bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_vect		oc;
@@ -2889,10 +2919,15 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 			return (false);
 	}
 	hit_info->t = params.root;
-	hit_info->point = ray_at(ray, params.root);
-	hit_info->normal = vect_simple_div(vect_subtract(hit_info->point, fig.sphere.center), fig.sphere.radius);
 	// pointer in hit_info to object node hit so as to only calc normal once (after knowing closest hit)
 	return (true);	
+}
+
+t_vect	get_light_normal(t_hit_info *hit_info, t_figure *fig)
+{
+	(void)hit_info;
+	(void)fig;
+	return(new_vect(0.0, 1.0, 0.0));
 }
 
 t_vect	get_light_pattern(t_hit_info *hit_info)
@@ -2970,6 +3005,8 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 		scene->height = height;
 		recalculate_view(scene);
 		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+		if (!scene->cumulative_image)
+			exit (1);
 		main_loop(scene);
 	}
 }
@@ -3125,6 +3162,18 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	camera->viewport_pixel0.z = camera->viewport_origin.z + (0.5 * temp.z);
 }
 
+t_texture	*get_texture(char *path)
+{
+	t_texture	*res;
+
+	res = (t_texture *)ft_calloc(1, sizeof(t_texture));
+	res->path = ft_strdup(path);
+	res->texture = mlx_load_png(path);
+	if (!res->texture || !res->path)
+		exit (1);
+	return (res);
+}
+
 t_color	hexa_to_vect(int color)
 {
 	t_color	res;
@@ -3180,7 +3229,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	t_object 	*new_obj;
 	t_object 	*new_light;
 
-	new_obj = (t_object *)malloc(sizeof(t_object));
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
 		return (-1);
 	new_obj->material = mat;
@@ -3189,12 +3238,14 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
+		new_obj->texture = get_texture("./textures/pillow.png");
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
 		new_obj->get_origin = get_origin_sphere;
 		new_obj->edit_dimensions = resize_sphere;
 		new_obj->get_visual = get_sphere_pattern;
+		new_obj->get_normal = get_sphere_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == PLANE)
@@ -3208,6 +3259,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_plane;
 		new_obj->edit_dimensions = resize_plane;
 		new_obj->get_visual = get_plane_pattern;
+		new_obj->get_normal = get_plane_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == QUAD)
@@ -3223,6 +3275,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_quad;
 		new_obj->edit_dimensions = resize_quad;
 		new_obj->get_visual = get_quad_pattern;
+		new_obj->get_normal = get_quad_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == BOX)
@@ -3239,6 +3292,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_box;
 		new_obj->edit_dimensions = resize_box;
 		new_obj->get_visual = get_box_pattern;
+		new_obj->get_normal = get_box_normal;
 		new_obj->next = NULL;
 		init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
 	}
@@ -3254,6 +3308,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_disk;
 		new_obj->edit_dimensions = resize_disk;
 		new_obj->get_visual = get_disk_pattern;
+		new_obj->get_normal = get_disk_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == CYLINDER)
@@ -3269,6 +3324,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_cylinder;
 		new_obj->edit_dimensions = resize_cylinder;
 		new_obj->get_visual = get_cylinder_pattern;
+		new_obj->get_normal = get_cylinder_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == CONE)
@@ -3284,6 +3340,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_cone;
 		new_obj->edit_dimensions = resize_cone;
 		new_obj->get_visual = get_cone_pattern;
+		new_obj->get_normal = get_cone_normal;
 		new_obj->next = NULL;
 	}
 	else if (type == LIGHT)
@@ -3297,12 +3354,15 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_origin = get_origin_point_light;
 		new_obj->edit_dimensions = resize_point_light;
 		new_obj->get_visual = get_light_pattern;
+		new_obj->get_normal = get_light_normal;
 		new_obj->next = NULL;
 	}
 	new_obj->selected = false;
 	if (mat.type == EMISSIVE && type == LIGHT)
 	{
-		new_light = (t_object *)malloc(sizeof(t_object));
+		new_light = (t_object *)ft_calloc(1, sizeof(t_object));
+		if (!new_light)
+			exit (1);
 		new_light = ft_memcpy(new_light, new_obj, sizeof(t_object));
 		add_object(&scene->lights, new_light);
 		if (type == LIGHT)
@@ -3319,7 +3379,9 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 {
 	t_object 	*new_obj;
 
-	new_obj = (t_object *)malloc(sizeof(t_object));
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+			exit (1);
 	new_obj->type = QUAD;
 	new_obj->figure.quad.center = face.quad.center;
 	new_obj->figure.quad.u_vect = face.quad.u_vect;
@@ -3332,6 +3394,7 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 	new_obj->get_origin = get_origin_quad;
 	new_obj->edit_dimensions = resize_quad;
 	new_obj->get_visual = get_quad_pattern;
+	new_obj->get_normal = get_quad_normal;
 	new_obj->next = NULL;
 	add_object(&box->figure.box.faces, new_obj);
 }
@@ -3634,7 +3697,7 @@ void	init_figures(t_scene *scene)
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
 	//init_object(scene, fig, mat, BOX);
 
-	fig.sphere.center = new_vect(-2.5, -3.5, -3);
+	fig.sphere.center = new_vect(0, 0, -3);
 	fig.sphere.radius = 1.5;
 	mat.color = hexa_to_vect(BRONZE);
 	mat.albedo = mat.color;
@@ -3643,7 +3706,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 6.5;
 	mat.type = METAL;
-	//init_object(scene, fig, mat, SPHERE);
+	init_object(scene, fig, mat, SPHERE);
 	
 	fig.quad.u_vect = new_vect(0.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, 4);
@@ -3723,6 +3786,8 @@ void	init_scene(t_scene *scene)
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	if (!scene->cumulative_image)
+			exit (1);
 	scene->state = (uint32_t)(scene->height * scene->width * mlx_get_time());
 	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	pthread_mutex_init(&scene->stop_mutex, NULL);
@@ -3746,6 +3811,20 @@ void	free_primitive(t_object **object)
 	free(*object);
 }
 
+void	free_texture(t_texture **texture)
+{
+	if (texture)
+	{
+		if ((*texture) && (*texture)->path)
+			free((*texture)->path);
+		if ((*texture) && (*texture)->texture)
+		{
+			mlx_delete_texture((*texture)->texture);
+			free((*texture));
+		}
+	}
+}
+
 void	free_objects(t_object **objects)
 {
 	t_object *temp;
@@ -3754,6 +3833,10 @@ void	free_objects(t_object **objects)
 	{
 		while ((*objects))
 		{
+			if ((*objects)->texture)
+			{
+				free_texture(&(*objects)->texture);
+			}
 			temp = (*objects)->next;
 			free((*objects));
 			(*objects) = temp;

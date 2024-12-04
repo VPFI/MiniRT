@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/03 19:20:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/04 21:40:49 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,6 +288,18 @@ typedef struct s_disk
 	float		radius;
 }				t_disk;
 
+typedef struct s_texel
+{
+	int	x;
+	int	y;
+}		t_texel;
+
+typedef struct s_texture
+{
+	char			*path;
+	mlx_texture_t	*texture;
+}					t_texture;
+
 typedef union s_figure
 {
 	t_sphere		sphere;
@@ -298,18 +310,20 @@ typedef union s_figure
 	t_cylinder		cylinder;
 	t_cone			cone;
 	t_point_light	p_light;
-}				t_figure;
+}					t_figure;
 
 typedef struct s_object
 {
 	union s_figure 	figure;
 	t_material		material;
+	t_texture		*texture;
 	t_fig_type		type;
 	struct s_object	*next;
 	bool			selected;
 	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
 	t_vect			(*get_origin)(t_object *object);
 	t_vect			(*get_visual)(t_hit_info *hit_info);
+	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
 	void			(*edit_orientation)(t_object *object, t_vect transformation);
 	void			(*edit_dimensions)(t_object *object, t_vect transformation);
