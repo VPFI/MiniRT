@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/04 21:54:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:37:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -2813,10 +2813,83 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (true);	
 }
 
-t_vect	get_sphere_texture(t_texture *texture)
+void	remove_point_texture_offset_sphere(t_vect *point, float *polar_coords, t_vect *texture_dims)
 {
-	(void)texture;
-	return (new_vect(0.0, 1.0, 0.0));
+	if (point->x < 0.0)
+		polar_coords[LATITUDE] = -polar_coords[LATITUDE] + texture_dims->x
+			+ (texture_dims->x * (int)(polar_coords[LATITUDE] / texture_dims->x));
+	if (point->y > 0.0)
+		polar_coords[LONGITUDE] = -polar_coords[LONGITUDE] + texture_dims->y
+			+ (texture_dims->y * (int)(polar_coords[LONGITUDE] / texture_dims->y));
+	if (polar_coords[LATITUDE] >= texture_dims->x)
+		polar_coords[LATITUDE] = polar_coords[LATITUDE]
+			- (texture_dims->x * (int)(polar_coords[LATITUDE] / texture_dims->x));
+	if (polar_coords[LONGITUDE] >= texture_dims->y)
+		polar_coords[LONGITUDE] = polar_coords[LONGITUDE]
+			- (texture_dims->y * (int)(polar_coords[LONGITUDE] / texture_dims->y));
+}
+
+void	rotate_texture_normal(t_vect *point, t_vect *normal)
+{
+	t_vect	axis;
+	float	angle;
+	t_vect	point_normal;
+	t_vect	texture_normal;
+
+	point_normal = unit_vect(*point);
+	texture_normal = new_vect(0.0, 0.0, 1.0);
+	axis = vect_cross(texture_normal, point_normal);
+	if (zero_vect(axis))
+		return ;
+	axis = unit_vect(axis);
+	angle = acosf(f_clamp(vect_dot(texture_normal, point_normal), -1.0, 1.0));
+	*normal = rotate_vector(*normal, axis, angle);
+}
+
+t_vect	translate_texture_to_normal(uint8_t *pixel)
+{
+	t_vect	normal;
+	t_color	pixel_color;
+
+	pixel_color.x = *pixel / (float) 255;
+	pixel_color.y = *(pixel + 1) / (float) 255;
+	pixel_color.z = *(pixel + 2) / (float) 255;
+	normal.x = (pixel_color.x / 0.5) - 1;
+	normal.y = (pixel_color.y / 0.5) - 1;
+	normal.z = (pixel_color.z / 0.5) - 1;
+	return (normal);
+}
+
+t_vect	get_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *tx)
+{
+	t_texel	texel;
+	t_vect	normal;
+	uint8_t	*pixel;
+	float	point_radius;
+	t_vect	texture_dims;
+	float	polar_coord[2];
+
+	set_polar_coords(point, &hit_info->object->figure, polar_coord);
+	point_radius = sqrtf(pow(point->x, 2) + pow(point->z, 2));
+	texture_dims.x = tx->texture_dim * (point_radius / hit_info->object->figure.sphere.radius);
+	texture_dims.y = tx->texture_dim * (tx->texture->height / (float)tx->texture->width);
+	remove_point_texture_offset_sphere(point, polar_coord, &texture_dims);
+	texel.x = polar_coord[LATITUDE] * (tx->texture->width / texture_dims.x);
+	texel.y = polar_coord[LONGITUDE] * (tx->texture->height/ texture_dims.y);
+	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	normal = translate_texture_to_normal(pixel);
+	rotate_texture_normal(point, &normal);
+	return (normal);
+}
+
+t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
+{
+	t_vect	texture_normal;
+	t_vect	translated_point;
+
+	translated_point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
+	texture_normal = get_bump_map_normal_sphere(hit_info, &translated_point, texture);
+	return (texture_normal);
 }
 
 void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
@@ -2838,16 +2911,16 @@ void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
 
 t_vect	get_sphere_pattern(t_hit_info *hit_info)
 {
-	t_vect	point;
+	t_vect			point;
 	t_pattern_vars	p_var;
-	float	polar_coords[2];
-	float	projected_pattern;
+	float			polar_coords[2];
+	float			projected_pattern;
 
 	point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
 	set_polar_coords(&point, &hit_info->object->figure, polar_coords);
-	projected_pattern = sqrtf(pow(point.x, 2) + pow(point.z, 2)) * (1 / hit_info->object->figure.sphere.radius); // Pattern-dim / radius
+	projected_pattern = sqrtf(pow(point.x, 2) + pow(point.z, 2)) * ((M_PI / 8) / hit_info->object->figure.sphere.radius); // Pattern-dim / radius
 	p_var.x_index_square = (int)(fabs(polar_coords[LONGITUDE]) / projected_pattern);
-	p_var.y_index_square = (int)(fabs(polar_coords[LATITUDE]) / 1);
+	p_var.y_index_square = (int)(fabs(polar_coords[LATITUDE]) / (M_PI / 8));
 	if (point.x < 0.0)
 		p_var.x_index_square++;
 	if (point.y < 0.0)
@@ -2887,9 +2960,9 @@ void	translate_sphere(t_object *object, t_vect transformation)
 
 t_vect	get_sphere_normal(t_hit_info *hit_info, t_figure *fig)
 {
-	if (hit_info->object->texture->path)
+	if (hit_info->object->texture)
 	{
-		return (get_sphere_texture(NULL));
+		return (get_sphere_texture(hit_info, hit_info->object->texture));
 	}
 	else
 	{
@@ -3162,13 +3235,16 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	camera->viewport_pixel0.z = camera->viewport_origin.z + (0.5 * temp.z);
 }
 
-t_texture	*get_texture(char *path)
+t_texture	*get_texture(char *path, float texture_dim)
 {
 	t_texture	*res;
 
+	if (!path)
+		return (NULL);
 	res = (t_texture *)ft_calloc(1, sizeof(t_texture));
 	res->path = ft_strdup(path);
 	res->texture = mlx_load_png(path);
+	res->texture_dim = texture_dim;
 	if (!res->texture || !res->path)
 		exit (1);
 	return (res);
@@ -3238,7 +3314,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = get_texture("./textures/pillow.png");
+		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
@@ -3697,15 +3773,17 @@ void	init_figures(t_scene *scene)
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
 	//init_object(scene, fig, mat, BOX);
 
-	fig.sphere.center = new_vect(0, 0, -3);
+	fig.sphere.center = new_vect(0, 0, 0.0);
 	fig.sphere.radius = 1.5;
 	mat.color = hexa_to_vect(BRONZE);
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
+	mat.pattern = false;
+	mat.pattern_dim = M_PI;
 	mat.metal_roughness = 0.4;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 6.5;
-	mat.type = METAL;
+	mat.type = LAMBERTIAN;
 	init_object(scene, fig, mat, SPHERE);
 	
 	fig.quad.u_vect = new_vect(0.0, 0.0, 0.0);

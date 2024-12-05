@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/04 21:40:49 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:02:44 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,6 +298,7 @@ typedef struct s_texture
 {
 	char			*path;
 	mlx_texture_t	*texture;
+	float			texture_dim;
 }					t_texture;
 
 typedef union s_figure
@@ -418,6 +419,7 @@ void		set_new_image(t_scene *scene);
 
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 t_vect		get_obj_color(t_hit_info *hit_info);
+void		set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords);
 t_ray		dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_color *emittance, t_thread *thread);
 
 void		*set_rendering(void *args);
