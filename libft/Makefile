@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
+#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/09 17:34:45 by vperez-f          #+#    #+#              #
-#    Updated: 2024/06/21 15:29:44 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/12/06 17:55:25 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,18 +41,20 @@ RM = rm -f
 NAME = libft.a
 
 %.o: %.c 	 libft.h Makefile
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME): $(OFILES)
-	$(ARLIB) $(NAME) $(OFILES)
+	@$(ARLIB) $(NAME) $(OFILES)
 
 clean:
-	$(RM) $(OBJ)
+	@$(RM) $(OBJ)
+	@printf "LIBFT: Object files removal successful!\n"
 
 fclean:	clean
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
+	@printf "LIBFT: Archive library removal successful!\n"
 
 re:	fclean all
 

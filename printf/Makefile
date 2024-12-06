@@ -6,7 +6,7 @@
 #    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/09 17:34:45 by vperez-f          #+#    #+#              #
-#    Updated: 2024/10/05 16:20:23 by vpf              ###   ########.fr        #
+#    Updated: 2024/12/06 17:55:30 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,18 +27,20 @@ RM = rm -f
 NAME = libftprintf.a
 
 %.o: %.c 	 ft_printf.h Makefile
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME): $(OFILES)
-	$(ARLIB) $(NAME) $(OFILES)
+	@$(ARLIB) $(NAME) $(OFILES)
 	
 clean:
-	$(RM) $(OBJ)
+	@$(RM) $(OBJ)
+	@printf "PRINTF: Object files removal successful!\n"
 
 fclean:	clean
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
+	@printf "PRINTF: Archive library removal successful!\n"
 
 re:	fclean all
 
