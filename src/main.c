@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/06 18:20:08 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/07 03:31:38 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,22 +248,32 @@ int	is_press_and_ctrl(mlx_key_data_t key_data)
 }
 
 //Euler-Rodrigues rotation formula  || https://en.wikipedia.org/wiki/Rodrigues_rotation_formula
-t_vect	rotate_vector(t_vect vec, t_vect axis, float angle)
+void	rotate_vector(t_vect *vec, t_vect axis, float ang)
 {
-	t_vect		rotated_res;
 	t_vect		aux;
-	float		dot_product;
-	float		cosine;
-	float		sine;
+	float		cos;
 
-	aux = vect_cross(axis, vec);
-	cosine = cosf(angle);
-	sine = sinf(angle);
-	dot_product = vect_dot(vec, axis);
-	rotated_res = vect_add(
-		vect_add(vect_simple_mult(vec, cosine), vect_simple_mult(aux, sine)),
-		vect_simple_mult(axis, dot_product * (1 - cosine)));
-	return (rotated_res);
+	aux = vect_cross(axis, *vec);
+	cos = cosf(ang);
+	*vec = vect_add(
+		vect_add(vect_simple_mult(*vec, cos), vect_simple_mult(aux, sinf(ang))),
+		vect_simple_mult(axis, vect_dot(*vec, axis) * (1 - cos)));
+}
+
+void	rotate_by_angle(t_vect *vect, t_vect *normal, float angle)
+{
+	t_vect	ideal;
+	t_vect	axis;
+
+	ideal = new_vect(0.0, 0.0, 1.0);
+	if (vect_dot(*normal, ideal) == -1.0)
+		axis = new_vect(0.0, 1.0, 0.0);
+	else
+		axis = vect_cross(*normal, ideal);
+	if (zero_vect(axis))
+		return ;
+	axis = unit_vect(axis);
+	rotate_vector(vect, axis, angle);
 }
 
 void	rotate_x(t_vect *pt, float angle)
@@ -1863,9 +1873,9 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 	//fdsfdsfdfdfdfdfdfdfd
 	angle = acosf(vect_dot(normal, ideal));
 	if (vec && !zero_vect(*vec))
-		*vec = rotate_vector(*vec, axis, angle);
+		rotate_vector(vec, axis, angle);
 	if (point && !zero_vect(*point))
-		*point = rotate_vector(*point, axis, angle);
+		rotate_vector(point, axis, angle);
 	return (angle);	
 }
 
@@ -2271,7 +2281,8 @@ t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
 	axis = unit_vect(axis);
 	angle = sin(fig.cone.radius
 			/ hypot(fig.cone.radius, fig.cone.height));
-	res = unit_vect(rotate_vector(projected, axis, angle));
+	rotate_vector(&projected, axis, angle);
+	res = unit_vect(projected);
 	return (res);
 }
 
@@ -2297,7 +2308,7 @@ t_vect	compute_cone_normal(t_figure *fig, t_hit_info *hit_info)
 		else
 			axis = vect_cross(fig->cone.normal, ideal);
 		axis = unit_vect(axis);
-		res = rotate_vector(res, axis, -refsys_angle);
+		rotate_vector(&res, axis, -refsys_angle);
 	}
 	return (res);
 }
@@ -2481,9 +2492,9 @@ t_vect	get_rotated_point_quad(t_hit_info *hit_info)
 	rotate_reference_system(hit_info->object->figure.quad.normal, &u_vect_rotated, &rotated_point);
 	u_vect_rotated = clamp_vect(u_vect_rotated, -1.0, 1.0);
 	if (u_vect_rotated.y > 0.0)
-		rotated_point = rotate_vector(rotated_point, new_vect(0.0, 0.0, 1.0), acos(-u_vect_rotated.x));
+		rotate_vector(&rotated_point, new_vect(0.0, 0.0, 1.0), acos(-u_vect_rotated.x));
 	else if (u_vect_rotated.y < 0.0)
-		rotated_point = rotate_vector(rotated_point, new_vect(0.0, 0.0, 1.0), -acos(-u_vect_rotated.x));
+		rotate_vector(&rotated_point, new_vect(0.0, 0.0, 1.0), -acos(-u_vect_rotated.x));
 	rotated_point.x = round(rotated_point.x * 10000.0) / 10000.0;
 	rotated_point.y = round(rotated_point.y * 10000.0) / 10000.0;
 	rotated_point.z = round(rotated_point.z * 10000.0) / 10000.0;
@@ -2724,6 +2735,52 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (false);
 }
 
+void	remove_point_texture_offset(t_vect *point, t_vect *texture_dims)
+{
+	if (point->x < 0.0)
+		point->x = point->x + texture_dims->x
+			+ (texture_dims->x * (int)(fabs(point->x / texture_dims->x)));
+	if (point->y > 0.0)
+		point->y = point->y - texture_dims->y
+			- (texture_dims->y * (int)(point->y / texture_dims->y));
+	if (point->x >= texture_dims->x)
+		point->x = point->x
+			- (texture_dims->x * (int)(point->x / texture_dims->x));
+	if (fabs(point->y) >= texture_dims->y)
+		point->y = point->y
+			+ (texture_dims->y * (int)(fabs(point->y) / texture_dims->y));
+}
+
+void	set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal)
+{
+	t_texel		texel;
+	uint8_t		*pixel;
+	t_vect		texture_dims;
+
+	texture_dims.x = tx->texture_dim;
+	texture_dims.y = tx->texture_dim
+		* (tx->texture->height / (float) tx->texture->width);
+	remove_point_texture_offset(point, &texture_dims);
+	texel.x = point->x * (tx->texture->width / texture_dims.x);
+	texel.y = fabs(point->y) * (tx->texture->height / texture_dims.y);
+	pixel = tx->texture->pixels
+		+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	*normal = translate_texture_to_normal(pixel);
+}
+
+t_vect	get_plane_texture(t_hit_info *hit_info, t_texture *tx)
+{
+	float	angle;
+	t_vect	texture_normal;
+	t_vect	rotated_point;
+
+	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.plane.center);
+	angle = rotate_reference_system(hit_info->object->figure.plane.normal, NULL, &rotated_point);
+	set_bump_map_normal_plane(&rotated_point, tx, &texture_normal);
+	rotate_by_angle(&texture_normal, &hit_info->object->figure.plane.normal, -angle);
+	return (texture_normal);
+}
+
 t_vect	get_plane_pattern(t_hit_info *hit_info)
 {
 	t_vect	rotated_point;
@@ -2788,8 +2845,15 @@ void	translate_plane(t_object *object, t_vect transformation)
 
 t_vect	get_plane_normal(t_hit_info *hit_info, t_figure *fig)
 {
-	(void)hit_info;
-	return (fig->plane.normal);
+	if (hit_info->object->texture)
+	{
+
+		return (get_plane_texture(hit_info, hit_info->object->texture));
+	}
+	else
+	{
+		return (fig->plane.normal);
+	}
 }
 
 bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -2843,7 +2907,7 @@ void	rotate_texture_normal(t_vect *point, t_vect *normal)
 		return ;
 	axis = unit_vect(axis);
 	angle = acosf(f_clamp(vect_dot(texture_normal, point_normal), -1.0, 1.0));
-	*normal = rotate_vector(*normal, axis, angle);
+	rotate_vector(normal, axis, angle);
 }
 
 t_vect	translate_texture_to_normal(uint8_t *pixel)
@@ -2860,10 +2924,9 @@ t_vect	translate_texture_to_normal(uint8_t *pixel)
 	return (normal);
 }
 
-t_vect	get_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *tx)
+void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *tx, t_vect *normal)
 {
 	t_texel	texel;
-	t_vect	normal;
 	uint8_t	*pixel;
 	float	point_radius;
 	t_vect	texture_dims;
@@ -2877,9 +2940,8 @@ t_vect	get_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture
 	texel.x = polar_coord[LATITUDE] * (tx->texture->width / texture_dims.x);
 	texel.y = polar_coord[LONGITUDE] * (tx->texture->height/ texture_dims.y);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
-	normal = translate_texture_to_normal(pixel);
-	rotate_texture_normal(point, &normal);
-	return (normal);
+	*normal = translate_texture_to_normal(pixel);
+	rotate_texture_normal(point, normal);
 }
 
 t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
@@ -2888,7 +2950,7 @@ t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
 	t_vect	translated_point;
 
 	translated_point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
-	texture_normal = get_bump_map_normal_sphere(hit_info, &translated_point, texture);
+	set_bump_map_normal_sphere(hit_info, &translated_point, texture, &texture_normal);
 	return (texture_normal);
 }
 
@@ -2904,9 +2966,9 @@ void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
 	latitude_normal = unit_vect(latitude_normal);
 	point_normal = unit_vect(point_normal);
 	projected_radius = sqrtf(pow(point->x, 2) + pow(point->z, 2));
+	polar_coords[LATITUDE] = acosf(f_clamp(latitude_normal.z, -1.0, 1.0)) * projected_radius;
 	polar_coords[LONGITUDE] = acosf(f_clamp(vect_dot(point_normal, latitude_normal), -1.0, 1.0))
 		* fig->sphere.radius;
-	polar_coords[LATITUDE] = acosf(f_clamp(-latitude_normal.z, -1.0, 1.0)) * projected_radius;
 }
 
 t_vect	get_sphere_pattern(t_hit_info *hit_info)
@@ -2919,8 +2981,8 @@ t_vect	get_sphere_pattern(t_hit_info *hit_info)
 	point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
 	set_polar_coords(&point, &hit_info->object->figure, polar_coords);
 	projected_pattern = sqrtf(pow(point.x, 2) + pow(point.z, 2)) * ((M_PI / 8) / hit_info->object->figure.sphere.radius); // Pattern-dim / radius
-	p_var.x_index_square = (int)(fabs(polar_coords[LONGITUDE]) / projected_pattern);
-	p_var.y_index_square = (int)(fabs(polar_coords[LATITUDE]) / (M_PI / 8));
+	p_var.x_index_square = (int)(fabs(polar_coords[LATITUDE]) / projected_pattern);
+	p_var.y_index_square = (int)(fabs(polar_coords[LONGITUDE]) / (M_PI / 8));
 	if (point.x < 0.0)
 		p_var.x_index_square++;
 	if (point.y < 0.0)
@@ -3329,6 +3391,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
 		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
+		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;

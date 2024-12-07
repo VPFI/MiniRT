@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/05 16:02:44 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/07 03:32:20 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -417,6 +417,7 @@ void		draw_buttons(t_button *buttons, t_scene *scene);
 
 void		set_new_image(t_scene *scene);
 
+t_vect		translate_texture_to_normal(uint8_t *pixel);
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 t_vect		get_obj_color(t_hit_info *hit_info);
 void		set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords);
@@ -425,9 +426,10 @@ t_ray		dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t
 void		*set_rendering(void *args);
 void		wait_for_threads(t_scene *scene);
 
+
 float		get_vector_arc_height(t_vect *point);
 t_vect		get_disk_pattern(t_hit_info *hit_info);
-t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color);
+t_vect		get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color);
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);
 
 t_color		hexa_to_vect(int color);

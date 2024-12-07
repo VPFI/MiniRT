@@ -6,7 +6,7 @@
 #    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/12/06 18:19:47 by vpf              ###   ########.fr        #
+#    Updated: 2024/12/06 22:00:09 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,11 +40,9 @@ BUILD_DIR_MLX = mlx/MLX42/build/
 
 PATH_MLX = $(BUILD_DIR_MLX)libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -O3 -g -fsanitize=address -fsanitize=leak #-fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -O3 #-g -fsanitize=address -fsanitize=leak #-fsanitize=thread
 
 MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
-
-MLX_COMPFLAGS = -DGLFW_FETCH=1 -DDEBUG=1
 
 CC = cc
 
@@ -77,6 +75,7 @@ $(DIR_MLX)MLX42:
 	@curl -sOL $(MLX_URL)
 	@tar -xpf v$(MLX_VERSION).tar.gz
 	@rm -rf v$(MLX_VERSION).tar.gz
+	@mkdir -p $(DIR_MLX)
 	@mv -f MLX42-$(MLX_VERSION) MLX42
 	@mv -f MLX42 $(DIR_MLX)
 	@echo "MLX downloaded successfully\n"
@@ -101,8 +100,11 @@ fclean:
 	@printf "MiniRT: Exe && MLX build removal successful!\n"
 
 cleanMLX:
-	@rm -rf $(DIR_MLX)MLX42
+	@rm -rf $(DIR_MLX)
 	@printf "MiniRT: MLX complete removal successful!\n"
+
+cleanALL: fclean cleanMLX
+	@printf "MiniRT: Total clean successful!\n"
 
 re:	fclean all
 
