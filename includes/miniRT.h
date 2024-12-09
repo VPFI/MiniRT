@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/08 04:11:48 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/09 22:27:56 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,14 @@ typedef struct s_vect
 	float	y;
 	float	z;
 }			t_vect;
+
+typedef struct s_base_params
+{
+	float 	point_arc;
+	float	base_height;
+	float	point_radius;
+	t_vect	point_to_base;
+}			t_base_params;
 
 typedef struct s_coords
 {
@@ -347,6 +355,7 @@ typedef struct s_scene
 	t_camera		camera;
 	t_camera		back_up_camera;
 	float			amb_light;
+	t_object		*sky_sphere;
 	t_object		*objects;
 	t_object		*lights;
 	uint32_t		height;
@@ -419,6 +428,7 @@ void		set_new_image(t_scene *scene);
 
 t_vect		translate_texture_to_normal(uint8_t *pixel);
 void		set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal);
+void		set_bump_map_normal_base(t_vect *point, t_vect *normal, t_texture *tx, float radius, float base_distance);
 
 t_vect		calc_pixel_color_normal(t_scene *scene, t_ray ray);
 t_vect		get_obj_color(t_hit_info *hit_info);
@@ -431,6 +441,7 @@ void		wait_for_threads(t_scene *scene);
 
 float		get_vector_arc_height(t_vect *point);
 t_vect		get_disk_pattern(t_hit_info *hit_info);
+void		set_base_params(t_base_params *params, t_vect *point, float radius);
 t_vect		get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color);
 t_vect		get_plane_pattern_color(t_vect *rotated_point, float pattern_dim, t_vect *material_color);
 bool		hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds);

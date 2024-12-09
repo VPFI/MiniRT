@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/09 02:28:15 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/09 22:28:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1419,7 +1419,7 @@ t_color	sample_area_light(t_thread *thread, t_object *light, t_hit_info hit_info
 		return (emittance);
 	shadow_ray.origin = hit_info.point;
 	sample_area = test_sample_area(thread->state, light);
-	shadow_ray.dir = vect_subtract(sample_area, hit_info.point); //get_light_sample() for everything // no need of 2 fucntions
+	shadow_ray.dir = vect_subtract(sample_area, hit_info.point);
 	if (!shadow_hit(thread->scene, shadow_ray, &test_hit, vect_length(shadow_ray.dir)))
 	{
 		mod2 = 1 / vect_length(shadow_ray.dir);
@@ -1883,6 +1883,21 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 	return (angle);	
 }
 
+void	rotate_texture_normal(t_vect *point_normal, t_vect *normal)
+{
+	t_vect	axis;
+	float	angle;
+	t_vect	ideal_normal;
+
+	ideal_normal = new_vect(0.0, 0.0, 1.0);
+	axis = vect_cross(ideal_normal, *point_normal);
+	if (zero_vect(axis))
+		return ;
+	axis = unit_vect(axis);
+	angle = acosf(f_clamp(vect_dot(ideal_normal, *point_normal), -1.0, 1.0));
+	rotate_vector(normal, axis, angle);
+}
+
 float	get_height(t_vect point, t_vect center, float base)
 {
 	t_vect		center_to_point;
@@ -1983,14 +1998,85 @@ int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 		return (-1);
 }
 
+float	get_point_angle(t_vect *point)
+{
+	float	angle;
+	t_vect	center_to_point;
+
+	center_to_point = *point;
+	center_to_point.z = 0;
+	center_to_point = unit_vect(center_to_point);
+	center_to_point.y = f_clamp(center_to_point.y, -1.0, 1.0);
+	angle = acosf(center_to_point.y);
+	return (angle);
+}
+
+void	rotate_texture_normal_cylinder(t_vect *point, t_vect *normal)
+{
+	t_vect	point_normal;
+
+	point_normal = *point;
+	point_normal.z = 0;
+	point_normal = unit_vect(point_normal);
+	rotate_texture_normal(&point_normal, normal);
+}
+
+void	remove_point_texture_offset_cylinder(t_vect *point, float *arc, t_vect *texture_dims)
+{
+	if (point->x < 0.0)
+		*arc = -*arc + texture_dims->x + (texture_dims->x * (int)(*arc / texture_dims->x));
+	if (point->z < 0.0)
+		point->z = point->z + texture_dims->y + (texture_dims->y * (int)(fabs(point->z) / texture_dims->y));
+	if (*arc >= texture_dims->x)
+		*arc = *arc	- (texture_dims->x * (int)(*arc / texture_dims->x));
+	if (point->z >= texture_dims->y)
+		point->z = point->z	- (texture_dims->y * (int)(point->z / texture_dims->y));
+}
+
+void	set_bump_map_normal_cylinder(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
+{
+	float	arc;
+	float	angle;
+	t_texel	texel;
+	uint8_t	*pixel;
+	t_vect	texture_dims;
+
+	texture_dims.x = tx->texture_dim;
+	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
+	angle = get_point_angle(point);
+	arc = angle * fig->cylinder.radius;
+	remove_point_texture_offset_cylinder(point, &arc, &texture_dims);
+	texel.x = arc * (tx->texture->width / texture_dims.x);
+	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	*normal = translate_texture_to_normal(pixel);
+	rotate_texture_normal_cylinder(point, normal);
+}
+
 t_vect	get_cylinder_texture(t_hit_info *ht, t_texture *tx, t_figure *fig, int is_base)
 {
+	float	angle;
+	t_vect	axis;
+	t_vect	rotated_point;
+	t_vect	reverse_normal;
 	t_vect	texture_normal;
 
+	rotated_point = vect_subtract(ht->point, fig->cylinder.center);
+	reverse_normal = vect_simple_mult(fig->cylinder.normal, -1.0);
+	angle = rotate_reference_system(reverse_normal, NULL, &rotated_point);
 	if (is_base)
-		set_bump_normal_base();
+	{
+		set_bump_map_normal_base(&rotated_point, &texture_normal, tx, fig->cylinder.radius, (-fig->cylinder.height / 2) * is_base);
+		if (is_base == 1)
+		{
+			axis = new_vect(0.0, 1.0, 0.0);
+			rotate_by_angle(&texture_normal, &axis, M_PI);
+		}
+	}
 	else
-		set_bump_map_normal_cylinder();		
+		set_bump_map_normal_cylinder(&rotated_point, &texture_normal, tx, fig);
+	rotate_by_angle(&texture_normal, &reverse_normal, -angle);
+	return (texture_normal);
 }
 
 t_vect	compute_cylinder_normal(t_figure *fig, t_hit_info *hit_info, int is_base)
@@ -2306,36 +2392,106 @@ t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
 	return (res);
 }
 
-t_vect	compute_cone_normal(t_figure *fig, t_hit_info *hit_info)
+t_vect	compute_cone_normal(t_figure *fig, t_hit_info *hit_info, int is_base)
 {
-	int			is_base;
 	t_vect		ideal;
 	t_vect		axis;
-	t_vect		res;
+	t_vect		normal;
 	float		refsys_angle;
 
-	res = new_vect(0.0, 0.0, 0.0);
-	is_base = belongs_to_base(hit_info->point, fig->cone.center,
-			fig->cone.normal, fig->cone.height);
 	if (is_base == 1)
-		res = fig->cone.normal;
+		normal = fig->cone.normal;
 	else
 	{
-		res = calculate_ideal_normal(hit_info->point, *fig, &refsys_angle);
+		normal = calculate_ideal_normal(hit_info->point, *fig, &refsys_angle);
 		ideal = new_vect(0.0, 0.0, 1.0);
 		if (vect_dot(fig->cone.normal, ideal) == -1.0)
 			axis = new_vect(0.0, 1.0, 0.0);
 		else
 			axis = vect_cross(fig->cone.normal, ideal);
 		axis = unit_vect(axis);
-		rotate_vector(&res, axis, -refsys_angle);
+		rotate_vector(&normal, axis, -refsys_angle);
 	}
-	return (res);
+	return (normal);
+}
+
+void	rotate_texture_normal_cone(t_vect *point, t_vect *normal, t_figure *fig)
+{
+	t_vect	axis;
+	float	angle;
+	t_vect	point_normal;
+
+	point_normal = *point;
+	point_normal.z = 0;
+	point_normal = unit_vect(point_normal);
+	axis = unit_vect(vect_cross(*point, point_normal));
+	angle = sin(fig->cone.radius / hypot(fig->cone.radius, fig->cone.height));
+	rotate_vector(&point_normal, axis, angle);
+	point_normal = unit_vect(point_normal);
+	rotate_texture_normal(&point_normal, normal);
+}
+
+void	remove_point_texture_offset_cone(t_vect *point, float *arc, t_vect *texture_dims)
+{
+	if (point->x < 0.0)
+		*arc = -*arc + texture_dims->x + (texture_dims->x * (int)(*arc / texture_dims->x));
+	if (point->z < 0.0)
+		point->z = point->z + texture_dims->y + (texture_dims->y * (int)(fabs(point->z) / texture_dims->y));
+	if (*arc >= texture_dims->x)
+		*arc = *arc	- (texture_dims->x * (int)(*arc / texture_dims->x));
+	if (point->z >= texture_dims->y)
+		point->z = point->z	- (texture_dims->y * (int)(point->z / texture_dims->y));
+}
+
+void	set_bump_map_normal_cone(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
+{
+	float	arc;
+	t_texel	texel;
+	uint8_t	*pixel;
+	t_vect	texture_dims;
+	float	point_radius;
+
+	point_radius = point->z * (fig->cone.radius / fig->cone.height);
+	texture_dims.x = tx->texture_dim * (point_radius / fig->cone.radius);
+	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
+	arc = get_point_angle(point) * point_radius;
+	remove_point_texture_offset_cone(point, &arc, &texture_dims);
+	texel.x = arc * (tx->texture->width / texture_dims.x);
+	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	*normal = translate_texture_to_normal(pixel);
+	rotate_texture_normal_cone(point, normal, fig);
+}
+
+t_vect	get_cone_texture(t_hit_info *ht, t_texture *tx, t_figure *fig, int is_base)
+{
+	float	angle;
+	t_vect	rotated_point;
+	t_vect	texture_normal;
+
+	rotated_point = vect_subtract(ht->point, fig->cone.center);
+	angle = rotate_reference_system(fig->cone.normal, NULL, &rotated_point);
+	if (is_base)
+		set_bump_map_normal_base(&rotated_point, &texture_normal, tx, fig->cone.radius, fig->cone.height);
+	else
+		set_bump_map_normal_cone(&rotated_point, &texture_normal, tx, fig);
+	rotate_by_angle(&texture_normal, &fig->cone.normal, -angle);
+	return (texture_normal);
 }
 
 t_vect	get_cone_normal(t_hit_info *hit_info, t_figure *fig)
 {
-	return (compute_cone_normal(fig, hit_info));
+	int	is_base;
+
+	is_base = belongs_to_base(hit_info->point, fig->cone.center, fig->cone.normal, fig->cone.height);
+	if (hit_info->object->texture)
+	{
+		return (get_cone_texture(hit_info, hit_info->object->texture, fig, is_base));
+	}
+	else
+	{
+		return (compute_cone_normal(fig, hit_info, is_base));
+	}
 }
 
 bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
@@ -2363,6 +2519,17 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	return (hit);
 }
 
+void	set_base_params(t_base_params *params, t_vect *point, float radius)
+{
+	params->point_to_base = *point;
+	params->point_to_base.z = 0.0;
+	params->point_radius = vect_length(params->point_to_base);
+	params->point_to_base = unit_vect(params->point_to_base);
+	params->point_to_base = clamp_vect(params->point_to_base, -1.0, 1.0);
+	params->point_arc = acosf(params->point_to_base.y) * params->point_radius;
+	params->base_height = radius - params->point_radius;
+}
+
 void	remove_point_texture_offset_disk(t_vect *point, t_vect *texture_dims, float *point_arc, float base_height)
 {
 	if (point->x < 0.0)
@@ -2383,29 +2550,58 @@ void	remove_point_texture_offset_disk(t_vect *point, t_vect *texture_dims, float
 	}
 }
 
-void	set_bump_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_texture *tx)
+void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims, t_base_params *bp, float base_distance)
 {
-	t_texel		texel;
-	uint8_t		*pixel;
-	t_vect		texture_dims;
-	t_vect		point_to_base;
-	float		point_radius;
+	if (point->x < 0.0)
+		bp->point_arc = -bp->point_arc + texture_dims->x
+			+ (texture_dims->x * (int)(bp->point_arc / texture_dims->x));
+	if (bp->point_arc >= texture_dims->x)
+		bp->point_arc = bp->point_arc
+			- (texture_dims->x * (int)(bp->point_arc / texture_dims->x));
+	if (base_distance < 0.0)
+		point->z = (base_distance - bp->base_height)
+			+ texture_dims->y
+			+ (texture_dims->y * (int)((fabs(base_distance)
+						+ bp->base_height) / texture_dims->y));
+	if (base_distance >= 0.0
+		&& base_distance < texture_dims->y)
+		point->z = base_distance + bp->base_height;
+	if (base_distance >= 0.0
+		&& base_distance + bp->base_height >= texture_dims->y)
+		point->z = (base_distance + bp->base_height)
+			- (texture_dims->y * (int)((base_distance
+						+ bp->base_height) / texture_dims->y));
+}
 
-	float 		point_arc;
-	float		base_height;
+void	set_bump_map_normal_base(t_vect *point, t_vect *normal, t_texture *tx, float radius, float base_distance)
+{
+	t_base_params	bp;
+	t_texel			texel;
+	uint8_t			*pixel;
+	t_vect			texture_dims;
 
-	point_to_base = *point;
-	point_to_base.z = 0.0;
-	point_radius = vect_length(point_to_base);
-	point_to_base = unit_vect(point_to_base);
-	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
-	point_arc = acosf(point_to_base.y) * point_radius;
-	base_height = fig->disk.radius - point_radius;
+	set_base_params(&bp, point, radius);
+	texture_dims.x = tx->texture_dim * (bp.point_radius / radius);
+	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
+	remove_point_texture_offset_base(point, &texture_dims, &bp, base_distance);
+	texel.x = bp.point_arc * (tx->texture->width / texture_dims.x);
+	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	*normal = translate_texture_to_normal(pixel);
+}
 
-	texture_dims.x = tx->texture_dim * (point_radius / fig->disk.radius);
+void	set_bump_map_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_texture *tx)
+{
+	t_base_params	bp;
+	t_texel			texel;
+	uint8_t			*pixel;
+	t_vect			texture_dims;
+
+	set_base_params(&bp, point, fig->disk.radius);
+	texture_dims.x = tx->texture_dim * (bp.point_radius / fig->disk.radius);
 	texture_dims.y = tx->texture_dim * (tx->texture->height / (float)tx->texture->width);
-	remove_point_texture_offset_disk(point, &texture_dims, &point_arc, base_height);
-	texel.x = point_arc * (tx->texture->width / texture_dims.x);
+	remove_point_texture_offset_disk(point, &texture_dims, &bp.point_arc, bp.base_height);
+	texel.x = bp.point_arc * (tx->texture->width / texture_dims.x);
 	texel.y = point->z * (tx->texture->height / texture_dims.y);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
@@ -2419,7 +2615,7 @@ t_vect	get_disk_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
 
 	rotated_point = vect_subtract(hit_info->point, fig->disk.center);
 	angle = rotate_reference_system(fig->disk.normal, NULL, &rotated_point);
-	set_bump_normal_disk(fig, &rotated_point, &texture_normal, tx);
+	set_bump_map_normal_disk(fig, &rotated_point, &texture_normal, tx);
 	rotate_by_angle(&texture_normal, &fig->disk.normal, -angle);
 	return (texture_normal);
 }
@@ -2437,8 +2633,7 @@ t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_co
 	point_to_base = rotated_point;
 	point_to_base.z = 0.0;
 	point_radius = vect_length(point_to_base);
-	point_to_base = unit_vect(point_to_base);
-	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
+	point_to_base = clamp_vect(unit_vect(point_to_base), -1.0, 1.0);
 	point_pattern_dim = point_radius * (pattern_dim / figure->disk.radius);
 	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
 	p_var.y_index_square = (int)(fabs(figure->disk.radius - point_radius) / pattern_dim);
@@ -3006,21 +3201,12 @@ void	remove_point_texture_offset_sphere(t_vect *point, float *polar_coords, t_ve
 			- (texture_dims->y * (int)(polar_coords[LONGITUDE] / texture_dims->y));
 }
 
-void	rotate_texture_normal(t_vect *point, t_vect *normal)
+void	rotate_texture_normal_sphere(t_vect *point, t_vect *normal)
 {
-	t_vect	axis;
-	float	angle;
 	t_vect	point_normal;
-	t_vect	texture_normal;
 
 	point_normal = unit_vect(*point);
-	texture_normal = new_vect(0.0, 0.0, 1.0);
-	axis = vect_cross(texture_normal, point_normal);
-	if (zero_vect(axis))
-		return ;
-	axis = unit_vect(axis);
-	angle = acosf(f_clamp(vect_dot(texture_normal, point_normal), -1.0, 1.0));
-	rotate_vector(normal, axis, angle);
+	rotate_texture_normal(&point_normal, normal);
 }
 
 t_vect	translate_texture_to_normal(uint8_t *pixel)
@@ -3054,7 +3240,7 @@ void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *
 	texel.y = polar_coord[LONGITUDE] * (tx->texture->height/ texture_dims.y);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
-	rotate_texture_normal(point, normal);
+	rotate_texture_normal_sphere(point, normal);
 }
 
 t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
@@ -4044,6 +4230,8 @@ void	init_scene(t_scene *scene)
 	scene->current_file = 0;
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
+	if (!scene->image)
+			exit (1);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	if (!scene->cumulative_image)
 			exit (1);
