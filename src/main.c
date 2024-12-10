@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/10 01:37:56 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/10 20:07:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,9 +404,8 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 	{
 		if (key_data.modifier == MLX_CONTROL)
 		{
-			camera->fov -= 1;
-			if (camera->fov < 0)
-				camera->fov = 0;
+			if (camera->fov > 1)
+				camera->fov -= 1;
 		}
 		else
 			camera->fov += 1;
@@ -430,9 +429,8 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 	{
 		if (key_data.modifier == MLX_CONTROL)
 		{
-			camera->focus_dist -= 0.5;
-			if (camera->focus_dist < 0)
-				camera->focus_dist = 0.5;
+			if (camera->focus_dist > 1)
+				camera->focus_dist -= 0.5;
 		}
 		else
 			camera->focus_dist += 0.5;
@@ -1254,7 +1252,7 @@ bool	shadow_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info, float max)
 
 	hit = false;
 	bounds[MIN] = 0.001;
-	bounds[MAX] = __FLT_MAX__;
+	bounds[MAX] = (float)(INT32_MAX - 10);
 	if (max)
 	{
 		bounds[MAX] = max;
@@ -1282,7 +1280,7 @@ bool	ray_hit(t_object *objects, t_ray ray, t_hit_info *hit_info)
 
 	hit = false;
 	bounds[MIN] = 0.001;
-	bounds[MAX] = __FLT_MAX__;
+	bounds[MAX] = (float)(INT32_MAX - 10);
 	while (objects)
 	{
 		if (objects->hit_func(ray, objects->figure, hit_info, bounds))
@@ -1303,7 +1301,7 @@ bool	ray_hit_plus_lights(t_object *objects, t_object *plights, t_ray ray, t_hit_
 
 	hit = false;
 	bounds[MIN] = 0.001;
-	bounds[MAX] = __FLT_MAX__;
+	bounds[MAX] = (float)(INT32_MAX - 10);
 	while (objects)
 	{
 		if (objects->hit_func(ray, objects->figure, hit_info, bounds))
@@ -1526,8 +1524,8 @@ t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info, t_color *emittanc
 	target_on_sphere = vect_add(bounce_dir, hit_info.normal);
 	if (zero_vect(target_on_sphere))
 		target_on_sphere = hit_info.normal;
-	target_on_sphere = vect_add(target_on_sphere, hit_info.point); // = target_onsphere + hit.info.point
-	bounce_ray = new_ray(unit_vect(vect_subtract(target_on_sphere, hit_info.point)), hit_info.point);
+	target_on_sphere = unit_vect(target_on_sphere); // = target_onsphere + hit.info.point
+	bounce_ray = new_ray(target_on_sphere, hit_info.point);
 	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	*emittance = light_sampling(thread, hit_info, LAMBERTIAN);
 	return (bounce_ray);
@@ -1929,8 +1927,7 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 	if (zero_vect(axis))
 		return (angle);
 	axis = unit_vect(axis);
-	//fdsfdsfdfdfdfdfdfdfd
-	angle = acosf(vect_dot(normal, ideal));
+	angle = (acosf(f_clamp(vect_dot(normal, ideal), -1.0, 1.0)));
 	if (vec && !zero_vect(*vec))
 		rotate_vector(vec, axis, angle);
 	if (point && !zero_vect(*point))
@@ -2101,8 +2098,8 @@ void	set_bump_map_normal_cylinder(t_vect *point, t_vect *normal, t_texture *tx, 
 	angle = get_point_angle(point);
 	arc = angle * fig->cylinder.radius;
 	remove_point_texture_offset_cylinder(point, &arc, &texture_dims);
-	texel.x = arc * (tx->texture->width / texture_dims.x);
-	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	texel.x = f_clamp(arc * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 	rotate_texture_normal_cylinder(point, normal);
@@ -2518,8 +2515,8 @@ void	set_bump_map_normal_cone(t_vect *point, t_vect *normal, t_texture *tx, t_fi
 	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
 	arc = get_point_angle(point) * point_radius;
 	remove_point_texture_offset_cone(point, &arc, &texture_dims);
-	texel.x = arc * (tx->texture->width / texture_dims.x);
-	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	texel.x = f_clamp(arc * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 	rotate_texture_normal_cone(point, normal, fig);
@@ -2646,8 +2643,8 @@ void	set_bump_map_normal_base(t_vect *point, t_vect *normal, t_texture *tx, floa
 	texture_dims.x = tx->texture_dim * (bp.point_radius / radius);
 	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
 	remove_point_texture_offset_base(point, &texture_dims, &bp, base_distance);
-	texel.x = bp.point_arc * (tx->texture->width / texture_dims.x);
-	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	texel.x = f_clamp(bp.point_arc * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 }
@@ -2663,8 +2660,8 @@ void	set_bump_map_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_te
 	texture_dims.x = tx->texture_dim * (bp.point_radius / fig->disk.radius);
 	texture_dims.y = tx->texture_dim * (tx->texture->height / (float)tx->texture->width);
 	remove_point_texture_offset_disk(point, &texture_dims, &bp.point_arc, bp.base_height);
-	texel.x = bp.point_arc * (tx->texture->width / texture_dims.x);
-	texel.y = point->z * (tx->texture->height / texture_dims.y);
+	texel.x = f_clamp(bp.point_arc * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 }
@@ -3113,13 +3110,11 @@ void	set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal)
 	t_vect		texture_dims;
 
 	texture_dims.x = tx->texture_dim;
-	texture_dims.y = tx->texture_dim
-		* (tx->texture->height / (float) tx->texture->width);
+	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
 	remove_point_texture_offset_plane(point, &texture_dims);
-	texel.x = point->x * (tx->texture->width / texture_dims.x);
-	texel.y = fabs(point->y) * (tx->texture->height / texture_dims.y);
-	pixel = tx->texture->pixels
-		+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	texel.x = f_clamp(point->x * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(fabs(point->y) * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
+	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 }
 
@@ -3221,7 +3216,6 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	float	root;
 	t_vect	point;
 
-	//careful with dot products close to 0 || floating point etc...
 	denominator = vect_dot(fig.plane.normal, ray.dir);
 	if (fabs(denominator) < 1e-8)
 		return (false);
@@ -3286,8 +3280,8 @@ void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *
 	texture_dims.x = tx->texture_dim * (point_radius / hit_info->object->figure.sphere.radius);
 	texture_dims.y = tx->texture_dim * (tx->texture->height / (float)tx->texture->width);
 	remove_point_texture_offset_sphere(point, polar_coord, &texture_dims);
-	texel.x = polar_coord[LATITUDE] * (tx->texture->width / texture_dims.x);
-	texel.y = polar_coord[LONGITUDE] * (tx->texture->height/ texture_dims.y);
+	texel.x = f_clamp(polar_coord[LATITUDE] * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
+	texel.y = f_clamp(polar_coord[LONGITUDE] * (tx->texture->height/ texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 	rotate_texture_normal_sphere(point, normal);
@@ -3603,7 +3597,7 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 	
 	//camera->origin = new_vect(10.0, 10.0, 10);
 	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
-	camera->origin = new_vect(0, 0, 15);
+	camera->origin = new_vect(0, 1, 2);
 	camera->orientation = unit_vect(new_vect(0, 0, -1));
 	//camera->origin = new_vect(-5.0, 16.0, 11.0);
 	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
@@ -3722,7 +3716,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
@@ -3737,7 +3731,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
 		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = get_texture("./textures/pillow.png", 1);
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
@@ -3997,15 +3991,15 @@ void	init_lights(t_scene *scene)
 	mat.emission_intensity = 5.0;
 	mat.type = EMISSIVE;
 	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(0, 6.0, -8.0);
+	fig.p_light.location = new_vect(2, 6.0, 0.0);
 	fig.p_light.radius_shadow = 1.0;;
 	mat.color = hexa_to_vect(WHITE);
 	mat.specular = 0.0;
 	mat.metal_roughness = 0.0;
 	mat.albedo = mat.color;
-	mat.emission_intensity = 5.0;
+	mat.emission_intensity = 2.0;
 	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
+	init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	fig.p_light.radius_shadow = 1.0;;
 	mat.color = hexa_to_vect(GREEN);
@@ -4057,7 +4051,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, QUAD);
+	//init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, 10);
@@ -4069,7 +4063,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, QUAD);
+	//init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, -10);
@@ -4081,7 +4075,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, QUAD);
+	//init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
 	fig.quad.v_vect = new_vect(0, -10, 0);
@@ -4093,7 +4087,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, QUAD);
+	//init_object(scene, fig, mat, QUAD);
 
 	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
 	fig.quad.v_vect = new_vect(0, 10, 0);
@@ -4105,7 +4099,7 @@ void	init_figures(t_scene *scene)
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, QUAD);
+	//init_object(scene, fig, mat, QUAD);
 
 	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
@@ -4120,8 +4114,30 @@ void	init_figures(t_scene *scene)
 	mat.type = LAMBERTIAN;
 	//init_object(scene, fig, mat, BOX);
 
-	fig.plane.center = new_vect(0, -1.0, 0.0);
+	fig.plane.center = new_vect(2, -1.0, -2.0);
 	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
+	mat.color = hexa_to_vect(RED);
+	mat.pattern = true;
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
+	mat.emission_intensity = 2.5;
+	mat.albedo = mat.color;
+	mat.type = LAMBERTIAN;
+	//init_object(scene, fig, mat, PLANE);
+	
+	fig.plane.center = new_vect(2, -1.0, -3.0);
+	fig.plane.normal = new_vect(0.0, 0.0, 1.0);
+	mat.color = hexa_to_vect(RED);
+	mat.pattern = true;
+	mat.specular = 1.0;
+	mat.metal_roughness = 0.0;
+	mat.emission_intensity = 2.5;
+	mat.albedo = mat.color;
+	mat.type = LAMBERTIAN;
+	//init_object(scene, fig, mat, PLANE);
+	
+	fig.plane.center = new_vect(2, -1.0, 4.0);
+	fig.plane.normal = new_vect(0.0, 1.0, -1.0);
 	mat.color = hexa_to_vect(RED);
 	mat.pattern = true;
 	mat.specular = 1.0;
@@ -4189,7 +4205,20 @@ void	init_figures(t_scene *scene)
 	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
 	//init_object(scene, fig, mat, BOX);
 
-	fig.sphere.center = new_vect(0, 0, 0.0);
+	fig.sphere.center = new_vect(0, 1, 0.0);
+	fig.sphere.radius = 1;
+	mat.color = hexa_to_vect(WHITE);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.pattern = false;
+	mat.pattern_dim = M_PI;
+	mat.metal_roughness = 0.0;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 6.5;
+	mat.type = METAL;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(0, 0, -5.0);
 	fig.sphere.radius = 1.5;
 	mat.color = hexa_to_vect(BRONZE);
 	mat.albedo = mat.color;
@@ -4199,7 +4228,7 @@ void	init_figures(t_scene *scene)
 	mat.metal_roughness = 0.4;
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 6.5;
-	mat.type = LAMBERTIAN;
+	mat.type = METAL;
 	init_object(scene, fig, mat, SPHERE);
 	
 	fig.quad.u_vect = new_vect(0.0, 0.0, 0.0);
@@ -4278,7 +4307,7 @@ void	init_sky_sphere(t_scene *scene)
 	new_obj->material = new_standard_material();
 	new_obj->type = SPHERE;
 	new_obj->figure.sphere.center = scene->camera.origin;
-	new_obj->texture = get_texture("./textures/table_mountain_2_puresky_4k.png", 1);
+	new_obj->texture = get_texture("./textures/std_sky_sphere.png", 1);
 	new_obj->figure.sphere.radius = new_obj->texture->texture->width / (M_PI * 2.0);
 	new_obj->hit_func = hit_sphere;
 	new_obj->edit_origin = translate_sphere;
