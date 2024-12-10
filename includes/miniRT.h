@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/09 22:27:56 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/09 22:58:21 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 # define MAX_DEPTH  8
 # define SPP 		1
 
-# define TEST 		0
+# define TEST 		1
 
 # define DEFOCUS	0.0
 # define FOCUS_DIST	13

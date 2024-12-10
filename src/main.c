@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/09 22:28:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/10 01:37:56 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1639,12 +1639,73 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	}
 	return (true);
 }
+
+void	set_sky_texture_color(t_vect *point, t_figure *fig, t_texture *tx, t_color *color)
+{
+	float		polar_coords[2];
+	t_vect		texture_dims;
+	uint8_t		*pixel;
+	t_texel		texel;
+	float		point_radius;
+
+	set_polar_coords(point, fig, polar_coords);
+	point_radius = sqrt(pow(point->x, 2) + pow(point->z, 2));
+	texture_dims.x = tx->texture->width * (point_radius / fig->sphere.radius);
+	texture_dims.y = tx->texture->height;
+	if (point->x < 0.0)
+		polar_coords[LATITUDE] = -polar_coords[LATITUDE];
+	if (point->y > 0.0)
+		polar_coords[LONGITUDE] = -polar_coords[LONGITUDE];
+	texel.x = (polar_coords[LATITUDE] * (tx->texture->width / texture_dims.x));
+	texel.y = polar_coords[LONGITUDE] + (texture_dims.y / 2.0);
+	if (polar_coords[LATITUDE] < 0)
+		texel.x += tx->texture->width;
+	texel.x = f_clamp(texel.x, 0, tx->texture->width - 1);
+	texel.y = f_clamp(texel.y, 0, tx->texture->height - 1);
+	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	color->x = *pixel / 255.0;
+	color->y = *(pixel + 1) / 255.0;
+	color->z = *(pixel + 2) / 255.0;
+}
+
+t_color	get_sky_sphere_color(t_thread *thread, t_hit_info *ht)
+{
+	t_color	scene_sky_color;
+	t_vect	translated_point;
+
+	translated_point = vect_subtract(ht->point, thread->scene->sky_sphere->figure.sphere.center);
+	set_sky_texture_color(&translated_point, &thread->scene->sky_sphere->figure, thread->scene->sky_sphere->texture, &scene_sky_color);
+	return (scene_sky_color);
+}
+
+t_color	get_sky_color(t_thread *thread, t_ray *ray)
+{
+	float		mod;
+	t_hit_info	hit_info;
+	t_vect		background;
+
+	ft_bzero(&hit_info, sizeof(hit_info));
+	background = new_color(0.0, 0.0, 0.0);
+	if (thread->scene->sky_sphere && ray_hit(thread->scene->sky_sphere, *ray, &hit_info))
+	{
+		hit_info.point = ray_at(*ray, hit_info.t);
+		background = get_sky_sphere_color(thread, &hit_info);
+	}
+	else
+	{
+		mod = 0.5 * (ray->dir.y + 1.0);
+		background = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
+		if (AMB)
+			background = hexa_to_vect(AMB_COLOR);
+		background = vect_simple_mult(background, thread->scene->amb_light);
+	}
+	return (background);
+}
+
 t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 {
 	t_color		emittance;
-	t_color		background;
 	float		time_aux;
-	float		mod;
 	t_hit_info	hit_info;
 	t_ray		bounce_ray;
 
@@ -1677,13 +1738,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), get_obj_color(&hit_info)), emittance), 1 / rr_coef_test));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
-	t_vect	unit_dir = unit_vect(ray.dir);
-	mod = 0.5 * (unit_dir.y + 1.0);
-	background = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
-	if (AMB)
-		background = hexa_to_vect(AMB_COLOR);
-	background = vect_simple_mult(background, thread->scene->amb_light);
-	return (background);
+	return (get_sky_color(thread, &ray));
 }
 
 void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
@@ -2140,13 +2195,17 @@ t_color	get_cylinder_body_pattern(t_hit_info *hit_info)
 t_vect	get_cylinder_pattern(t_hit_info *ht)
 {
 	t_figure	base;
+	int			is_base;
+	t_vect		rotated_point;
 
-	if (belongs_to_base(ht->point, ht->object->figure.cylinder.center, ht->object->figure.cylinder.normal, ht->object->figure.cylinder.height / 2))
+	is_base = belongs_to_base(ht->point, ht->object->figure.cylinder.center, ht->object->figure.cylinder.normal, ht->object->figure.cylinder.height / 2);
+	if (is_base)
 	{
-		base.disk.center = ray_at(new_ray(ht->object->figure.cylinder.normal, ht->object->figure.cylinder.center), ht->object->figure.cylinder.height / 2);
+		base.disk.center.y = ht->object->figure.cylinder.height / 2;
 		base.disk.radius = ht->object->figure.cylinder.radius;
-		base.disk.normal = ht->normal;
-		return (get_base_pattern(&ht->point, &base, ht->object->material.pattern_dim, &ht->object->material.color));
+		rotated_point = vect_subtract(ht->point, ht->object->figure.cylinder.center);
+		rotate_reference_system(ht->object->figure.cylinder.normal, NULL, &rotated_point);
+		return (get_base_pattern(&rotated_point, &base, ht->object->material.pattern_dim, &ht->object->material.color));
 	}
 	else
 		return (get_cylinder_body_pattern(ht));
@@ -2306,9 +2365,9 @@ t_vect	get_cone_body_pattern(t_hit_info *hit_info)
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.cone.center);
 	rotate_reference_system(hit_info->object->figure.cone.normal, NULL, &rotated_point);
 	point_radius = rotated_point.z	* (hit_info->object->figure.cone.radius / hit_info->object->figure.cone.height);
-	point_pattern_dim = point_radius * ((M_PI / 3) / hit_info->object->figure.cone.radius);
+	point_pattern_dim = point_radius * (hit_info->object->material.pattern_dim / hit_info->object->figure.cone.radius);
 	p_var.x_index_square = (int)(fabs(acos(get_vector_arc_height(&rotated_point)) * point_radius) / point_pattern_dim);
-	p_var.y_index_square = (int)(rotated_point.z / (M_PI / 3));
+	p_var.y_index_square = (int)(rotated_point.z / hit_info->object->material.pattern_dim);
 	if (rotated_point.x < 0.0)
 		p_var.x_index_square++;
 	if (rotated_point.z < 0.0)
@@ -2323,13 +2382,16 @@ t_vect	get_cone_body_pattern(t_hit_info *hit_info)
 t_vect	get_cone_pattern(t_hit_info *ht)
 {
 	t_figure	base;
+	t_vect		rotated_point;
 
 	if (belongs_to_base(ht->point, ht->object->figure.cone.center, ht->object->figure.cone.normal, ht->object->figure.cone.height))
 	{
-		base.disk.center = ray_at(new_ray(ht->object->figure.cone.normal, ht->object->figure.cone.center), ht->object->figure.cone.height);
 		base.disk.radius = ht->object->figure.cone.radius;
-		base.disk.normal = ht->normal;
-		return (get_base_pattern(&ht->point, &base, ht->object->material.pattern_dim, &ht->object->material.color));
+		base.disk.center.y = ht->object->figure.cone.height;
+		base.disk.radius = ht->object->figure.cone.radius;
+		rotated_point = vect_subtract(ht->point, ht->object->figure.cone.center);
+		rotate_reference_system(ht->object->figure.cone.normal, NULL, &rotated_point);
+		return (get_base_pattern(&rotated_point, &base, ht->object->material.pattern_dim, &ht->object->material.color));
 	}
 	else
 		return (get_cone_body_pattern(ht));
@@ -2623,23 +2685,16 @@ t_vect	get_disk_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
 t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color)
 {	
 	t_pattern_vars	p_var;
-	t_vect			rotated_point;
-	t_vect			point_to_base;
-	float			point_radius;
+	t_base_params	bp;
 	float			point_pattern_dim;
 
-	rotated_point = vect_subtract(*point, figure->disk.center);
-	rotate_reference_system(figure->disk.normal, NULL, &rotated_point);
-	point_to_base = rotated_point;
-	point_to_base.z = 0.0;
-	point_radius = vect_length(point_to_base);
-	point_to_base = clamp_vect(unit_vect(point_to_base), -1.0, 1.0);
-	point_pattern_dim = point_radius * (pattern_dim / figure->disk.radius);
-	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
-	p_var.y_index_square = (int)(fabs(figure->disk.radius - point_radius) / pattern_dim);
-	if (rotated_point.x > 0.0)
+	set_base_params(&bp, point, figure->disk.radius);
+	point_pattern_dim = bp.point_radius * (pattern_dim / figure->disk.radius);
+	p_var.x_index_square = (int)(fabs(bp.point_arc)/ point_pattern_dim);
+	p_var.y_index_square = (int)((fabs(bp.base_height) + figure->disk.center.y)  / pattern_dim);
+	if (point->x > 0.0)
 		p_var.x_index_square++;
-	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
+	if (point->z > 0.0 && fabs(point->z) > 0.0001)
 		p_var.y_index_square++;
 	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
 	if (p_var.pattern_index == 0)
@@ -2650,22 +2705,17 @@ t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_co
 
 t_vect	get_disk_pattern(t_hit_info *hit_info)
 {	
-	t_vect	rotated_point;
-	t_vect	point_to_base;
+	t_base_params	bp;
 	t_pattern_vars	p_var;
-	float	point_radius;
-	float	point_pattern_dim;
+	t_vect			rotated_point;
+	float			point_pattern_dim;
 
 	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.disk.center);
 	rotate_reference_system(hit_info->object->figure.disk.normal, NULL, &rotated_point);
-	point_to_base = rotated_point;
-	point_to_base.z = 0.0;
-	point_radius = vect_length(point_to_base);
-	point_to_base = unit_vect(point_to_base);
-	point_to_base = clamp_vect(point_to_base, -1.0, 1.0);
-	point_pattern_dim = point_radius * (hit_info->object->material.pattern_dim / hit_info->object->figure.disk.radius);
-	p_var.x_index_square = (int)(fabs(acosf(point_to_base.y) * point_radius)/ point_pattern_dim);
-	p_var.y_index_square = (int)(fabs(hit_info->object->figure.disk.radius - point_radius) / hit_info->object->material.pattern_dim);
+	set_base_params(&bp, &rotated_point, hit_info->object->figure.disk.radius);
+	point_pattern_dim = bp.point_radius * (hit_info->object->material.pattern_dim / hit_info->object->figure.disk.radius);
+	p_var.x_index_square = (int)(fabs(bp.point_arc)/ point_pattern_dim);
+	p_var.y_index_square = (int)(fabs(bp.base_height) / hit_info->object->material.pattern_dim);
 	if (rotated_point.x > 0.0)
 		p_var.x_index_square++;
 	if (rotated_point.z > 0.0 && fabs(rotated_point.z) > 0.0001)
@@ -3266,8 +3316,7 @@ void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
 	point_normal = unit_vect(point_normal);
 	projected_radius = sqrtf(pow(point->x, 2) + pow(point->z, 2));
 	polar_coords[LATITUDE] = acosf(f_clamp(latitude_normal.z, -1.0, 1.0)) * projected_radius;
-	polar_coords[LONGITUDE] = acosf(f_clamp(vect_dot(point_normal, latitude_normal), -1.0, 1.0))
-		* fig->sphere.radius;
+	polar_coords[LONGITUDE] = acosf(f_clamp(vect_dot(point_normal, latitude_normal), -1.0, 1.0)) * fig->sphere.radius;
 }
 
 t_vect	get_sphere_pattern(t_hit_info *hit_info)
@@ -3757,7 +3806,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
 		new_obj->figure.cylinder.radius = fig.cylinder.radius;
 		new_obj->figure.cylinder.height = fig.cylinder.height;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_cylinder;
 		new_obj->edit_origin = translate_cylinder;
 		new_obj->edit_orientation = rotate_cylinder;
@@ -3774,7 +3823,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
 		new_obj->figure.cone.radius = fig.cone.radius;
 		new_obj->figure.cone.height = fig.cone.height;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_cone;
 		new_obj->edit_origin = translate_cone;
 		new_obj->edit_orientation = rotate_cone;
@@ -4219,6 +4268,29 @@ void	init_figures(t_scene *scene)
 	//init_object(scene, fig, mat, DISK);
 }
 
+void	init_sky_sphere(t_scene *scene)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		exit (1);
+	new_obj->material = new_standard_material();
+	new_obj->type = SPHERE;
+	new_obj->figure.sphere.center = scene->camera.origin;
+	new_obj->texture = get_texture("./textures/table_mountain_2_puresky_4k.png", 1);
+	new_obj->figure.sphere.radius = new_obj->texture->texture->width / (M_PI * 2.0);
+	new_obj->hit_func = hit_sphere;
+	new_obj->edit_origin = translate_sphere;
+	new_obj->edit_orientation = rotate_sphere;
+	new_obj->get_origin = get_origin_sphere;
+	new_obj->edit_dimensions = resize_sphere;
+	new_obj->get_visual = get_sphere_pattern;
+	new_obj->get_normal = get_sphere_normal;
+	new_obj->next = NULL;
+	add_object(&scene->sky_sphere, new_obj);
+}
+
 void	init_scene(t_scene *scene)
 {
 	ft_bzero(scene, sizeof(t_scene));
@@ -4231,10 +4303,10 @@ void	init_scene(t_scene *scene)
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	if (!scene->image)
-			exit (1);
+		exit (1);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	if (!scene->cumulative_image)
-			exit (1);
+		exit (1);
 	scene->state = (uint32_t)(scene->height * scene->width * mlx_get_time());
 	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	pthread_mutex_init(&scene->stop_mutex, NULL);
@@ -4247,15 +4319,8 @@ void	init_scene(t_scene *scene)
 	init_lights(scene);
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
-}
-
-void	free_primitive(t_object **object)
-{
-	if ((*object)->type == BOX)
-	{
-		free_objects(&(*object)->figure.box.faces);
-	}
-	free(*object);
+	if (TEST)
+		init_sky_sphere(scene);
 }
 
 void	free_texture(t_texture **texture)
@@ -4270,6 +4335,19 @@ void	free_texture(t_texture **texture)
 			free((*texture));
 		}
 	}
+}
+
+void	free_primitive(t_object **object)
+{
+	if ((*object)->type == BOX)
+	{
+		free_objects(&(*object)->figure.box.faces);
+	}
+	if ((*object)->texture)
+	{
+		free_texture(&(*object)->texture);
+	}
+	free(*object);
 }
 
 void	free_objects(t_object **objects)
@@ -4363,6 +4441,7 @@ int	main(int argc, char **argv)
 	free_boxes(scene.objects);
 	free_objects(&scene.objects);
 	free_objects(&scene.lights);
+	free_objects(&scene.sky_sphere);
 	//free_buttons(scene.buttons);
 	return (0);
 }
