@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/10 20:07:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/11 20:24:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1273,14 +1273,17 @@ bool	shadow_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info, float max)
 	return (hit);
 }
 
-bool	ray_hit(t_object *objects, t_ray ray, t_hit_info *hit_info)
+bool	ray_hit(t_object *objects, t_ray ray, t_hit_info *hit_info, t_object *sky_sphere)
 {
 	float		bounds[2];
 	bool		hit;
 
 	hit = false;
 	bounds[MIN] = 0.001;
-	bounds[MAX] = (float)(INT32_MAX - 10);
+	if (sky_sphere)
+		bounds[MAX] = sky_sphere->figure.sphere.radius;
+	else
+		bounds[MAX] = (float)(INT32_MAX - 10);
 	while (objects)
 	{
 		if (objects->hit_func(ray, objects->figure, hit_info, bounds))
@@ -1340,7 +1343,7 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
 			color = vect_simple_mult(color, 1.8);
-		color = vect_simple_div(color, hit_info.t / scene->camera.focus_dist);
+		//color = vect_simple_div(color, hit_info.t);
 		// Check min level of darkness so not black...
 	}
 	else
@@ -1623,7 +1626,7 @@ bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray
 	{
 		float	cos = vect_dot(vect_simple_mult(ray.dir, -1.0), hit_info.normal);
 		if (hit_info.object->material.specular > fast_rand(thread->state) 
-			|| (reflectance(1.0, cos) > fast_rand(thread->state) && hit_info.object->material.specular))
+			|| (reflectance(1.5, cos) > fast_rand(thread->state) && hit_info.object->material.specular))
 		{
 			(*bounce_ray) = metal_scatter(thread->state, hit_info, ray, emittance, thread);
 			if (vect_dot((*bounce_ray).dir, hit_info.normal) <= 0)
@@ -1684,7 +1687,7 @@ t_color	get_sky_color(t_thread *thread, t_ray *ray)
 
 	ft_bzero(&hit_info, sizeof(hit_info));
 	background = new_color(0.0, 0.0, 0.0);
-	if (thread->scene->sky_sphere && ray_hit(thread->scene->sky_sphere, *ray, &hit_info))
+	if (thread->scene->sky_sphere && ray_hit(thread->scene->sky_sphere, *ray, &hit_info, NULL))
 	{
 		hit_info.point = ray_at(*ray, hit_info.t);
 		background = get_sky_sphere_color(thread, &hit_info);
@@ -1695,8 +1698,8 @@ t_color	get_sky_color(t_thread *thread, t_ray *ray)
 		background = vect_add(vect_simple_mult(new_color(1, 1, 1), (1.0 - mod)), vect_simple_mult(new_color(0.3, 0.7, 1), mod));
 		if (AMB)
 			background = hexa_to_vect(AMB_COLOR);
-		background = vect_simple_mult(background, thread->scene->amb_light);
 	}
+	background = vect_simple_mult(background, thread->scene->amb_light);
 	return (background);
 }
 
@@ -1718,7 +1721,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	ft_bzero(&hit_info, sizeof(hit_info));
 	emittance = new_color(0, 0, 0);
 	time_aux = mlx_get_time();
-	if (ray_hit(thread->scene->objects, ray, &hit_info))
+	if (ray_hit(thread->scene->objects, ray, &hit_info, thread->scene->sky_sphere))
 	{
 		hit_info.point = ray_at(ray, hit_info.t);
 		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
@@ -2410,12 +2413,18 @@ t_vect	get_origin_cone(t_object *object)
 
 void	rotate_cone(t_object *object, t_vect transformation)
 {
+	t_ray	cone_ray;
+
+	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
+	object->figure.cone.center = ray_at(cone_ray, (object->figure.cone.height / 2));
 	if (transformation.x)
 		rotate_x(&object->figure.cone.normal, transformation.x);
 	else if (transformation.y)
 		rotate_y(&object->figure.cone.normal, transformation.y);
 	else if (transformation.z)
 		rotate_z(&object->figure.cone.normal, transformation.z);
+	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
+	object->figure.cone.center = ray_at(cone_ray, -(object->figure.cone.height / 2));
 	object->figure.cone.normal = unit_vect(object->figure.cone.normal);
 	print_vec_s(object->figure.cone.normal, "New Cone orientation: ");
 	return ;
@@ -3077,7 +3086,7 @@ bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
 	t_hit_info	internal_hit_info;
 
-	if (ray_hit(fig.box.faces, ray, &internal_hit_info))
+	if (ray_hit(fig.box.faces, ray, &internal_hit_info, NULL))
 	{
 		if (internal_hit_info.t <= bounds[MIN] || bounds[MAX] <= internal_hit_info.t)
 			return (false);
@@ -4137,15 +4146,15 @@ void	init_figures(t_scene *scene)
 	//init_object(scene, fig, mat, PLANE);
 	
 	fig.plane.center = new_vect(2, -1.0, 4.0);
-	fig.plane.normal = new_vect(0.0, 1.0, -1.0);
-	mat.color = hexa_to_vect(RED);
-	mat.pattern = true;
+	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
+	mat.color = hexa_to_vect(WHITE);
+	mat.pattern = false;
 	mat.specular = 1.0;
 	mat.metal_roughness = 0.0;
 	mat.emission_intensity = 2.5;
 	mat.albedo = mat.color;
 	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
+	init_object(scene, fig, mat, PLANE);
 
 
 	// for (int i = 0; i < 5; i++)
@@ -4216,7 +4225,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 6.5;
 	mat.type = METAL;
-	init_object(scene, fig, mat, SPHERE);
+	//init_object(scene, fig, mat, SPHERE);
 
 	fig.sphere.center = new_vect(0, 0, -5.0);
 	fig.sphere.radius = 1.5;
@@ -4229,7 +4238,7 @@ void	init_figures(t_scene *scene)
 	mat.refraction_index = 1.5;
 	mat.emission_intensity = 6.5;
 	mat.type = METAL;
-	init_object(scene, fig, mat, SPHERE);
+	//init_object(scene, fig, mat, SPHERE);
 	
 	fig.quad.u_vect = new_vect(0.0, 0.0, 0.0);
 	fig.quad.v_vect = new_vect(0, 0, 4);
@@ -4307,7 +4316,7 @@ void	init_sky_sphere(t_scene *scene)
 	new_obj->material = new_standard_material();
 	new_obj->type = SPHERE;
 	new_obj->figure.sphere.center = scene->camera.origin;
-	new_obj->texture = get_texture("./textures/std_sky_sphere.png", 1);
+	new_obj->texture = get_texture("textures/table_mountain_2_puresky_4k.png", 1);
 	new_obj->figure.sphere.radius = new_obj->texture->texture->width / (M_PI * 2.0);
 	new_obj->hit_func = hit_sphere;
 	new_obj->edit_origin = translate_sphere;
