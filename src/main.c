@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/12 21:16:06 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/12 22:25:58 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,7 +320,7 @@ t_vect	align_camera_to_axis(mlx_key_data_t key_data)
 	res = new_vect(0.0, 0.0, -1.0);
 	if (key_data.key == MLX_KEY_W)
 	{
-		res = new_vect(0.0, 0.99, 0.0);
+		res = new_vect(0.0, 1.0, 0.0);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
@@ -328,7 +328,7 @@ t_vect	align_camera_to_axis(mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		res = new_vect(0.0, -0.99, 0.0);
+		res = new_vect(0.0, -1.0, 0.0);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
@@ -353,33 +353,19 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_W)
 	{
-		if (camera->orientation.z > 0.0)
-			rotate_x(&camera->orientation, -0.05);
-		else
-			rotate_x(&camera->orientation, 0.05);
+		rotate_vector(&camera->orientation, camera->u, 0.05);
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
-		rotate_y(&camera->orientation, 0.05);
+		rotate_vector(&camera->orientation, camera->v, 0.05);
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		if (camera->orientation.z > 0.0)
-			rotate_x(&camera->orientation, 0.05);
-		else
-			rotate_x(&camera->orientation, -0.05);
+		rotate_vector(&camera->orientation, camera->u, -0.05);
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
-		rotate_y(&camera->orientation, -0.05);
-	}
-	else if (key_data.key == MLX_KEY_Q)
-	{
-		rotate_z(&camera->orientation, 0.05);
-	}
-	else if (key_data.key == MLX_KEY_E)
-	{
-		rotate_z(&camera->orientation, -0.05);
+		rotate_vector(&camera->orientation, camera->v, -0.05);
 	}
 	print_vec_s(unit_vect(camera->orientation), "New camera orientation");
 	return (1);
@@ -493,11 +479,31 @@ void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 	return ;
 }
 
+t_vect	clamp_object_normal(t_object *target_object)
+{
+	t_vect	transformation;
+	t_vect	obj_origin;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	obj_origin = target_object->get_origin(target_object);
+	transformation.x = roundf(obj_origin.x);
+	transformation.y = roundf(obj_origin.y);
+	transformation.z = roundf(obj_origin.z);
+	transformation = vect_subtract(transformation, obj_origin);
+	return (transformation);
+}
+
 int	check_object_rotations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
 {
 	t_vect	transformation;
 
 	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_ENTER)
+	{
+		transformation = clamp_object_normal();
+		target_object->edit_orientation(target_object, camera, transformation);
+		return (1);	
+	}
 	if (key_data.key == MLX_KEY_W)
 	{
 		transformation.x-= 0.0873;
@@ -860,7 +866,7 @@ void	transform_object(t_object *objects, t_object *lights, t_scene *scene, mlx_k
 		return ;
 	if (is_movement_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
 		check_object_translations(target_object, &scene->camera, key_data);
-	else if (is_rotation_key_down(key_data))
+	else if (is_rotation_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
 		check_object_rotations(target_object, &scene->camera, key_data);
 	else if (is_aspect_key_down(key_data))
 		check_object_aspect(target_object, key_data);
@@ -3739,7 +3745,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
@@ -4022,7 +4028,7 @@ void	init_lights(t_scene *scene)
 	mat.albedo = mat.color;
 	mat.emission_intensity = 2.0;
 	mat.type = EMISSIVE;
-	init_object(scene, fig, mat, LIGHT);
+	//init_object(scene, fig, mat, LIGHT);
 	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
 	fig.p_light.radius_shadow = 1.0;;
 	mat.color = hexa_to_vect(GREEN);
