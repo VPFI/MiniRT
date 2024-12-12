@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/12 14:38:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/12 17:30:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -334,7 +334,7 @@ typedef struct s_object
 	t_vect			(*get_visual)(t_hit_info *hit_info);
 	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
-	void			(*edit_orientation)(t_object *object, t_vect transformation);
+	void			(*edit_orientation)(t_object *object, t_camera *camera, t_vect transformation);
 	void			(*edit_dimensions)(t_object *object, t_vect transformation);
 }					t_object;
 

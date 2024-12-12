@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/12 16:11:39 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/12 21:16:06 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -493,15 +493,14 @@ void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 	return ;
 }
 
-int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
+int	check_object_rotations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
 {
-	//Adapt object movements to camer orientation
 	t_vect	transformation;
 
 	transformation = new_vect(0.0, 0.0, 0.0);
 	if (key_data.key == MLX_KEY_W)
 	{
-		transformation.x += 0.0873;
+		transformation.x-= 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
@@ -509,7 +508,7 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_S)
 	{
-		transformation.x -= 0.0873;
+		transformation.x += 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_D)
 	{
@@ -529,7 +528,7 @@ int	check_object_rotations(t_object *target_object, mlx_key_data_t key_data)
 		{
 			transformation = vect_simple_mult(transformation, 1 / 0.0873 * M_PI / 2);
 		}
-		target_object->edit_orientation(target_object, transformation);
+		target_object->edit_orientation(target_object, camera, transformation);
 		return (1);
 	}
 	return (0);
@@ -862,7 +861,7 @@ void	transform_object(t_object *objects, t_object *lights, t_scene *scene, mlx_k
 	if (is_movement_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
 		check_object_translations(target_object, &scene->camera, key_data);
 	else if (is_rotation_key_down(key_data))
-		check_object_rotations(target_object, key_data);
+		check_object_rotations(target_object, &scene->camera, key_data);
 	else if (is_aspect_key_down(key_data))
 		check_object_aspect(target_object, key_data);
 	else if (check_object_focus(target_object, scene, key_data))
@@ -1196,8 +1195,6 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 	t_scene	*scene;
 
 	scene = sc;
-	// agrupate scene stop | wait threads | scene stop  |+| specific functionality
-	// make controls based on fov or other dynamic way?
 	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
 	{
 		set_stop_status(scene);
@@ -1343,7 +1340,7 @@ t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
 			color = vect_simple_mult(color, 1.5);
-		color = vect_simple_div(color, fmaxf(hit_info.t * 0.05, 1.2));
+		color = vect_simple_div(color, fmaxf((log(hit_info.t) / log(3)), 1.0));
 	}
 	else
 	{
@@ -1836,8 +1833,8 @@ t_vect	defocus_sample(t_camera camera, uint32_t *state)
 void	edit_mode(t_thread *thread, uint32_t x, uint32_t y)
 {
 	t_ray		ray;
-	t_vect		pixel_offset;
 	t_color		color;
+	t_vect		pixel_offset;
 
 	ray.origin = defocus_sample(thread->scene->camera, thread->state);
 	pixel_offset = set_pixel(thread->scene->camera, x, y);
@@ -1849,10 +1846,10 @@ void	edit_mode(t_thread *thread, uint32_t x, uint32_t y)
 
 void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
 {
-	int			sample_count;
 	t_ray		ray;
-	t_vect		pixel_offset;
 	t_color		color;
+	t_vect		pixel_offset;
+	int			sample_count;
 
 	sample_count = 0;
 	color = new_color(0, 0, 0);
@@ -2232,14 +2229,14 @@ t_vect	get_origin_cylinder(t_object *object)
 	return (object->figure.cylinder.center);
 }
 
-void	rotate_cylinder(t_object *object, t_vect transformation)
+void	rotate_cylinder(t_object *object, t_camera *camera, t_vect transformation)
 {
 	if (transformation.x)
-		rotate_x(&object->figure.cylinder.normal, transformation.x);
+		rotate_vector(&object->figure.cylinder.normal, camera->u, transformation.x);
 	else if (transformation.y)
-		rotate_y(&object->figure.cylinder.normal, transformation.y);
+		rotate_vector(&object->figure.cylinder.normal, camera->v, transformation.y);
 	else if (transformation.z)
-		rotate_z(&object->figure.cylinder.normal, transformation.z);
+		rotate_vector(&object->figure.cylinder.normal, camera->orientation, transformation.z);
 	object->figure.cylinder.normal = unit_vect(object->figure.cylinder.normal);
 	print_vec_s(object->figure.cylinder.normal, "New Cylinder orientation: ");
 	return ;
@@ -2418,18 +2415,25 @@ t_vect	get_origin_cone(t_object *object)
 	return (object->figure.cone.center);
 }
 
-void	rotate_cone(t_object *object, t_vect transformation)
+void	rotate_cone(t_object *object, t_camera *camera, t_vect transformation)
 {
+	(void)camera;
 	t_ray	cone_ray;
 
 	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
 	object->figure.cone.center = ray_at(cone_ray, (object->figure.cone.height / 2));
 	if (transformation.x)
-		rotate_x(&object->figure.cone.normal, transformation.x);
+	{
+		rotate_vector(&object->figure.cone.normal, camera->u, transformation.x);
+	}
 	else if (transformation.y)
-		rotate_y(&object->figure.cone.normal, transformation.y);
+	{
+		rotate_vector(&object->figure.cone.normal, camera->v, transformation.y);
+	}
 	else if (transformation.z)
-		rotate_z(&object->figure.cone.normal, transformation.z);
+	{
+		rotate_vector(&object->figure.cone.normal, camera->orientation, transformation.z);
+	}
 	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
 	object->figure.cone.center = ray_at(cone_ray, -(object->figure.cone.height / 2));
 	object->figure.cone.normal = unit_vect(object->figure.cone.normal);
@@ -2752,14 +2756,14 @@ t_vect	get_origin_disk(t_object *object)
 	return (object->figure.disk.center);
 }
 
-void	rotate_disk(t_object *object, t_vect transformation)
+void	rotate_disk(t_object *object, t_camera *camera, t_vect transformation)
 {
 	if (transformation.x)
-		rotate_x(&object->figure.disk.normal, transformation.x);
+		rotate_vector(&object->figure.disk.normal, camera->u, transformation.x);
 	else if (transformation.y)
-		rotate_y(&object->figure.disk.normal, transformation.y);
+		rotate_vector(&object->figure.disk.normal, camera->v, transformation.y);
 	else if (transformation.z)
-		rotate_z(&object->figure.disk.normal, transformation.z);
+		rotate_vector(&object->figure.disk.normal, camera->orientation, transformation.z);
 	object->figure.disk.normal = unit_vect(object->figure.disk.normal);
 	print_vec_s(object->figure.disk.normal, "New Disk orientation: ");
 	return ;
@@ -2916,22 +2920,22 @@ t_vect	get_origin_quad(t_object *object)
 	return (object->figure.quad.center);
 }
 
-void	rotate_quad(t_object *object, t_vect transformation)
+void	rotate_quad(t_object *object, t_camera *camera, t_vect transformation)
 {
 	if (transformation.x)
 	{
-		rotate_x(&object->figure.quad.u_vect, transformation.x);
-		rotate_x(&object->figure.quad.v_vect, transformation.x);
+		rotate_vector(&object->figure.quad.u_vect, camera->u, transformation.x);
+		rotate_vector(&object->figure.quad.v_vect, camera->u, transformation.x);
 	}
 	else if (transformation.y)
 	{
-		rotate_y(&object->figure.quad.u_vect, transformation.y);
-		rotate_y(&object->figure.quad.v_vect, transformation.y);
+		rotate_vector(&object->figure.quad.u_vect, camera->v, transformation.y);
+		rotate_vector(&object->figure.quad.v_vect, camera->v, transformation.y);
 	}
 	else if (transformation.z)
 	{
-		rotate_z(&object->figure.quad.u_vect, transformation.z);
-		rotate_z(&object->figure.quad.v_vect, transformation.z);
+		rotate_vector(&object->figure.quad.u_vect, camera->orientation, transformation.z);
+		rotate_vector(&object->figure.quad.v_vect, camera->orientation, transformation.z);
 	}
 	object->figure.quad.normal = unit_vect(vect_cross(object->figure.quad.u_vect, object->figure.quad.v_vect));
 	print_vec_s(object->figure.quad.normal, "New Quad orientation: ");
@@ -3042,22 +3046,22 @@ t_vect	get_origin_box(t_object *object)
 	return (object->figure.box.center);
 }
 
-void	rotate_box(t_object *object, t_vect transformation)
+void	rotate_box(t_object *object, t_camera *camera, t_vect transformation)
 {
 	if (transformation.x)
 	{
-		rotate_x(&object->figure.box.u_vect, transformation.x);
-		rotate_x(&object->figure.box.v_vect, transformation.x);
+		rotate_vector(&object->figure.box.u_vect, camera->u, transformation.x);
+		rotate_vector(&object->figure.box.v_vect, camera->u, transformation.x);
 	}
 	else if (transformation.y)
 	{
-		rotate_y(&object->figure.box.u_vect, transformation.y);
-		rotate_y(&object->figure.box.v_vect, transformation.y);
+		rotate_vector(&object->figure.box.u_vect, camera->v, transformation.y);
+		rotate_vector(&object->figure.box.v_vect, camera->v, transformation.y);
 	}
 	else if (transformation.z)
 	{
-		rotate_z(&object->figure.box.u_vect, transformation.z);
-		rotate_z(&object->figure.box.v_vect, transformation.z);
+		rotate_vector(&object->figure.box.u_vect, camera->orientation, transformation.z);
+		rotate_vector(&object->figure.box.v_vect, camera->orientation, transformation.z);
 	}
 	recalculate_faces(object, object->figure.box.dimensions);
 	print_vec_s(vect_cross(object->figure.box.u_vect, object->figure.box.v_vect), "New Box orientation: ");
@@ -3193,14 +3197,14 @@ t_vect	get_origin_plane(t_object *object)
 	return (object->figure.plane.center);
 }
 
-void	rotate_plane(t_object *object, t_vect transformation)
+void	rotate_plane(t_object *object, t_camera *camera, t_vect transformation)
 {
 	if (transformation.x)
-		rotate_x(&object->figure.plane.normal, transformation.x);
+		rotate_vector(&object->figure.plane.normal, camera->u, transformation.x);
 	else if (transformation.y)
-		rotate_y(&object->figure.plane.normal, transformation.y);
+		rotate_vector(&object->figure.plane.normal, camera->v, transformation.y);
 	else if (transformation.z)
-		rotate_z(&object->figure.plane.normal, transformation.z);
+		rotate_vector(&object->figure.plane.normal, camera->orientation, transformation.z);
 	object->figure.plane.normal = unit_vect(object->figure.plane.normal);
 	print_vec_s(object->figure.plane.normal, "New Plane orientation: ");
 	return ;
@@ -3364,10 +3368,11 @@ t_vect	get_origin_sphere(t_object *object)
 	return (object->figure.sphere.center);
 }
 
-void	rotate_sphere(t_object *object, t_vect transformation)
+void	rotate_sphere(t_object *object, t_camera *camera, t_vect transformation)
 {
 	(void)object;
 	(void)transformation;
+	(void)camera;
 	return ;
 }
 
@@ -3734,7 +3739,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = NULL; get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
@@ -3766,7 +3771,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.quad.u_vect = fig.quad.u_vect;
 		new_obj->figure.quad.v_vect = fig.quad.v_vect;
 		new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
