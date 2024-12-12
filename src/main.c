@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/11 20:24:46 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/12 16:11:39 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1328,7 +1328,7 @@ bool	ray_hit_plus_lights(t_object *objects, t_object *plights, t_ray ray, t_hit_
 	return (hit);
 }
 
-t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
+t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
 {
 	t_color		color;
 	t_hit_info	hit_info;
@@ -1339,16 +1339,18 @@ t_color	calc_pixel_color_normal(t_scene *scene, t_ray ray)
 		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
 		if (hit_info.object->type == LIGHT)
 			color = hit_info.object->material.color;
-		else	
+		else
 			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
 		if (hit_info.object->selected)
-			color = vect_simple_mult(color, 1.8);
-		//color = vect_simple_div(color, hit_info.t);
-		// Check min level of darkness so not black...
+			color = vect_simple_mult(color, 1.5);
+		color = vect_simple_div(color, fmaxf(hit_info.t * 0.05, 1.2));
 	}
 	else
 	{
-		color = vect_simple_mult(hexa_to_vect(SILVER), scene->amb_light);
+		if (scene->sky_sphere)
+			color = get_sky_color(thread, &ray);
+		else
+			color = vect_simple_mult(hexa_to_vect(SILVER), scene->amb_light);
 	}
 	return (color);
 }
@@ -1591,6 +1593,12 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	return (bounce_ray);
 }
+void	check_normal(t_vect *normal, t_vect *ray_dir)
+{	
+	if (vect_dot(*normal, unit_vect(*ray_dir)) <= 0.0)
+		return ;
+	*normal = vect_simple_mult(*normal, -1.0);
+}
 
 bool	is_2d(t_object *object)
 {
@@ -1603,10 +1611,9 @@ bool	is_2d(t_object *object)
 
 bool	scatter_ray(t_thread *thread, t_hit_info hit_info, t_ray *bounce_ray, t_ray ray, t_color *emittance)
 {
-	if (!(vect_dot(hit_info.normal, unit_vect(ray.dir)) <= 0.0)
-		&& (is_2d(hit_info.object)))
+	if (!hit_info.object->texture && is_2d(hit_info.object))
 	{
-		hit_info.normal = vect_simple_mult(hit_info.normal, -1.0);
+		check_normal(&hit_info.normal, &ray.dir);
 	}
 	if (hit_info.object->material.type == LAMBERTIAN)
 	{
@@ -1835,7 +1842,7 @@ void	edit_mode(t_thread *thread, uint32_t x, uint32_t y)
 	ray.origin = defocus_sample(thread->scene->camera, thread->state);
 	pixel_offset = set_pixel(thread->scene->camera, x, y);
 	ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-	color = calc_pixel_color_normal(thread->scene, ray);
+	color = calc_pixel_color_normal(thread, thread->scene, ray);
 	color = clamp_vect(color, 0.0, 1.0);
 	safe_pixel_put(thread->scene, x, y, color);
 }
@@ -1906,9 +1913,9 @@ void	main_loop(void *sc)
 	if (!scene->choose_file)
 		return ;
 	if (!scene->do_backup)
-	{	
-		set_new_image(scene);
-		mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	{
+		//set_new_image(scene);
+		//mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	}
 	scene->time = mlx_get_time();
 	init_render(scene);
@@ -3491,6 +3498,8 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 		if (!scene->cumulative_image)
 			exit (1);
+		set_new_image(scene);
+		mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 		main_loop(scene);
 	}
 }
@@ -3740,7 +3749,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
 		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
-		new_obj->texture = get_texture("./textures/pillow.png", 1);
+		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 1);
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
