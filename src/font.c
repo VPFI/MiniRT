@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 13:41:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/09/30 21:44:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:43:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ void	write_str(t_scene *scene, char *msg, int *xy, int size)
 		temp_line = ft_strjoin("fonts/", path);
 		l_file = open(temp_line, O_RDONLY);
 		if (l_file < 0)
-			return ;
+			return (free(temp_line));
 		free(temp_line);
 		temp_line = get_next_line(l_file);
 		points = ft_strtrim(temp_line, "\n");

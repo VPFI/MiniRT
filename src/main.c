@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/12 22:25:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/13 23:14:25 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void	move_menu(t_scene *scene, keys_t key)
 	}
 	else if (key == MLX_KEY_DOWN)
 	{
-		if (scene->current_file < 20 && scene->buttons[scene->current_file + 1].text) 
+		if (scene->current_file < scene->map_count - 1) 
 			scene->current_file++;
 	}
 	else if (key == MLX_KEY_LEFT)
@@ -103,7 +103,7 @@ void	move_menu(t_scene *scene, keys_t key)
 	}
 	else if (key == MLX_KEY_RIGHT)
 	{
-		if (scene->current_file < 10 && scene->buttons[scene->current_file + 10].text)
+		if (scene->current_file < 10 && (scene->current_file + 10) < scene->map_count && scene->buttons[scene->current_file + 10].text)
 			scene->current_file += 10;
 	}
 	draw_buttons(scene->buttons, scene);
@@ -371,7 +371,7 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 	return (1);
 }
 
-int	check_translations(t_camera *camera, mlx_key_data_t key_data)
+int	check_translations(t_camera *camera, t_object *skysphere, mlx_key_data_t key_data)
 {
 	t_vect	transformation;
 
@@ -379,6 +379,7 @@ int	check_translations(t_camera *camera, mlx_key_data_t key_data)
 		transformation = absolute_translate(key_data);
 	else
 		transformation = relative_translate(camera, key_data);
+	skysphere->figure.sphere.center = vect_add(skysphere->figure.sphere.center, transformation);
 	camera->origin = vect_add(camera->origin, transformation);
 	print_vec_s(camera->origin, "New camera origin: ");
 	return (1);
@@ -465,32 +466,17 @@ int	is_settings_key_down(mlx_key_data_t key_data)
 	return (0);
 }
 
-void	move_camera(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
+void	move_camera(t_camera *camera, t_camera *backup, t_object *skysphere, mlx_key_data_t key_data)
 {
-	//control for infinite moving overflows etc....
 	if (is_reset_key_down(key_data))
 		check_reset(camera, backup, key_data);
 	else if (is_rotation_key_down(key_data))
 		check_rotations(camera, key_data);
 	else if (is_movement_key_down(key_data))
-		check_translations(camera, key_data);
+		check_translations(camera, skysphere, key_data);
 	else if (is_settings_key_down(key_data))
 		check_settings(camera, key_data);
 	return ;
-}
-
-t_vect	clamp_object_normal(t_object *target_object)
-{
-	t_vect	transformation;
-	t_vect	obj_origin;
-
-	transformation = new_vect(0.0, 0.0, 0.0);
-	obj_origin = target_object->get_origin(target_object);
-	transformation.x = roundf(obj_origin.x);
-	transformation.y = roundf(obj_origin.y);
-	transformation.z = roundf(obj_origin.z);
-	transformation = vect_subtract(transformation, obj_origin);
-	return (transformation);
 }
 
 int	check_object_rotations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
@@ -498,15 +484,9 @@ int	check_object_rotations(t_object *target_object, t_camera *camera, mlx_key_da
 	t_vect	transformation;
 
 	transformation = new_vect(0.0, 0.0, 0.0);
-	if (key_data.key == MLX_KEY_ENTER)
-	{
-		transformation = clamp_object_normal();
-		target_object->edit_orientation(target_object, camera, transformation);
-		return (1);	
-	}
 	if (key_data.key == MLX_KEY_W)
 	{
-		transformation.x-= 0.0873;
+		transformation.x -= 0.0873;
 	}
 	else if (key_data.key == MLX_KEY_A)
 	{
@@ -561,13 +541,13 @@ t_vect	relative_translate(t_camera *camera, mlx_key_data_t key_data)
 	{
 		transformation = vect_simple_mult(camera->u, -0.1);
 	}
-	else if (key_data.key == MLX_KEY_SPACE)
-	{
-		transformation = vect_simple_mult(camera->v, 0.1);
-	}
 	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
 	{
 		transformation = vect_simple_mult(camera->v, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation = vect_simple_mult(camera->v, 0.1);
 	}
 	return (transformation);
 }
@@ -593,13 +573,13 @@ t_vect	absolute_translate(mlx_key_data_t key_data)
 	{
 		transformation = new_vect(-0.1, 0.0, 0.0);
 	}
-	else if (key_data.key == MLX_KEY_SPACE)
-	{
-		transformation = new_vect(0.0, 0.1, 0.0);
-	}
 	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
 	{
 		transformation = new_vect(0.0, -0.1, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation = new_vect(0.0, 0.1, 0.0);
 	}
 	return (transformation);
 }
@@ -884,9 +864,13 @@ void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 		scene->amb_light -= 0.05;
 		if (scene->amb_light < 0.0)
 			scene->amb_light = 0.0;
+		printf("Ambient light intensity: %f\n", scene->amb_light);
 	}
 	else if (key_data.key == MLX_KEY_PERIOD)
+	{
 		scene->amb_light += 0.05;
+		printf("Ambient light intensity: %f\n", scene->amb_light);
+	}
 	else if (key_data.key == MLX_KEY_RIGHT_SHIFT)
 		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	return ;
@@ -1158,7 +1142,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 			transform_object(scene->objects, scene->lights, scene, key_data);
 		else
 		{
-			move_camera(&scene->camera, &scene->back_up_camera, key_data);
+			move_camera(&scene->camera, &scene->back_up_camera, scene->sky_sphere, key_data);
 			recalculate_view(scene);
 		}
 		main_loop(scene);
@@ -1206,16 +1190,20 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		set_stop_status(scene);
 		close_all(scene);
 	}
-	else if (!scene->choose_file && is_movement_key_down(key_data))
+	else if (!scene->choose_file && scene->map_count && is_movement_key_down(key_data))
 		move_menu(scene, key_data.key);
 	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
 	{
+		if (scene->map_count)
+		{
+			printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
+		}
 		scene->choose_file = 1;
 		set_new_image(scene);
 		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
-		printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
+		main_loop(scene);
 	}
-	else if (scene->edit_mode == false)
+	else if (scene->edit_mode == false && scene->choose_file)
 		render_mode_hooks(scene, key_data);
 	else if (scene->edit_mode == true)
 		edit_mode_hooks(scene, key_data);
@@ -3493,6 +3481,16 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 	scene->width = width;
 	if (!scene->choose_file)
 	{
+		if (scene->map_count)
+			free_buttons(scene->buttons, scene->map_count);
+		if (scene->cumulative_image)
+			free(scene->cumulative_image);
+		scene->width = width;
+		scene->height = height;
+		recalculate_view(scene);
+		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+		if (!scene->cumulative_image)
+			exit (1);
 		set_new_image(scene);
 		draw_file_menu(scene);
 	}
@@ -4356,7 +4354,7 @@ void	init_scene(t_scene *scene)
 	scene->height = WINH;
 	scene->amb_light = AMB_LIGHT;
 	scene->aspect_ratio = scene->width / (float)scene->height;
-	scene->choose_file = 1;
+	scene->choose_file = 0;
 	scene->current_file = 0;
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
@@ -4484,7 +4482,7 @@ int	main(int argc, char **argv)
 	t_scene	scene;
 
 	init_scene(&scene);
-	//draw_file_menu(&scene);
+	draw_file_menu(&scene);
 	main_loop(&scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
@@ -4500,6 +4498,6 @@ int	main(int argc, char **argv)
 	free_objects(&scene.objects);
 	free_objects(&scene.lights);
 	free_objects(&scene.sky_sphere);
-	//free_buttons(scene.buttons);
+	free_buttons(scene.buttons, scene.map_count);
 	return (0);
 }

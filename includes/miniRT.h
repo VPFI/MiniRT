@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/12 17:30:46 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/13 22:34:12 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1400
-# define WINH 		800
+# define WINW 		1820
+# define WINH 		980
 
 # define THREADS 	8
 
@@ -37,7 +37,7 @@
 # define TEST 		1
 
 # define DEFOCUS	0.0
-# define FOCUS_DIST	13
+# define FOCUS_DIST	5
 # define FOV		40
 
 # define AMB		1
@@ -361,7 +361,8 @@ typedef struct s_scene
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;
-	t_button		buttons[20];
+	t_button		*buttons;
+	int				map_count;
 	int				choose_file;
 	int				current_file;
 }					t_scene;
@@ -388,6 +389,8 @@ int 		get_r(int rgba);
 int 		get_g(int rgba);
 int 		get_b(int rgba);
 int 		get_a(int rgba);
+
+void		init_scene(t_scene *scene);
 
 void		print_list(t_object *list);
 
@@ -422,7 +425,10 @@ void		calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
 void		write_str(t_scene *scene, char *msg, int *xy, int size);
 
 void		draw_file_menu(t_scene *scene);
+void		free_buttons(t_button *buttons, int n);
 void		draw_buttons(t_button *buttons, t_scene *scene);
+
+void		free_texture(t_texture **texture);
 
 void		set_new_image(t_scene *scene);
 
