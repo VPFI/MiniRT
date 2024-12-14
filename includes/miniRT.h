@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/13 22:34:12 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/14 19:54:30 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,6 +362,7 @@ typedef struct s_scene
 	uint32_t		width;
 	float			aspect_ratio;
 	t_button		*buttons;
+	t_texture		*menu_tx;
 	int				map_count;
 	int				choose_file;
 	int				current_file;
@@ -420,9 +421,9 @@ void		wait_for_threads_and_backup(t_scene *scene);
 void		safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_vect color);
 void		safe_pixel_put_bres(t_scene *scene, uint32_t x, uint32_t y, int color);
 
-void		init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt);
+void		init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt, int color);
 void		calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
-void		write_str(t_scene *scene, char *msg, int *xy, int size);
+void		write_str(t_scene *scene, char *msg, int *xys, int color);
 
 void		draw_file_menu(t_scene *scene);
 void		free_buttons(t_button *buttons, int n);

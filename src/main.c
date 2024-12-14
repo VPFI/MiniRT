@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/13 23:14:25 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/14 20:11:59 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	move_menu(t_scene *scene, keys_t key)
 {
 	if (key == MLX_KEY_UP)
 	{
-		if (scene->current_file > 0 && scene->buttons[scene->current_file - 1].text)
+		if (scene->current_file > 0)
 			scene->current_file--;
 	}
 	else if (key == MLX_KEY_DOWN)
@@ -98,13 +98,15 @@ void	move_menu(t_scene *scene, keys_t key)
 	}
 	else if (key == MLX_KEY_LEFT)
 	{
-		if (scene->current_file >= 10 && scene->buttons[scene->current_file - 10].text)
+		if (scene->current_file >= 10)
 			scene->current_file -= 10;
 	}
 	else if (key == MLX_KEY_RIGHT)
 	{
-		if (scene->current_file < 10 && (scene->current_file + 10) < scene->map_count && scene->buttons[scene->current_file + 10].text)
+		if ((scene->current_file + 10) < scene->map_count)
 			scene->current_file += 10;
+		else if ((int)(scene->current_file / 20) < (int)(scene->map_count) / 20)
+			scene->current_file = ((scene->current_file / 20) + 1) * 20;
 	}
 	draw_buttons(scene->buttons, scene);
 }
@@ -4370,6 +4372,7 @@ void	init_scene(t_scene *scene)
 	scene->edit_mode = false;
 	scene->do_backup = false;
 	scene->object_selected = false;
+	scene->menu_tx = get_texture("./textures/Sad_face1.png", 1);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	init_figures(scene);
 	init_lights(scene);
@@ -4498,6 +4501,7 @@ int	main(int argc, char **argv)
 	free_objects(&scene.objects);
 	free_objects(&scene.lights);
 	free_objects(&scene.sky_sphere);
+	free_texture(&scene.menu_tx);
 	free_buttons(scene.buttons, scene.map_count);
 	return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   font.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 13:41:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/13 14:43:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/14 19:42:30 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	free_arr_font(char **arr)
 	}
 }
 
-void	draw_letter(t_scene *scene, char *points, int prm[4])
+void	draw_letter(t_scene *scene, char *points, int prm[4], int color)
 {
 	int			strt;
 	float		size;
@@ -47,7 +47,7 @@ void	draw_letter(t_scene *scene, char *points, int prm[4])
 		p1.y = ((ft_atoi(list[strt + 1]) * size) + prm[1]);
 		p2.x = (((ft_atoi(list[strt + 2]) * size + prm[0])) + (60 * prm[3]));
 		p2.y = ((ft_atoi(list[strt + 3]) * size) + prm[1]);
-		init_bresenham_line_font(scene, &p1, &p2);
+		init_bresenham_line_font(scene, &p1, &p2, color);
 		strt += 4;
 	}
 	free_arr_font(list);
@@ -61,7 +61,7 @@ void	set_params(int x, int y, int size, int param[4])
 	param[3] = 0;
 }
 
-void	write_str(t_scene *scene, char *msg, int *xy, int size)
+void	write_str(t_scene *scene, char *msg, int *xys, int color)
 {
 	int		l_file;
 	int		param[4];
@@ -70,7 +70,7 @@ void	write_str(t_scene *scene, char *msg, int *xy, int size)
 	char	*temp_line;
 
 	path[1] = '\0';
-	set_params(xy[0], xy[1], size, param);
+	set_params(xys[0], xys[1], xys[2], param);
 	while (msg[param[3]])
 	{
 		path[0] = msg[param[3]];
@@ -82,7 +82,7 @@ void	write_str(t_scene *scene, char *msg, int *xy, int size)
 		temp_line = get_next_line(l_file);
 		points = ft_strtrim(temp_line, "\n");
 		free(temp_line);
-		draw_letter(scene, points, param);
+		draw_letter(scene, points, param, color);
 		free(points);
 		close(l_file);
 		param[3]++;

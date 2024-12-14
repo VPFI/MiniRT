@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   bresenham_font.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/25 16:49:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/10/09 17:03:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/14 19:37:37 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)
 	safe_pixel_put_bres(scene, res_x, res_y, bres->color);
 }
 
-void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt)
+void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt, int color)
 {
 	t_bresenham	bres;
 
@@ -47,7 +47,7 @@ void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt)
 	bres.f_pt.x = (int)round(f_pt->x);
 	bres.f_pt.y = (int)round(f_pt->y);
 	bres.f_pt.color = 0x00000000;
-	bres.color = 0xC9DFECFF;
+	bres.color = color;
 	bres.i_one = -1;
 	bres.i_two = -1;
 	bres.dx = fabs(bres.f_pt.x - bres.i_pt.x);
