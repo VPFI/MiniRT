@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/16 20:46:10 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/17 00:55:51 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -4475,7 +4475,30 @@ int	ft_strcmp(const char *s1, const char *s2)
 
 float	ft_atof(char *array)
 {
-	
+	int		i;
+	char	*aux;
+	int		integer_part;
+	float	decimal_part;
+
+	i = 0;
+	while (array[i] && array[i] != '.')
+		i++;		
+	if (i != ft_strlen(array))
+	{
+		aux = ft_substr(array, i, ft_strlen(array));
+		if (!aux)
+			exit_err(ERR_MEM_MSG, "(malloc)", 1);
+		decimal_part = ft_atoi(aux);
+	}
+	integer_part = ft_atoi(array);
+	if (integer_part >= 0)
+	{
+		return ((float)(integer_part + decimal_part));
+	}
+	else if (integer_part < 0)
+	{
+		return ((float)(integer_part - decimal_part));
+	}
 }
 
 t_vect	input_to_vect(char *input, float min, float max)
@@ -4555,17 +4578,12 @@ void	load_sphere(t_scene *scene, char **components, int amount)
 	if (amount < 4)
 		exit_err(ERR_ATTR_MSG, "sphere | missing essential attributes\n", 2);
 	mat = new_standard_material();
-	fig.sphere.center = input_to_vect(components[1], __FLT_MIN__, __FLT_MAX__);
+	fig.sphere.center = input_to_vect(components[1], INT_MIN, INT_MAX);
 	fig.sphere.radius = ft_atof(components[2]);
 	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
 	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
-	mat.pattern = false;
-	mat.pattern_dim = 0.7853;
-	mat.refraction_index = 2.5;
-	mat.emission_intensity = 8.0;
 	mat.type = LAMBERTIAN;
+	texture = NULL;
 	init_object(scene, fig, mat, texture);
 }
 
