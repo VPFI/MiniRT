@@ -3,16 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
+#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/12/13 14:45:33 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/12/16 01:31:39 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = miniRT
 
-CFILES = main.c mlx_utils.c bresenham_font.c font.c vect_functions.c file_selector.c
+CFILES = main.c mlx_utils.c bresenham_font.c font.c vect_functions.c file_selector.c parser.c
 
 HEADERS = includes/miniRT.h
 

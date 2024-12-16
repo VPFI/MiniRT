@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/14 20:16:36 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/16 01:45:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,9 @@ void	draw_headers(t_scene *scene)
 	coords[1] = scene->height * 0.05;
 	coords[2] = 6;
 	write_str(scene, "MiniRT", coords, DEF_COLOR);
-	pagination = ft_itoa((int)(scene->current_file / 20));
+	pagination = ft_itoa((int)(scene->current_file / 20) + 1);
 	pagination = ft_strappend(&pagination, "\\");
-	aux = ft_itoa((int)(scene->map_count / 20));
+	aux = ft_itoa((int)(scene->map_count / 20) + 1);
 	pagination = ft_strappend(&pagination, aux);
 	coords[0] = (scene->width / 2) - scene->width  * 0.0335;
 	coords[1] = scene->height * 0.975;
@@ -135,6 +135,43 @@ void	free_buttons(t_button *buttons, int n)
 	free(buttons);
 }
 
+char	*get_full_path_name(char *name)
+{
+	char	*path;
+
+	path = ft_strdup(name);
+	path = ft_strattach("./maps/", &path);
+	return (path);
+}
+
+char	*get_map_path(int map_index)
+{
+	int				i;
+	DIR 			*d;
+	struct dirent	*dir;
+
+	i = 0;
+	d = opendir("./maps");
+	if (d)
+	{
+		while ((dir = readdir(d)) != NULL)
+		{
+			if (dir->d_name[0] && dir->d_name[0] != '.'
+				&& ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
+			{
+				if (i == map_index)
+				{
+					closedir(d);
+					return (get_full_path_name(dir->d_name));
+				}
+				i++;
+			}
+		}
+		closedir(d);
+	}
+	return (NULL);
+}
+
 int	count_maps(void)
 {
 	int				i;
@@ -147,7 +184,8 @@ int	count_maps(void)
 	{
 		while ((dir = readdir(d)) != NULL)
 		{
-			if (dir->d_name[0] && dir->d_name[0] != '.' && ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
+			if (dir->d_name[0] && dir->d_name[0] != '.'
+				&& ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
 			{
 				i++;
 			}
@@ -223,7 +261,8 @@ void	draw_file_menu(t_scene *scene)
 	{
 		while ((dir = readdir(d)) != NULL)
 		{
-			if (dir->d_name[0] && dir->d_name[0] != '.' && ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
+			if (dir->d_name[0] && dir->d_name[0] != '.'
+				&& ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
 			{
 				aux = 0;
 				while (dir->d_name[aux] != '.')

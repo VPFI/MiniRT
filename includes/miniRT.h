@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/14 19:54:30 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/16 02:53:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,26 @@
 
 # define AIR_REF_INDEX	1.0003
 
-# define ERR_NOFILE_MSG		"miniRT: no such file or dir: %s\n"
-# define ERR_PERM_MSG		"miniRT: permission denied: %s\n"
-# define ERR_STD_MSG		"miniRT: Unexpected error\n"
+# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\n Valid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\n\nOpening file selector...\n"
+# define ERR_HIDFILE_MSG		"Potentially hidden files not supported\n"
+# define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
+# define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."
+# define ERR_NOFILE_MSG		"No such file or dir: %s\n\n"
+# define ERR_PERM_MSG		"Permission denied\n"
+# define ERR_STD_MSG		"Unexpected error\n"
+# define ERR_EMPTY_MSG		"%s\n"
+# define ERR_MEM_MSG		"Memory allocation failed %s\n\n"
+
+# define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
+
+# define SPHERE				"sp"
+# define PLANE				"pl"
+# define QUAD				"qu"
+# define DISK				"di"
+# define BOX				"bx"
+# define CYLINDER			"cy"
+# define CONE				"co"
+# define P_LIGHT			"l"
 
 typedef struct s_vect	t_color;
 
@@ -345,6 +362,7 @@ typedef struct s_scene
 	t_vect			*cumulative_image;
 	t_thread		threads[THREADS];
 	t_thread_backup	threads_backup[THREADS];
+	char			*path;
 	uint32_t		state;
 	bool			stop;
 	bool			edit_mode;
@@ -485,5 +503,12 @@ t_vect		clamp_vect( t_vect vect, float min, float max);
 
 void		free_objects(t_object **objects);
 void		free_primitive(t_object **object);
+
+
+int			parse_map_path(t_scene *scene, int argc, char **argv);
+char		*get_map_path(int map_index);
+
+int			throw_err(char *msg, char *specifier, int err_code);
+void		exit_err(char *msg, char *specifier, int err_code);
 
 #endif

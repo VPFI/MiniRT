@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/14 20:11:59 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/16 02:53:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,8 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
 
 void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
 {
-	t_vect		*prev_color_index;
 	t_color		final_color;
+	t_vect		*prev_color_index;
 
 	if ((x >= thread->scene->width) || y >= thread->scene->height)
 		return ;
@@ -381,7 +381,8 @@ int	check_translations(t_camera *camera, t_object *skysphere, mlx_key_data_t key
 		transformation = absolute_translate(key_data);
 	else
 		transformation = relative_translate(camera, key_data);
-	skysphere->figure.sphere.center = vect_add(skysphere->figure.sphere.center, transformation);
+	if (skysphere)
+		skysphere->figure.sphere.center = vect_add(skysphere->figure.sphere.center, transformation);
 	camera->origin = vect_add(camera->origin, transformation);
 	print_vec_s(camera->origin, "New camera origin: ");
 	return (1);
@@ -902,7 +903,7 @@ t_material	new_standard_plight(void)
 	uint32_t	state;
 
 	state = (uint32_t)(mlx_get_time() * 10000);
-	mat.color = new_color(fast_rand(&state), fast_rand(&state), fast_rand(&state));
+	mat.color = new_color((fast_rand(&state) + 1) / 2, (fast_rand(&state) + 1) / 2, (fast_rand(&state) + 1) / 2);
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.0;
@@ -924,7 +925,7 @@ void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
 
 	selected_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!selected_obj)
-		exit (1);
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	mat = new_standard_material();
 	camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
 	offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
@@ -1099,11 +1100,11 @@ int	export_to_ppm(mlx_image_t *image)
 	if (fd < 0)
 	{
 		if (access(filename, F_OK))
-			ft_printf(STDERR_FILENO, ERR_NOFILE_MSG);
+			throw_err(ERR_NOFILE_MSG, filename, 1);
 		else if (access(filename, R_OK))
-			ft_printf(STDERR_FILENO, ERR_PERM_MSG);
+			throw_err(ERR_PERM_MSG, NULL, 1);
 		else
-			ft_printf(STDERR_FILENO, ERR_STD_MSG);
+			throw_err(ERR_STD_MSG, NULL, 1);
 		free(filename);
 		return (1);
 	}
@@ -1117,7 +1118,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_R && is_press_and_ctrl(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
 		scene->edit_mode = false;
@@ -1126,7 +1127,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (is_num_key_down(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (key_data.key == MLX_KEY_BACKSPACE && scene->object_selected)
@@ -1137,7 +1138,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (is_camera_key_down(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
 		if (scene->object_selected)
@@ -1151,7 +1152,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (is_scene_settings_key_down(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
 		change_scene_settings(scene, key_data);
@@ -1163,7 +1164,7 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_X && is_press_and_ctrl(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->do_backup = true;
 		scene->stop = false;
@@ -1173,13 +1174,28 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 	}
 	else if (key_data.key == MLX_KEY_E && is_press_and_ctrl(key_data))
 	{
-		scene->stop = true;
+		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
 		scene->edit_mode = true;
 		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
 		main_loop(scene);
 	}
+}
+
+void	select_scene(t_scene *scene)
+{
+	if (scene->map_count)
+	{
+		scene->path = get_map_path(scene->current_file);
+		if (!scene->path)
+			return (exit_err(ERR_MEM_MSG, "while retrieving map path", 1));
+	}
+	scene->choose_file = 1;
+	init_scene(scene);
+	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
+	main_loop(scene);
 }
 
 void	key_down(mlx_key_data_t key_data, void *sc)
@@ -1192,18 +1208,15 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 		set_stop_status(scene);
 		close_all(scene);
 	}
-	else if (!scene->choose_file && scene->map_count && is_movement_key_down(key_data))
-		move_menu(scene, key_data.key);
-	else if (!scene->choose_file && (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
+	else if (!scene->choose_file && scene->map_count
+		&& is_movement_key_down(key_data))
 	{
-		if (scene->map_count)
-		{
-			printf("YOU CHOSE %s.rt\n", scene->buttons[scene->current_file].text);
-		}
-		scene->choose_file = 1;
-		set_new_image(scene);
-		mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
-		main_loop(scene);
+		move_menu(scene, key_data.key);
+	}
+	else if (!scene->choose_file
+		&& (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
+	{
+		select_scene(scene);
 	}
 	else if (scene->edit_mode == false && scene->choose_file)
 		render_mode_hooks(scene, key_data);
@@ -1775,7 +1788,7 @@ void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup)
 	thread->state = malloc(sizeof(uint32_t));
 	if (!thread->state)
 	{
-		exit (205);
+		return (exit_err(ERR_MEM_MSG, "(malloc)", 2));
 	}
 	*(thread->state) = mlx_get_time() * (thread->id + 1) * 123456;
 	//printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
@@ -3474,6 +3487,44 @@ bool	hit_point_light(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bound
 	return (true);	
 }
 
+void	resize_file_selector(t_scene *scene)
+{
+	if (scene->map_count)
+	{
+		free_buttons(scene->buttons, scene->map_count);
+	}
+	if (scene->cumulative_image)
+	{
+		free(scene->cumulative_image);
+	}
+	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	if (!scene->cumulative_image)
+	{
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
+	}
+	draw_file_menu(scene);
+}
+
+void	resize_rendering(t_scene *scene)
+{
+	set_stop_status(scene);
+	wait_for_threads(scene);
+	scene->stop = false;
+	if (scene->cumulative_image)
+	{
+		free(scene->cumulative_image);
+	}
+	recalculate_view(scene);
+	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	if (!scene->cumulative_image)
+	{
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
+	}
+	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	main_loop(scene);
+}
+
 void	resize_minirt(int32_t width, int32_t height, void *sc)
 {
 	t_scene *scene;
@@ -3483,35 +3534,11 @@ void	resize_minirt(int32_t width, int32_t height, void *sc)
 	scene->width = width;
 	if (!scene->choose_file)
 	{
-		if (scene->map_count)
-			free_buttons(scene->buttons, scene->map_count);
-		if (scene->cumulative_image)
-			free(scene->cumulative_image);
-		scene->width = width;
-		scene->height = height;
-		recalculate_view(scene);
-		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
-		if (!scene->cumulative_image)
-			exit (1);
-		set_new_image(scene);
-		draw_file_menu(scene);
+		resize_file_selector(scene);
 	}
 	else
 	{
-		scene->stop = true;
-		wait_for_threads(scene);
-		scene->stop = false;
-		if (scene->cumulative_image)
-			free(scene->cumulative_image);
-		scene->width = width;
-		scene->height = height;
-		recalculate_view(scene);
-		scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
-		if (!scene->cumulative_image)
-			exit (1);
-		set_new_image(scene);
-		mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-		main_loop(scene);
+		resize_rendering(scene);
 	}
 }
 
@@ -3555,9 +3582,9 @@ void	select_object(t_scene *scene, uint32_t x, uint32_t y)
 
 void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void *sc)
 {
-	t_scene *scene;
 	int32_t	x;
 	int32_t	y;
+	t_scene *scene;
 
 	scene = sc;
 	(void)mods;
@@ -3673,11 +3700,15 @@ t_texture	*get_texture(char *path, float texture_dim)
 	if (!path)
 		return (NULL);
 	res = (t_texture *)ft_calloc(1, sizeof(t_texture));
+	if (!res)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 1), NULL);
 	res->path = ft_strdup(path);
+	if (!res->path)
+		return (exit_err(ERR_MEM_MSG, "(malloc)", 2), NULL);
 	res->texture = mlx_load_png(path);
+	if (!res->texture)
+		return (exit_err(ERR_MEM_MSG, res->path, 2), NULL);
 	res->texture_dim = texture_dim;
-	if (!res->texture || !res->path)
-		exit (1);
 	return (res);
 }
 
@@ -3738,14 +3769,14 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
-		return (-1);
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
 	new_obj->material = mat;
 	if (type == SPHERE)
 	{
 		new_obj->type = type;
 		new_obj->figure.sphere.center = fig.sphere.center;
 		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_sphere;
 		new_obj->edit_origin = translate_sphere;
 		new_obj->edit_orientation = rotate_sphere;
@@ -3760,7 +3791,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->type = type;
 		new_obj->figure.plane.center = fig.plane.center;
 		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
-		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 1);
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 1);
 		new_obj->hit_func = hit_plane;
 		new_obj->edit_origin = translate_plane;
 		new_obj->edit_orientation = rotate_plane;
@@ -3777,7 +3808,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.quad.u_vect = fig.quad.u_vect;
 		new_obj->figure.quad.v_vect = fig.quad.v_vect;
 		new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_quad;
 		new_obj->edit_origin = translate_quad;
 		new_obj->edit_orientation = rotate_quad;
@@ -3795,7 +3826,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.box.v_vect = fig.box.v_vect;
 		new_obj->figure.box.dimensions = fig.box.dimensions;
 		new_obj->figure.box.faces = NULL;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_box;
 		new_obj->edit_origin = translate_box;
 		new_obj->edit_orientation = rotate_box;
@@ -3812,7 +3843,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.disk.center = fig.disk.center;
 		new_obj->figure.disk.normal = unit_vect(fig.disk.normal);
 		new_obj->figure.disk.radius = fig.disk.radius;
-		new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_disk;
 		new_obj->edit_origin = translate_disk;
 		new_obj->edit_orientation = rotate_disk;
@@ -3829,7 +3860,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
 		new_obj->figure.cylinder.radius = fig.cylinder.radius;
 		new_obj->figure.cylinder.height = fig.cylinder.height;
-		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_cylinder;
 		new_obj->edit_origin = translate_cylinder;
 		new_obj->edit_orientation = rotate_cylinder;
@@ -3846,7 +3877,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
 		new_obj->figure.cone.radius = fig.cone.radius;
 		new_obj->figure.cone.height = fig.cone.height;
-		new_obj->texture = NULL; //get_texture("./textures/pillow.png", 0.78539816339);
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 		new_obj->hit_func = hit_cone;
 		new_obj->edit_origin = translate_cone;
 		new_obj->edit_orientation = rotate_cone;
@@ -3876,7 +3907,7 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 	{
 		new_light = (t_object *)ft_calloc(1, sizeof(t_object));
 		if (!new_light)
-			exit (1);
+			return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
 		new_light = ft_memcpy(new_light, new_obj, sizeof(t_object));
 		add_object(&scene->lights, new_light);
 		if (type == LIGHT)
@@ -3895,14 +3926,14 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
-			exit (1);
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	new_obj->type = QUAD;
 	new_obj->figure.quad.center = face.quad.center;
 	new_obj->figure.quad.u_vect = face.quad.u_vect;
 	new_obj->figure.quad.v_vect = face.quad.v_vect;
 	new_obj->figure.quad.normal = unit_vect(vect_cross(face.quad.u_vect, face.quad.v_vect));
 	new_obj->material = mat;
-	new_obj->texture = get_texture("./textures/pillow.png", 0.78539816339);
+	new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
 	new_obj->hit_func = hit_quad;
 	new_obj->edit_origin = translate_quad;
 	new_obj->edit_orientation = rotate_quad;
@@ -4326,17 +4357,17 @@ void	init_figures(t_scene *scene)
 	//init_object(scene, fig, mat, DISK);
 }
 
-void	init_sky_sphere(t_scene *scene)
+void	init_sky_sphere(t_scene *scene, char *path)
 {
 	t_object 	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
-		exit (1);
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	new_obj->material = new_standard_material();
 	new_obj->type = SPHERE;
 	new_obj->figure.sphere.center = scene->camera.origin;
-	new_obj->texture = get_texture("textures/table_mountain_2_puresky_4k.png", 1);
+	new_obj->texture = get_texture(path, 1);
 	new_obj->figure.sphere.radius = new_obj->texture->texture->width / (M_PI * 2.0);
 	new_obj->hit_func = hit_sphere;
 	new_obj->edit_origin = translate_sphere;
@@ -4349,7 +4380,7 @@ void	init_sky_sphere(t_scene *scene)
 	add_object(&scene->sky_sphere, new_obj);
 }
 
-void	init_scene(t_scene *scene)
+void	init_minirt(t_scene *scene)
 {
 	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
@@ -4361,10 +4392,10 @@ void	init_scene(t_scene *scene)
 	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
 	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
 	if (!scene->image)
-		exit (1);
+		return (exit_err(ERR_MEM_MSG, "while loading mlx image", 2));
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	if (!scene->cumulative_image)
-		exit (1);
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	scene->state = (uint32_t)(scene->height * scene->width * mlx_get_time());
 	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
 	pthread_mutex_init(&scene->stop_mutex, NULL);
@@ -4372,14 +4403,89 @@ void	init_scene(t_scene *scene)
 	scene->edit_mode = false;
 	scene->do_backup = false;
 	scene->object_selected = false;
-	scene->menu_tx = get_texture("./textures/Sad_face1.png", 1);
+	scene->path = NULL;
+	scene->menu_tx = get_texture("./textures/menu/Sad_face1.png", 1);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-	init_figures(scene);
-	init_lights(scene);
+}
+
+void	free_arr(char **arr)
+{
+	int	i;
+
+	i = 0;
+	if (arr)
+	{
+		while (arr[i])
+		{
+			free(arr[i]);
+			arr[i] = NULL;
+			i++;
+		}
+		free(arr);
+	}
+}
+
+char	**format_line(char *line)
+{
+	char	**res;
+	char	*temp_line;
+
+	temp_line = ft_strtrim(line, "\n");
+	res = ft_split(temp_line, ' ');
+	free(temp_line);
+	return (res);
+}
+
+int		parse_components(t_scene *scene, char **components)
+{
+	(void)scene;
+	(void)components;
+	return (0);
+}
+
+void	load_map_scene(t_scene *scene)
+{
+	int		map;
+	char	*line;
+	char	**components;
+
+	map = open(scene->path, O_RDONLY);
+	if (map < 0)	
+		return (exit_err(ERR_NOFILE_MSG, scene->path, 2));
+	line = get_next_line(map);
+	while (line)	
+	{
+		components = format_line(line);
+		if (!components)
+			return (exit_err(ERR_MEM_MSG, "while loading map", 2));
+		if (parse_components(scene, components))
+			return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
+		free(line);
+		free_arr(components);
+		line = get_next_line(map);		
+	}
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
-	if (TEST)
-		init_sky_sphere(scene);
+}
+
+void	load_standard_scene(t_scene *scene)
+{
+	init_camera(&scene->camera, scene->width, scene->height);
+	scene->back_up_camera = scene->camera;
+	init_sky_sphere(scene, STD_SKYSPHERE);	
+}
+
+void	init_scene(t_scene *scene)
+{
+	// if path null set standard scene
+	if (!scene->path)
+	{
+		load_standard_scene(scene);
+	}
+	else
+	{
+		load_map_scene(scene);
+	}
 }
 
 void	free_texture(t_texture **texture)
@@ -4477,15 +4583,30 @@ bool	get_stop_status(t_scene *scene)
 	return (res);
 }
 
+void	clean_memory(t_scene *scene)
+{
+	pthread_mutex_destroy(&scene->stop_mutex);
+	if (scene->mlx)
+		mlx_terminate(scene->mlx);
+	free(scene->cumulative_image);
+	free(scene->path);
+	free_boxes(scene->objects);
+	free_objects(&scene->objects);
+	free_objects(&scene->lights);
+	free_objects(&scene->sky_sphere);
+	free_texture(&scene->menu_tx);
+	free_buttons(scene->buttons, scene->map_count);
+	return ;
+}
+
 int	main(int argc, char **argv)
 {
 	//check exit when clicking x on window
-	(void)argc;
-	(void)argv;
 	t_scene	scene;
 
-	init_scene(&scene);
-	draw_file_menu(&scene);
+	init_minirt(&scene);
+	if (parse_map_path(&scene, argc, argv))
+		draw_file_menu(&scene);
 	main_loop(&scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
@@ -4493,15 +4614,6 @@ int	main(int argc, char **argv)
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
-	pthread_mutex_destroy(&scene.stop_mutex);
-	if (scene.mlx)
-		mlx_terminate(scene.mlx);
-	free(scene.cumulative_image);
-	free_boxes(scene.objects);
-	free_objects(&scene.objects);
-	free_objects(&scene.lights);
-	free_objects(&scene.sky_sphere);
-	free_texture(&scene.menu_tx);
-	free_buttons(scene.buttons, scene.map_count);
+	clean_memory(&scene);
 	return (0);
 }
