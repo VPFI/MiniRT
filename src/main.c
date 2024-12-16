@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/16 02:53:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/16 20:46:10 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -3762,15 +3762,44 @@ int	add_object(t_object **objects, t_object *new)
 	return (0);
 }
 
-int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
+int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 {
 	t_object 	*new_obj;
-	t_object 	*new_light;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
 	new_obj->material = mat;
+	if (type == SPHERE)
+	{
+		new_obj->type = type;
+		new_obj->figure.sphere.center = fig.sphere.center;
+		new_obj->figure.sphere.radius = fig.sphere.radius;
+		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
+		new_obj->hit_func = hit_sphere;
+		new_obj->edit_origin = translate_sphere;
+		new_obj->edit_orientation = rotate_sphere;
+		new_obj->get_origin = get_origin_sphere;
+		new_obj->edit_dimensions = resize_sphere;
+		new_obj->get_visual = get_sphere_pattern;
+		new_obj->get_normal = get_sphere_normal;
+		new_obj->next = NULL;
+	}
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
 	if (type == SPHERE)
 	{
 		new_obj->type = type;
@@ -3901,20 +3930,8 @@ int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
 		new_obj->get_visual = get_light_pattern;
 		new_obj->get_normal = get_light_normal;
 		new_obj->next = NULL;
-	}
-	new_obj->selected = false;
-	if (mat.type == EMISSIVE && type == LIGHT)
-	{
-		new_light = (t_object *)ft_calloc(1, sizeof(t_object));
-		if (!new_light)
-			return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
-		new_light = ft_memcpy(new_light, new_obj, sizeof(t_object));
-		add_object(&scene->lights, new_light);
-		if (type == LIGHT)
-		{
-			free(new_obj);
-			return (0);
-		}
+		add_object(&scene->lights, new_obj);
+		return (0);
 	}
 	add_object(&scene->objects, new_obj);
 	return (0);
@@ -4436,10 +4453,145 @@ char	**format_line(char *line)
 	return (res);
 }
 
+int	ft_strcmp(const char *s1, const char *s2)
+{
+	size_t			i;
+	unsigned char	*ts1;
+	unsigned char	*ts2;
+
+	i = 0;
+	ts1 = (unsigned char *)s1;
+	ts2 = (unsigned char *)s2;
+	while ((ts1[i] != '\0') && (ts2[i] != '\0'))
+	{
+		if (ts1[i] != ts2[i])
+		{
+			return (ts1[i] - ts2[i]);
+		}
+		i++;
+	}
+	return (ts1[i] - ts2[i]);
+}
+
+float	ft_atof(char *array)
+{
+	
+}
+
+t_vect	input_to_vect(char *input, float min, float max)
+{
+	t_vect	res;
+	int		count;
+	char	**vec_comp;
+
+	vec_comp = ft_split(input, ',');
+	count = count_components(vec_comp);
+	if (count != 3)
+		exit_err(ERR_ATTR_MSG, "text to vector\n", 2);
+	res.x = ft_atof(vec_comp[0]);
+	res.y = ft_atof(vec_comp[1]);
+	res.z = ft_atof(vec_comp[2]);
+	if (res.x > max || res.y > max || res.z > max)
+	{
+		print_vec_s(res, "Vector: -->");
+		fprintf(stderr, "Maximum threshold: %f\n", max);
+		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
+	}
+	if (res.x < min || res.y < min || res.z < min)
+	{
+		print_vec_s(res, "Vector: -->");
+		fprintf(stderr, "Minimum threshold: %f\n", min);
+		exit_err(ERR_EMPTY_MSG, "Minimum value threshold not reached\n", 2);
+	}
+	return (res);
+}
+
+int	count_components(char **components)
+{
+	int	i;
+
+	if (!components)
+		return (0);
+	i = 0;
+	while (components[i])
+	{
+		i++;
+	}
+	return (i);
+}
+
+int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = SPHERE;
+	new_obj->figure.sphere.center = fig.sphere.center;
+	new_obj->figure.sphere.radius = fig.sphere.radius;
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_sphere;
+	new_obj->edit_origin = translate_sphere;
+	new_obj->edit_orientation = rotate_sphere;
+	new_obj->get_origin = get_origin_sphere;
+	new_obj->edit_dimensions = resize_sphere;
+	new_obj->get_visual = get_sphere_pattern;
+	new_obj->get_normal = get_sphere_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+}
+
+void	load_sphere(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	if (amount < 4)
+		exit_err(ERR_ATTR_MSG, "sphere | missing essential attributes\n", 2);
+	mat = new_standard_material();
+	fig.sphere.center = input_to_vect(components[1], __FLT_MIN__, __FLT_MAX__);
+	fig.sphere.radius = ft_atof(components[2]);
+	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.0;
+	mat.pattern = false;
+	mat.pattern_dim = 0.7853;
+	mat.refraction_index = 2.5;
+	mat.emission_intensity = 8.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, texture);
+}
+
 int		parse_components(t_scene *scene, char **components)
 {
-	(void)scene;
-	(void)components;
+	int	amount;
+
+	amount = count_components(components);
+	if (!amount)
+		return (1);
+	if (ft_strcmp(components[0], SPHERE_ID))
+		load_sphere(scene, components, amount);
+	else if (ft_strcmp(components[0], PLANE_ID))
+		load_plane(scene, components, amount);
+	else if (ft_strcmp(components[0], QUAD_ID))
+		load_quad(scene, components, amount);
+	else if (ft_strcmp(components[0], DISK_ID))
+		load_disk(scene, components, amount);
+	else if (ft_strcmp(components[0], BOX_ID))
+		load_box(scene, components, amount);
+	else if (ft_strcmp(components[0], CYLINDER_ID))
+		load_cylinder(scene, components, amount);
+	else if (ft_strcmp(components[0], CONE_ID))
+		load_cone(scene, components, amount);
+	else if (ft_strcmp(components[0], P_LIGHT_ID))
+		load_p_light(scene, components, amount);
 	return (0);
 }
 

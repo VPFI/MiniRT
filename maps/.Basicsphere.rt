@@ -1,0 +1,21 @@
+	fig.sphere.center = new_vect(0.0, 1.0, -4);
+	fig.sphere.radius = 1;
+	mat.color = hexa_to_vect(DEF_COLOR);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, SPHERE);
+
+	fig.sphere.center = new_vect(0.0, 0.0, 0.0);
+	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
+	mat.color = hexa_to_vect(CYAN_GULF);
+	mat.albedo = mat.color;
+	mat.specular = 0.2;
+	mat.metal_roughness = 0.1;
+	mat.refraction_index = 1.5;
+	mat.emission_intensity = 0.0;
+	mat.type = LAMBERTIAN;
+	init_object(scene, fig, mat, PLANE);

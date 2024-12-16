@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/16 02:53:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/16 19:27:52 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@
 
 # define AIR_REF_INDEX	1.0003
 
-# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\n Valid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\n\nOpening file selector...\n"
-# define ERR_HIDFILE_MSG		"Potentially hidden files not supported\n"
+# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\n\nOpening file selector...\n"
+# define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
 # define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
 # define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."
 # define ERR_NOFILE_MSG		"No such file or dir: %s\n\n"
@@ -71,16 +71,18 @@
 # define ERR_EMPTY_MSG		"%s\n"
 # define ERR_MEM_MSG		"Memory allocation failed %s\n\n"
 
+# define ERR_ATTR_MSG		"Parsing %s\n"
+
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
 
-# define SPHERE				"sp"
-# define PLANE				"pl"
-# define QUAD				"qu"
-# define DISK				"di"
-# define BOX				"bx"
-# define CYLINDER			"cy"
-# define CONE				"co"
-# define P_LIGHT			"l"
+# define SPHERE_ID			"sp"
+# define PLANE_ID			"pl"
+# define QUAD_ID			"qu"
+# define DISK_ID			"di"
+# define BOX_ID				"bx"
+# define CYLINDER_ID		"cy"
+# define CONE_ID			"co"
+# define P_LIGHT_ID			"l"
 
 typedef struct s_vect	t_color;
 
