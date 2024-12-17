@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/17 00:55:51 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/17 22:05:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -3651,14 +3651,8 @@ void	init_camera(t_camera *camera, uint32_t width, uint32_t height)
 
 	world_axis = new_vect(0.0, 1.0, 0.0);
 	
-	//camera->origin = new_vect(10.0, 10.0, 10);
-	//camera->orientation = unit_vect(new_vect(-0.67, -0.26, -0.69));
 	camera->origin = new_vect(0, 1, 2);
 	camera->orientation = unit_vect(new_vect(0, 0, -1));
-	//camera->origin = new_vect(-5.0, 16.0, 11.0);
-	//camera->orientation = unit_vect(new_vect(0.4, -1.5, -1.0));
-	//camera->origin = new_vect(20.0, 3.0, -0.0);
-	//camera->orientation = unit_vect(new_vect(-1.0, -0.5, -1.0));
 	camera->fov = FOV;
 	camera->defocus_angle = DEFOCUS;
 	camera->focus_dist = FOCUS_DIST;
@@ -3759,33 +3753,6 @@ int	add_object(t_object **objects, t_object *new)
 		else
 			(*objects) = new;
 	}
-	return (0);
-}
-
-int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
-{
-	t_object 	*new_obj;
-
-	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
-	if (!new_obj)
-		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
-	new_obj->material = mat;
-	if (type == SPHERE)
-	{
-		new_obj->type = type;
-		new_obj->figure.sphere.center = fig.sphere.center;
-		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_sphere;
-		new_obj->edit_origin = translate_sphere;
-		new_obj->edit_orientation = rotate_sphere;
-		new_obj->get_origin = get_origin_sphere;
-		new_obj->edit_dimensions = resize_sphere;
-		new_obj->get_visual = get_sphere_pattern;
-		new_obj->get_normal = get_sphere_normal;
-		new_obj->next = NULL;
-	}
-	add_object(&scene->objects, new_obj);
 	return (0);
 }
 
@@ -4473,59 +4440,57 @@ int	ft_strcmp(const char *s1, const char *s2)
 	return (ts1[i] - ts2[i]);
 }
 
-float	ft_atof(char *array)
+float	sum_parts(int integer_part, float decimal_part, char *array)
 {
-	int		i;
-	char	*aux;
-	int		integer_part;
-	float	decimal_part;
-
-	i = 0;
-	while (array[i] && array[i] != '.')
-		i++;		
-	if (i != ft_strlen(array))
-	{
-		aux = ft_substr(array, i, ft_strlen(array));
-		if (!aux)
-			exit_err(ERR_MEM_MSG, "(malloc)", 1);
-		decimal_part = ft_atoi(aux);
-	}
-	integer_part = ft_atoi(array);
-	if (integer_part >= 0)
+	if (integer_part >= 0 && array[0] != '-')
 	{
 		return ((float)(integer_part + decimal_part));
 	}
-	else if (integer_part < 0)
+	else
 	{
 		return ((float)(integer_part - decimal_part));
+	}	
+}
+void	check_bounds(float num, float min, float max)
+{
+	if (num > max)
+	{
+		fprintf(stderr, "Maximum threshold: %f || Input --> %f\n", max, num);
+		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
+	}
+	if (num < min)
+	{
+		fprintf(stderr, "Minimum threshold: %f || Input --> %f\n", min, num);
+		exit_err(ERR_EMPTY_MSG, "Minimum value threshold not reached\n", 2);
 	}
 }
 
-t_vect	input_to_vect(char *input, float min, float max)
+float	ft_atof(char *array, float min, float max)
 {
-	t_vect	res;
-	int		count;
-	char	**vec_comp;
+	int		i;
+	float	res;
+	char	*aux;
+	float	decimal_part;
 
-	vec_comp = ft_split(input, ',');
-	count = count_components(vec_comp);
-	if (count != 3)
-		exit_err(ERR_ATTR_MSG, "text to vector\n", 2);
-	res.x = ft_atof(vec_comp[0]);
-	res.y = ft_atof(vec_comp[1]);
-	res.z = ft_atof(vec_comp[2]);
-	if (res.x > max || res.y > max || res.z > max)
+	i = 0;
+	decimal_part = 0;
+	if (ft_strlen(array) > 10)
 	{
-		print_vec_s(res, "Vector: -->");
-		fprintf(stderr, "Maximum threshold: %f\n", max);
+		fprintf(stderr, "Input --> %s\n", array);
 		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
 	}
-	if (res.x < min || res.y < min || res.z < min)
+	while (array[i] && array[i] != '.')
+		i++;		
+	if (i != (int)ft_strlen(array) && array[i + 1])
 	{
-		print_vec_s(res, "Vector: -->");
-		fprintf(stderr, "Minimum threshold: %f\n", min);
-		exit_err(ERR_EMPTY_MSG, "Minimum value threshold not reached\n", 2);
+		aux = ft_substr(array, (i + 1), ft_strlen(array));
+		if (!aux)
+			exit_err(ERR_MEM_MSG, "(malloc)", 1);
+		decimal_part = (ft_atoi(aux) / powf(10, ft_strlen(aux)));
+		free(aux);
 	}
+	res = sum_parts(ft_atoi(array), decimal_part, array);
+	check_bounds(res, min, max);
 	return (res);
 }
 
@@ -4541,6 +4506,23 @@ int	count_components(char **components)
 		i++;
 	}
 	return (i);
+}
+
+t_vect	input_to_vect(char *input, float min, float max)
+{
+	t_vect	res;
+	int		count;
+	char	**vec_comp;
+
+	vec_comp = ft_split(input, ',');
+	count = count_components(vec_comp);
+	if (count != 3)
+		exit_err(ERR_ATTR_MSG, "text to vector\n", 2);
+	res.x = ft_atof(vec_comp[0], min, max);
+	res.y = ft_atof(vec_comp[1], min, max);
+	res.z = ft_atof(vec_comp[2], min, max);
+	free_arr(vec_comp);
+	return (res);
 }
 
 int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
@@ -4567,6 +4549,122 @@ int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->get_normal = get_sphere_normal;
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	ft_strtolower(char *str)
+{
+	while(*str)
+	{
+		*str = ft_tolower(*str);
+		str++;;
+	}
+}
+
+int	get_material_index(char *id)
+{
+	if (!id)
+		exit_err(ERR_ATTR_MSG, "Wrong material type\n", 2);
+	ft_strtolower(id);
+	if (!ft_strcmp(id, "lambertian") || !ft_strcmp(id, "diffuse"))
+		return (LAMBERTIAN);
+	else if (!ft_strcmp(id, "metal"))
+		return (METAL);
+	else if (!ft_strcmp(id, "glossy") || !ft_strcmp(id, "plastic"))
+		return (GLOSSY);
+	else if (!ft_strcmp(id, "glass") || !ft_strcmp(id, "dielectric"))
+		return (DIELECTRIC);
+	else if (!ft_strcmp(id, "emissive"))
+		return (EMISSIVE);
+	else
+		exit_err(ERR_MAT_MSG, id, 2);
+	return (0);
+}
+
+void	parse_material(char **settings, t_material *mat)
+{
+	int	amount;
+
+	amount = count_components(settings);
+	if (amount != 6)
+		exit_err(ERR_EMPTY_MSG, "Missing material components\n", 2);
+	mat->type = get_material_index(settings[1]);		
+	mat->specular = ft_atof(settings[2], 0, 1);
+	mat->metal_roughness = ft_atof(settings[3], 0, 1);
+	mat->refraction_index = ft_atof(settings[4], 0, 100);
+	mat->emission_intensity = ft_atof(settings[5], 0, (float)INT_MAX);
+}
+
+bool	get_pattern_bool(char *id)
+{
+	if (id)
+	{
+		if (!ft_strcmp(id, "0") || !ft_strcmp(id, "false"))
+		{
+			return (false);
+		}
+		else if (!ft_strcmp(id, "1") || !ft_strcmp(id, "true"))
+		{
+			return (true);
+		}
+	}
+	exit_err(ERR_EMPTY_MSG, "Unknown pattern value\n", 2);
+	return (false);
+}
+
+void	parse_pattern(char **settings, t_material *mat)
+{
+	int	amount;
+
+	amount = count_components(settings);
+	if (amount != 3)
+		exit_err(ERR_EMPTY_MSG, "Missing pattern components\n", 2);
+	mat->pattern = get_pattern_bool(settings[1]);
+	mat->pattern_dim = ft_atof(settings[2], 0, (float)INT_MAX);
+}
+void	parse_texture(char **settings, t_texture **tx)
+{
+	int	amount;
+
+	amount = count_components(settings);
+	if (amount != 3)
+		exit_err(ERR_EMPTY_MSG, "Missing texture components\n", 2);
+	(*tx)->path = settings[1];
+	(*tx)->texture_dim = ft_atof(settings[2], 0, (float)INT_MAX);
+	*tx = get_texture((*tx)->path, (*tx)->texture_dim);
+	if (!(*tx))
+	{
+		exit_err(ERR_ATTR_MSG, "texture\n", 2);
+	}
+}
+
+void	parse_extra_components(t_material *mat,
+	t_texture **tx, char **components, int i)
+{
+	char	**unit;
+
+	while (components[i])
+	{
+		unit = ft_split(components[i], ':');
+		if (!unit)
+			exit_err(ERR_ATTR_MSG, "extra material components\n", 2);
+		if (!ft_strcmp(unit[0], "material") || !ft_strcmp(unit[0], "mat"))
+		{
+			parse_material(unit, mat);
+		}
+		else if (!ft_strcmp(unit[0], "pattern"))
+		{
+			parse_pattern(unit, mat);
+		}
+		else if (!ft_strcmp(unit[0], "texture") || !ft_strcmp(unit[0], "tx"))
+		{
+			parse_texture(unit, tx);
+		}
+		else
+			exit_err(ERR_ATTR_MSG, "Unknown extra attribute identifier\n", 2);
+		free_arr(unit);
+		i++;
+	}	
 }
 
 void	load_sphere(t_scene *scene, char **components, int amount)
@@ -4575,16 +4673,18 @@ void	load_sphere(t_scene *scene, char **components, int amount)
 	t_material	mat;
 	t_texture	*texture;
 
+	texture = NULL;
 	if (amount < 4)
+	{
 		exit_err(ERR_ATTR_MSG, "sphere | missing essential attributes\n", 2);
+	}
 	mat = new_standard_material();
-	fig.sphere.center = input_to_vect(components[1], INT_MIN, INT_MAX);
-	fig.sphere.radius = ft_atof(components[2]);
+	fig.sphere.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.sphere.radius = ft_atof(components[2], 0, (float)INT_MAX);
 	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
 	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	texture = NULL;
-	init_object(scene, fig, mat, texture);
+	parse_extra_components(&mat, &texture, components, 4);
+	init_sphere(scene, fig, mat, texture);
 }
 
 int		parse_components(t_scene *scene, char **components)
@@ -4594,22 +4694,24 @@ int		parse_components(t_scene *scene, char **components)
 	amount = count_components(components);
 	if (!amount)
 		return (1);
-	if (ft_strcmp(components[0], SPHERE_ID))
+	if (!ft_strcmp(components[0], SPHERE_ID))
+	{
 		load_sphere(scene, components, amount);
-	else if (ft_strcmp(components[0], PLANE_ID))
-		load_plane(scene, components, amount);
-	else if (ft_strcmp(components[0], QUAD_ID))
-		load_quad(scene, components, amount);
-	else if (ft_strcmp(components[0], DISK_ID))
-		load_disk(scene, components, amount);
-	else if (ft_strcmp(components[0], BOX_ID))
-		load_box(scene, components, amount);
-	else if (ft_strcmp(components[0], CYLINDER_ID))
-		load_cylinder(scene, components, amount);
-	else if (ft_strcmp(components[0], CONE_ID))
-		load_cone(scene, components, amount);
-	else if (ft_strcmp(components[0], P_LIGHT_ID))
-		load_p_light(scene, components, amount);
+	}
+	// else if (!ft_strcmp(components[0], PLANE_ID))
+	// 	load_plane(scene, components, amount);
+	// else if (!ft_strcmp(components[0], QUAD_ID))
+	// 	load_quad(scene, components, amount);
+	// else if (!ft_strcmp(components[0], DISK_ID))
+	// 	load_disk(scene, components, amount);
+	// else if (!ft_strcmp(components[0], BOX_ID))
+	// 	load_box(scene, components, amount);
+	// else if (!ft_strcmp(components[0], CYLINDER_ID))
+	// 	load_cylinder(scene, components, amount);
+	// else if (!ft_strcmp(components[0], CONE_ID))
+	// 	load_cone(scene, components, amount);
+	// else if (!ft_strcmp(components[0], P_LIGHT_ID))
+	// 	load_p_light(scene, components, amount);
 	return (0);
 }
 
@@ -4627,15 +4729,19 @@ void	load_map_scene(t_scene *scene)
 	{
 		components = format_line(line);
 		if (!components)
-			return (exit_err(ERR_MEM_MSG, "while loading map", 2));
+		{
+			return (free(line), exit_err(ERR_MEM_MSG, "while loading map", 2));
+		}
 		if (parse_components(scene, components))
+		{
+			free(line);
+			free_arr(components);
 			return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
+		}
 		free(line);
 		free_arr(components);
 		line = get_next_line(map);		
 	}
-	init_camera(&scene->camera, scene->width, scene->height);
-	scene->back_up_camera = scene->camera;
 }
 
 void	load_standard_scene(t_scene *scene)
@@ -4655,6 +4761,8 @@ void	init_scene(t_scene *scene)
 	else
 	{
 		load_map_scene(scene);
+		init_camera(&scene->camera, scene->width, scene->height);
+		scene->back_up_camera = scene->camera;
 	}
 }
 
@@ -4777,6 +4885,7 @@ int	main(int argc, char **argv)
 	init_minirt(&scene);
 	if (parse_map_path(&scene, argc, argv))
 		draw_file_menu(&scene);
+	init_scene(&scene);
 	main_loop(&scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);

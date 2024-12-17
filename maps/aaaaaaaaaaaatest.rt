@@ -1,0 +1,5 @@
+ID  COORDS    DIM      COLOR       [MAT    |  SPECULAR   ROUGHNESS  REFRACTION   EMISSION] [PATTERN | PATTERNDIM] [TEXTURE | TEXTUREDIM]
+
+sp   0,0,1     1    200,100,100   LAMBERTIAN     0-1         0-1        0-10     0-INT_MAX   pattern   0-INT_MAX      path     0-INTMAX
+
+mat:LAMBERTIAN:0-1:0-1:0-10:0-INT_MAX    ||   pattern:0:0-INTMAX     ||    texture:"path":0-INTMAX

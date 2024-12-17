@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/16 01:41:21 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/17 17:09:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,10 @@ int	check_file_format(char *path)
 	if (!filename)
 		return (exit_err(ERR_STD_MSG, NULL, 1), 1);
 	if (filename[0] == '.')
-		return (throw_err(ERR_HIDFILE_MSG, NULL, 2));
+		return (free(filename), throw_err(ERR_HIDFILE_MSG, NULL, 2));
 	if (check_extension(filename))
-		return (throw_err(ERR_INCEXT_MSG, NULL, 2));
+		return (free(filename), throw_err(ERR_INCEXT_MSG, NULL, 2));
+	free(filename);
 	return (0);
 }
 
@@ -111,6 +112,7 @@ int	parse_map_path(t_scene *scene, int argc, char **argv)
 		return (throw_err(ERR_INCMAP_MSG, argv[1], 12));
 	if (check_file_validity(argv[1]))
 		return (throw_err(ERR_NOFILE_MSG, argv[1], 12));
+	scene->choose_file = 1;
 	scene->path = ft_strdup(argv[1]);
 	return (0);
 }
