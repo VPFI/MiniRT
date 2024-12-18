@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/17 22:05:48 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/18 20:19:27 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -3917,7 +3917,10 @@ void	add_box_face(t_object *box, t_figure face, t_material mat)
 	new_obj->figure.quad.v_vect = face.quad.v_vect;
 	new_obj->figure.quad.normal = unit_vect(vect_cross(face.quad.u_vect, face.quad.v_vect));
 	new_obj->material = mat;
-	new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
+	if (box->texture)
+		new_obj->texture = get_texture(box->texture->path, box->texture->texture_dim);
+	else
+		new_obj->texture = NULL;
 	new_obj->hit_func = hit_quad;
 	new_obj->edit_origin = translate_quad;
 	new_obj->edit_orientation = rotate_quad;
@@ -4220,9 +4223,9 @@ void	init_figures(t_scene *scene)
 	// 		mat.albedo = mat.color;
 	// 		mat.type = LAMBERTIAN;
 	// 		fig.box.center = new_vect(-2 + (1 * i), -1.0, -5 + j);
-	// 		fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
 	// 		fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
 	// 		fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
+	// 		fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
 	// 		init_object(scene, fig, mat, BOX);
 	// 	}
 	// }
@@ -4409,16 +4412,6 @@ void	free_arr(char **arr)
 	}
 }
 
-char	**format_line(char *line)
-{
-	char	**res;
-	char	*temp_line;
-
-	temp_line = ft_strtrim(line, "\n");
-	res = ft_split(temp_line, ' ');
-	free(temp_line);
-	return (res);
-}
 
 int	ft_strcmp(const char *s1, const char *s2)
 {
@@ -4438,6 +4431,22 @@ int	ft_strcmp(const char *s1, const char *s2)
 		i++;
 	}
 	return (ts1[i] - ts2[i]);
+}
+
+char	**format_line(char *line)
+{
+	char	**res;
+	char	*temp_line;
+
+	temp_line = ft_strtrim(line, "\n");
+	res = ft_split(temp_line, ' ');
+	free(temp_line);
+	if (res && res[0] && !ft_strncmp(res[0], "#", 1))
+	{
+		free_arr(res);
+		return (NULL);
+	}
+	return (res);
 }
 
 float	sum_parts(int integer_part, float decimal_part, char *array)
@@ -4517,7 +4526,7 @@ t_vect	input_to_vect(char *input, float min, float max)
 	vec_comp = ft_split(input, ',');
 	count = count_components(vec_comp);
 	if (count != 3)
-		exit_err(ERR_ATTR_MSG, "text to vector\n", 2);
+		exit_err(ERR_VECT_MSG, input, 2);
 	res.x = ft_atof(vec_comp[0], min, max);
 	res.y = ft_atof(vec_comp[1], min, max);
 	res.z = ft_atof(vec_comp[2], min, max);
@@ -4568,7 +4577,7 @@ int	get_material_index(char *id)
 	ft_strtolower(id);
 	if (!ft_strcmp(id, "lambertian") || !ft_strcmp(id, "diffuse"))
 		return (LAMBERTIAN);
-	else if (!ft_strcmp(id, "metal"))
+	else if (!ft_strcmp(id, "metal") || !ft_strcmp(id, "metallic"))
 		return (METAL);
 	else if (!ft_strcmp(id, "glossy") || !ft_strcmp(id, "plastic"))
 		return (GLOSSY);
@@ -4687,6 +4696,353 @@ void	load_sphere(t_scene *scene, char **components, int amount)
 	init_sphere(scene, fig, mat, texture);
 }
 
+int	init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = PLANE;
+	new_obj->figure.plane.center = fig.plane.center;
+	new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_plane;
+	new_obj->edit_origin = translate_plane;
+	new_obj->edit_orientation = rotate_plane;
+	new_obj->get_origin = get_origin_plane;
+	new_obj->edit_dimensions = resize_plane;
+	new_obj->get_visual = get_plane_pattern;
+	new_obj->get_normal = get_plane_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_plane(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 4)
+	{
+		exit_err(ERR_ATTR_MSG, "plane | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.plane.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.plane.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 4);
+	init_plane(scene, fig, mat, texture);
+}
+int	init_quad(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = QUAD;
+	new_obj->figure.quad.center = fig.quad.center;
+	new_obj->figure.quad.u_vect = fig.quad.u_vect;
+	new_obj->figure.quad.v_vect = fig.quad.v_vect;
+	new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_quad;
+	new_obj->edit_origin = translate_quad;
+	new_obj->edit_orientation = rotate_quad;
+	new_obj->get_origin = get_origin_quad;
+	new_obj->edit_dimensions = resize_quad;
+	new_obj->get_visual = get_quad_pattern;
+	new_obj->get_normal = get_quad_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_quad(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 5)
+	{
+		exit_err(ERR_ATTR_MSG, "quad | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.quad.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.quad.u_vect = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	fig.quad.v_vect = input_to_vect(components[3], (float)INT_MIN, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[4], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 5);
+	init_quad(scene, fig, mat, texture);
+}
+
+int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = DISK;
+	new_obj->figure.disk.center = fig.disk.center;
+	new_obj->figure.disk.normal = unit_vect(fig.disk.normal);
+	new_obj->figure.disk.radius = fig.disk.radius;
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_disk;
+	new_obj->edit_origin = translate_disk;
+	new_obj->edit_orientation = rotate_disk;
+	new_obj->get_origin = get_origin_disk;
+	new_obj->edit_dimensions = resize_disk;
+	new_obj->get_visual = get_disk_pattern;
+	new_obj->get_normal = get_disk_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_disk(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 5)
+	{
+		exit_err(ERR_ATTR_MSG, "disk | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.disk.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.disk.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	fig.disk.radius = ft_atof(components[3], 0, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[4], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 5);
+	init_disk(scene, fig, mat, texture);
+}
+
+int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = BOX;
+	new_obj->figure.box.center = fig.box.center;
+	new_obj->figure.box.u_vect = fig.box.u_vect;
+	new_obj->figure.box.v_vect = fig.box.v_vect;
+	new_obj->figure.box.dimensions = fig.box.dimensions;
+	new_obj->figure.box.faces = NULL;
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_box;
+	new_obj->edit_origin = translate_box;
+	new_obj->edit_orientation = rotate_box;
+	new_obj->get_origin = get_origin_box;
+	new_obj->edit_dimensions = resize_box;
+	new_obj->get_visual = get_box_pattern;
+	new_obj->get_normal = get_box_normal;
+	new_obj->next = NULL;
+	init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_box(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 6)
+	{
+		exit_err(ERR_ATTR_MSG, "box | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.box.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.box.u_vect = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	fig.box.v_vect = input_to_vect(components[3], (float)INT_MIN, (float)INT_MAX);
+	fig.box.dimensions = input_to_vect(components[4], (float)INT_MIN, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 6);
+	init_box(scene, fig, mat, texture);
+}
+
+int	init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = CYLINDER;
+	new_obj->figure.cylinder.center = fig.cylinder.center;
+	new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
+	new_obj->figure.cylinder.radius = fig.cylinder.radius;
+	new_obj->figure.cylinder.height = fig.cylinder.height;
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_cylinder;
+	new_obj->edit_origin = translate_cylinder;
+	new_obj->edit_orientation = rotate_cylinder;
+	new_obj->get_origin = get_origin_cylinder;
+	new_obj->edit_dimensions = resize_cylinder;
+	new_obj->get_visual = get_cylinder_pattern;
+	new_obj->get_normal = get_cylinder_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_cylinder(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 6)
+	{
+		exit_err(ERR_ATTR_MSG, "cylinder | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.cylinder.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.cylinder.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	fig.cylinder.radius = ft_atof(components[3], 0, (float)INT_MAX);
+	fig.cylinder.height = ft_atof(components[4], 0, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 6);
+	init_cylinder(scene, fig, mat, texture);
+}
+
+int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = CONE;
+	new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
+	new_obj->figure.cone.radius = fig.cone.radius;
+	new_obj->figure.cone.height = fig.cone.height;
+	new_obj->figure.cone.center = vect_add(fig.cone.center, vect_simple_mult(fig.cone.normal, -fig.cone.height / 2));
+	new_obj->texture = tx;
+	new_obj->hit_func = hit_cone;
+	new_obj->edit_origin = translate_cone;
+	new_obj->edit_orientation = rotate_cone;
+	new_obj->get_origin = get_origin_cone;
+	new_obj->edit_dimensions = resize_cone;
+	new_obj->get_visual = get_cone_pattern;
+	new_obj->get_normal = get_cone_normal;
+	new_obj->next = NULL;
+	add_object(&scene->objects, new_obj);
+	return (0);
+}
+
+void	load_cone(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 6)
+	{
+		exit_err(ERR_ATTR_MSG, "cone | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.cone.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.cone.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
+	fig.cone.radius = ft_atof(components[3], 0, (float)INT_MAX);
+	fig.cone.height = ft_atof(components[4], 0, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 6);
+	init_cone(scene, fig, mat, texture);
+}
+
+int	init_p_light(t_scene *scene, t_figure fig, t_material mat)
+{
+	t_object 	*new_obj;
+
+	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!new_obj)
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
+	new_obj->material = mat;
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	new_obj->selected = true;
+	scene->object_selected = true;
+	new_obj->type = LIGHT;
+	new_obj->figure.p_light.location = fig.p_light.location;
+	new_obj->figure.p_light.radius_shadow = fig.p_light.radius_shadow;
+	new_obj->texture = NULL;
+	new_obj->hit_func = hit_point_light;
+	new_obj->edit_origin = translate_point_light;
+	new_obj->edit_orientation = rotate_sphere;
+	new_obj->get_origin = get_origin_point_light;
+	new_obj->edit_dimensions = resize_point_light;
+	new_obj->get_visual = get_light_pattern;
+	new_obj->get_normal = get_light_normal;
+	new_obj->next = NULL;
+	add_object(&scene->lights, new_obj);
+	return (0);
+}
+
+void	load_p_light(t_scene *scene, char **components, int amount)
+{
+	t_figure	fig;
+	t_material	mat;
+	t_texture	*texture;
+
+	texture = NULL;
+	if (amount < 4)
+	{
+		exit_err(ERR_ATTR_MSG, "point light | missing essential attributes\n", 2);
+	}
+	mat = new_standard_material();
+	fig.p_light.location = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
+	fig.p_light.radius_shadow = ft_atof(components[2], 0, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
+	mat.albedo = mat.color;
+	parse_extra_components(&mat, &texture, components, 4);
+	init_p_light(scene, fig, mat);
+}
+
 int		parse_components(t_scene *scene, char **components)
 {
 	int	amount;
@@ -4695,23 +5051,40 @@ int		parse_components(t_scene *scene, char **components)
 	if (!amount)
 		return (1);
 	if (!ft_strcmp(components[0], SPHERE_ID))
-	{
 		load_sphere(scene, components, amount);
+	else if (!ft_strcmp(components[0], PLANE_ID))
+		load_plane(scene, components, amount);
+	else if (!ft_strcmp(components[0], QUAD_ID))
+		load_quad(scene, components, amount);
+	else if (!ft_strcmp(components[0], DISK_ID))
+		load_disk(scene, components, amount);
+	else if (!ft_strcmp(components[0], BOX_ID))
+		load_box(scene, components, amount);
+	else if (!ft_strcmp(components[0], CYLINDER_ID))
+		load_cylinder(scene, components, amount);
+	else if (!ft_strcmp(components[0], CONE_ID))
+		load_cone(scene, components, amount);
+	else if (!ft_strcmp(components[0], P_LIGHT_ID))
+		load_p_light(scene, components, amount);
+	else
+		return (1);
+	return (0);
+}
+
+int	is_space(char c)
+{
+	return ((c >= '\a' && c <= '\r') || c == ' ');
+}
+
+char	*check_spaces_and_comments(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i] && is_space(line[i]))
+	{
+		i++;
 	}
-	// else if (!ft_strcmp(components[0], PLANE_ID))
-	// 	load_plane(scene, components, amount);
-	// else if (!ft_strcmp(components[0], QUAD_ID))
-	// 	load_quad(scene, components, amount);
-	// else if (!ft_strcmp(components[0], DISK_ID))
-	// 	load_disk(scene, components, amount);
-	// else if (!ft_strcmp(components[0], BOX_ID))
-	// 	load_box(scene, components, amount);
-	// else if (!ft_strcmp(components[0], CYLINDER_ID))
-	// 	load_cylinder(scene, components, amount);
-	// else if (!ft_strcmp(components[0], CONE_ID))
-	// 	load_cone(scene, components, amount);
-	// else if (!ft_strcmp(components[0], P_LIGHT_ID))
-	// 	load_p_light(scene, components, amount);
 	return (0);
 }
 
@@ -4728,15 +5101,14 @@ void	load_map_scene(t_scene *scene)
 	while (line)	
 	{
 		components = format_line(line);
-		if (!components)
+		if (components && components[0])
 		{
-			return (free(line), exit_err(ERR_MEM_MSG, "while loading map", 2));
-		}
-		if (parse_components(scene, components))
-		{
-			free(line);
-			free_arr(components);
-			return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
+			if (parse_components(scene, components))
+			{
+				free(line);
+				free_arr(components);
+				return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
+			}
 		}
 		free(line);
 		free_arr(components);
@@ -4753,7 +5125,6 @@ void	load_standard_scene(t_scene *scene)
 
 void	init_scene(t_scene *scene)
 {
-	// if path null set standard scene
 	if (!scene->path)
 	{
 		load_standard_scene(scene);
@@ -4877,6 +5248,14 @@ void	clean_memory(t_scene *scene)
 	return ;
 }
 
+void	close_mlx(void *sc)
+{
+	t_scene *scene;
+
+	scene = sc;
+	mlx_close_window(scene->mlx);
+}
+
 int	main(int argc, char **argv)
 {
 	//check exit when clicking x on window
@@ -4886,7 +5265,9 @@ int	main(int argc, char **argv)
 	if (parse_map_path(&scene, argc, argv))
 		draw_file_menu(&scene);
 	init_scene(&scene);
+	deselect_objects(scene.objects, scene.lights, &scene.object_selected);
 	main_loop(&scene);
+	mlx_close_hook(scene.mlx, close_mlx, &scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
 	mlx_resize_hook(scene.mlx, resize_minirt, &scene);

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/17 21:16:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:40:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@
 # define ERR_MEM_MSG		"Memory allocation failed %s\n\n"
 
 # define ERR_ATTR_MSG		"Parsing: %s\n"
+# define ERR_VECT_MSG		"Parsing: %s to vector form\n"
 # define ERR_MAT_MSG		"Wrong material type: %s\n"
 
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
