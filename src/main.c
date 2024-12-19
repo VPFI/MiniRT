@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/18 20:19:27 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/19 01:52:29 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -5043,13 +5043,8 @@ void	load_p_light(t_scene *scene, char **components, int amount)
 	init_p_light(scene, fig, mat);
 }
 
-int		parse_components(t_scene *scene, char **components)
+int	parse_objects(t_scene *scene, char **components, int amount)
 {
-	int	amount;
-
-	amount = count_components(components);
-	if (!amount)
-		return (1);
 	if (!ft_strcmp(components[0], SPHERE_ID))
 		load_sphere(scene, components, amount);
 	else if (!ft_strcmp(components[0], PLANE_ID))
@@ -5068,6 +5063,29 @@ int		parse_components(t_scene *scene, char **components)
 		load_p_light(scene, components, amount);
 	else
 		return (1);
+	return (0);
+}
+
+int	parse_scene(t_scene *scene, char **components, int amount)
+{
+	(void)scene;
+	(void)components;
+	(void)amount;
+	return (1);
+}
+
+int	parse_components(t_scene *scene, char **components)
+{
+	int	amount;
+
+	amount = count_components(components);
+	if (!amount)
+		return (1);
+	if (parse_objects(scene, components, amount)
+		&& parse_scene(scene, components, amount))
+	{
+		return (throw_err(ERR_NOID_MSG, components[0], 1));
+	}
 	return (0);
 }
 
@@ -5253,7 +5271,8 @@ void	close_mlx(void *sc)
 	t_scene *scene;
 
 	scene = sc;
-	mlx_close_window(scene->mlx);
+	set_stop_status(scene);
+	close_all(scene);
 }
 
 int	main(int argc, char **argv)

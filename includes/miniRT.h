@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/18 18:40:46 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/19 01:31:50 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1820
-# define WINH 		980
+# define WINW 		1280
+# define WINH 		720
 
 # define THREADS 	8
 
@@ -73,6 +73,7 @@
 
 # define ERR_ATTR_MSG		"Parsing: %s\n"
 # define ERR_VECT_MSG		"Parsing: %s to vector form\n"
+# define ERR_NOID_MSG		"Invalid identifier %s\n"
 # define ERR_MAT_MSG		"Wrong material type: %s\n"
 
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
