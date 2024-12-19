@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/19 01:31:50 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/19 15:55:10 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1280
-# define WINH 		720
+# define WINW 		1820
+# define WINH 		980
 
 # define THREADS 	8
 
@@ -77,6 +77,11 @@
 # define ERR_MAT_MSG		"Wrong material type: %s\n"
 
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
+
+
+# define CAMERA_ID			"C"
+# define AMBIENT_ID			"A"
+# define SETTINGS_ID		"S"
 
 # define SPHERE_ID			"sp"
 # define PLANE_ID			"pl"
@@ -368,6 +373,8 @@ typedef struct s_scene
 	t_thread		threads[THREADS];
 	t_thread_backup	threads_backup[THREADS];
 	char			*path;
+	int				samples;
+	int				max_depth;
 	uint32_t		state;
 	bool			stop;
 	bool			edit_mode;
@@ -377,6 +384,7 @@ typedef struct s_scene
 	float			time;
 	t_camera		camera;
 	t_camera		back_up_camera;
+	int				amb_color;
 	float			amb_light;
 	t_object		*sky_sphere;
 	t_object		*objects;
