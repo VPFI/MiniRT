@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/19 16:13:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/22 23:35:48 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -2830,16 +2830,16 @@ int	correct_box_pattern_index(t_vect *dimensions, int face_index, int pattern_in
 {
 	if ((face_index == 2 || face_index == 3))
 	{
-		if (!((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+		if (!((int)((dimensions->z - 0.0001) / 2) % 2))
 			pattern_index = !pattern_index;
-		if (((int)(((dimensions->x - 0.0001) / 2) / 0.5) % 2))
+		if (((int)((dimensions->x - 0.0001) / 2) % 2))
 			pattern_index = !pattern_index;		
 	}
 	if ((face_index == 4 || face_index == 5))
 	{
-		if (((int)(((dimensions->z - 0.0001) / 2) / 0.5) % 2))
+		if (((int)((dimensions->z - 0.0001) / 2) % 2))
 			pattern_index = !pattern_index;
-		if (((int)(((dimensions->y - 0.0001) / 2) / 0.5) % 2))
+		if (((int)((dimensions->y - 0.0001) / 2) % 2))
 			pattern_index = !pattern_index;
 	}
 	return (pattern_index);
@@ -2895,8 +2895,8 @@ t_vect	get_quad_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
 
 t_vect	get_face_pattern(t_hit_info *hit_info, t_vect *dimensions, int face_index)
 {
-	t_vect	rotated_point;
 	t_pattern_vars	p_var;
+	t_vect			rotated_point;
 
 	rotated_point = get_rotated_point_quad(hit_info);
 	p_var.x_index_square = (int)(fabs(rotated_point.x) / hit_info->object->material.pattern_dim);
@@ -3702,10 +3702,10 @@ t_texture	*get_texture(char *path, float texture_dim)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 1), NULL);
 	res->path = ft_strdup(path);
 	if (!res->path)
-		return (exit_err(ERR_MEM_MSG, "(malloc)", 2), NULL);
+		return (free_texture(&res), exit_err(ERR_MEM_MSG, "(malloc)", 2), NULL);
 	res->texture = mlx_load_png(path);
 	if (!res->texture)
-		return (exit_err(ERR_MEM_MSG, res->path, 2), NULL);
+		return (exit_err(ERR_MEM_MSG, res->path, 2), free_texture(&res), NULL);
 	res->texture_dim = texture_dim;
 	return (res);
 }
@@ -4383,7 +4383,7 @@ void	init_minirt(t_scene *scene)
 	scene->width = WINW;
 	scene->height = WINH;
 	scene->amb_color = AMB_COLOR;
-	scene->amb_light = AMB_LIGHT;
+	scene->amb_light = -1;
 	scene->aspect_ratio = scene->width / (float)scene->height;
 	scene->choose_file = 0;
 	scene->current_file = 0;
@@ -4649,9 +4649,7 @@ void	parse_texture(char **settings, t_texture **tx)
 	amount = count_components(settings);
 	if (amount != 3)
 		exit_err(ERR_EMPTY_MSG, "Missing texture components\n", 2);
-	(*tx)->path = settings[1];
-	(*tx)->texture_dim = ft_atof(settings[2], 0, (float)INT_MAX);
-	*tx = get_texture((*tx)->path, (*tx)->texture_dim);
+	*tx = get_texture(settings[1], ft_atof(settings[2], 0, (float)INT_MAX));
 	if (!(*tx))
 	{
 		exit_err(ERR_ATTR_MSG, "texture\n", 2);
@@ -4891,7 +4889,7 @@ int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	return (0);
 }
 
-void	load_box(t_scene *scene, char **components, int amount)
+void	load_box(t_scene *scene, char **cmp, int amount)
 {
 	t_figure	fig;
 	t_material	mat;
@@ -4904,16 +4902,16 @@ void	load_box(t_scene *scene, char **components, int amount)
 		exit_err(ERR_ATTR_MSG, "box | missing essential attributes\n", 2);
 	}
 	mat = new_standard_material();
-	fig.box.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.box.u_vect = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	fig.box.v_vect = input_to_vect(components[3], (float)INT_MIN, (float)INT_MAX);
+	fig.box.center = input_to_vect(cmp[1], (float)INT_MIN, (float)INT_MAX);
+	fig.box.u_vect = input_to_vect(cmp[2], (float)INT_MIN, (float)INT_MAX);
+	fig.box.v_vect = input_to_vect(cmp[3], (float)INT_MIN, (float)INT_MAX);
 	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
 	if (zero_vect(normal))
 		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	fig.box.dimensions = input_to_vect(components[4], (float)INT_MIN, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
+	fig.box.dimensions = input_to_vect(cmp[4], (float)INT_MIN, (float)INT_MAX);
+	mat.color = vect_simple_div(input_to_vect(cmp[5], 0, 255), 255.0);
 	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 6);
+	parse_extra_material_components(&mat, &texture, cmp, 6);
 	init_box(scene, fig, mat, texture);
 }
 
@@ -5054,9 +5052,7 @@ void	load_p_light(t_scene *scene, char **components, int amount)
 {
 	t_figure	fig;
 	t_material	mat;
-	t_texture	*texture;
 
-	texture = NULL;
 	if (amount < 5)
 	{
 		exit_err(ERR_ATTR_MSG, "point light | missing essential attributes\n", 2);
@@ -5128,6 +5124,8 @@ void	load_camera(t_scene *scene, char **components, int amount)
 	{
 		exit_err(ERR_ATTR_MSG, "camera | missing essential attributes\n", 2);
 	}
+	if (!zero_vect(scene->camera.orientation) || !zero_vect(scene->camera.origin) || scene->camera.fov)
+		exit_err(ERR_EMPTY_MSG, "Cannot define camera multiple times\n", 2);
 	scene->camera.origin = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
 	scene->camera.orientation = unit_vect(input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX));
 	if (zero_vect(scene->camera.orientation))
@@ -5144,6 +5142,8 @@ void	load_ambient(t_scene *scene, char **components, int amount)
 	{
 		exit_err(ERR_ATTR_MSG, "ambient | missing essential attributes\n", 2);
 	}
+	if (scene->amb_light != -1)
+		exit_err(ERR_EMPTY_MSG, "Cannot define ambient multiple times\n", 2);
 	scene->amb_light = ft_atof(components[1], 0, 1);
 	scene->amb_color = vect_to_int(vect_simple_div(input_to_vect(components[2], 0, 255), 255.0));
 }
@@ -5154,7 +5154,7 @@ void	parse_spp(char **settings, t_scene *scene)
 
 	amount = count_components(settings);
 	if (amount != 2)
-		exit_err(ERR_EMPTY_MSG, "Missing sampples components\n", 2);
+		exit_err(ERR_EMPTY_MSG, "Missing samples components\n", 2);
 	scene->samples = (int)ft_atof(settings[1], 0, (float)INT_MAX);
 }
 
@@ -5206,11 +5206,11 @@ void	parse_extra_scene_components(t_scene *scene, char **components, int i)
 
 void	load_settings(t_scene *scene, char **components, int amount)
 {
-	if (amount < 2)
+	if (amount < 1)
 	{
 		exit_err(ERR_ATTR_MSG, "scene | missing essential attributes\n", 2);
 	}
-	parse_extra_scene_components(scene, components, 2);
+	parse_extra_scene_components(scene, components, 1);
 }
 
 int	parse_scene(t_scene *scene, char **components, int amount)
@@ -5289,6 +5289,8 @@ void	load_map_scene(t_scene *scene)
 
 void	load_standard_scene(t_scene *scene)
 {
+	scene->amb_light = AMB_LIGHT;
+	scene->amb_color = AMB_COLOR;
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
 	init_sky_sphere(scene, STD_SKYSPHERE);	
@@ -5439,7 +5441,6 @@ int	main(int argc, char **argv)
 		draw_file_menu(&scene);
 	init_scene(&scene);
 	deselect_objects(scene.objects, scene.lights, &scene.object_selected);
-	printf("%i\n", scene.object_selected);
 	main_loop(&scene);
 	mlx_close_hook(scene.mlx, close_mlx, &scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);

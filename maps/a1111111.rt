@@ -1,20 +1,24 @@
 #    ID  COORDS    orientation   DIM        COLOR       [MAT    |  SPECULAR   ROUGHNESS  REFRACTION   EMISSION] [PATTERN | PATTERNDIM] [TEXTURE | TEXTUREDIM]
-#                     != 0       [H/R/...]     0-255       mat:x        0-1         0-1       0-10      0-INT_MAX    0/1       0-INT_MAX    path      0-INT_MAX
+#                     != 0       [H/R/...]     0-255       mat:x        0-1         0-1       0-10  0-INT_MAX  pattern:0/1   0-INT_MAX  tx:path      0-INT_MAX
 #    cy  0,0,0       1,1,0       2.5  1     200,80,40  mat:glossy      0.25        0.1       1.5           2         0            1     /textures/...     1
 
-A    0.1    255,255,255
+A    0.9    255,255,255
 
-C    0,0,1  0,0,-1    50      cam:3:3
-
-S    skybox:./textures/sky_sphere/overcast_soil_puresky_4k.png     depth:8  spp:5
+C    -4,1,3  0.55,-0.125,-0.8    40      cam:3:0
 
 
-sp   0,1,-1    1    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2
-       cy   -1,0,-2  0,1,1   2   2    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:0:1.2 
+S        depth:8  spp:1    skysphere:./textures/sky_sphere/autumn_field_puresky_4k.png
 
 
-    co   1,0,-3       1,0,1 	2   2               200,100,100  mat:plastic:0.25:0.1:2.5:5                       pattern:1:1.2 
+#sp   0,1,-1    1    255,255,255   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2           texture:./textures/bump_maps/pillow.png:1
+#       
+#       cy   -1,0,-2  0,1,1   2   2    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:0:1.2 
+#
+#    co   1,0,-3       1,0,1 	2   2               200,100,100  mat:plastic:0.25:0.1:2.5:5                       pattern:1:1.2 
 
-pl   0,0,-7  0,0,1                        200,100,100    mat:plastic:0.25:0.1:2.5:5                         pattern:true:1.2 
 
-l       0,5,-1                       1    230,230,230       5
+#pl   0,0,-7  0,0,1                        200,100,100    mat:plastic:0.25:0.1:2.5:5                         pattern:true:1.2 
+
+bx   0,0,-3  1,0.25,0   -0.25,1,0    1,1,1     255,255,255    mat:diffuse:0.25:0.1:2.5:5                         pattern:true:1
+
+#l       0,5,-1                       1    230,230,230       5

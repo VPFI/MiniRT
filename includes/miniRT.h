@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/19 15:55:10 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/22 21:12:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 # include "../printf/ft_printf.h"
 # include "../mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1820
-# define WINH 		980
+# define WINW 		800 //1820
+# define WINH 		800 //980
 
 # define THREADS 	8
 
@@ -61,7 +61,7 @@
 
 # define AIR_REF_INDEX	1.0003
 
-# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\n\nOpening file selector...\n"
+# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\"\n\nOpening file selector...\n"
 # define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
 # define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
 # define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."
