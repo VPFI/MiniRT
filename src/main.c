@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/22 23:35:48 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/23 19:05:30 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,6 +210,16 @@ int	is_aspect_key_down(mlx_key_data_t key_data)
 	}
 	return (0);
 }
+int	is_copy_delete_key_down(mlx_key_data_t key_data)
+{
+	if ((key_data.key == MLX_KEY_N
+		|| key_data.key == MLX_KEY_BACKSPACE)
+		&& (key_data.action == MLX_PRESS))
+	{
+		return (1);
+	}
+	return (0);
+}
 
 int	is_num_key_down(mlx_key_data_t key_data)
 {
@@ -220,9 +230,7 @@ int	is_num_key_down(mlx_key_data_t key_data)
 		|| key_data.key == MLX_KEY_5
 		|| key_data.key == MLX_KEY_6
 		|| key_data.key == MLX_KEY_7
-		|| key_data.key == MLX_KEY_8
-		|| key_data.key == MLX_KEY_N
-		|| key_data.key == MLX_KEY_BACKSPACE)
+		|| key_data.key == MLX_KEY_8)
 		&& (key_data.action == MLX_PRESS))
 	{
 		return (1);
@@ -915,87 +923,161 @@ t_material	new_standard_plight(void)
 	return (mat);
 }
 
-void	add_world_object(t_scene *scene, mlx_key_data_t key_data)
+void	copy_world_object(t_scene *scene, mlx_key_data_t key_data, t_vect *offset_origin)
 {
-	t_figure	fig;
-	t_material	mat;
-	t_ray		camera_ray;
-	t_vect		offset_origin;
 	t_object	*selected_obj;
+	t_material	mat;
 
+	mat = new_standard_material();
 	selected_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!selected_obj)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
+	if (key_data.key == MLX_KEY_N && scene->object_selected)
+	{
+		selected_obj = ft_memcpy(selected_obj, get_selected_object(scene->objects, scene->lights), sizeof(t_object));
+		selected_obj->edit_origin(selected_obj, vect_subtract(*offset_origin, selected_obj->get_origin(selected_obj)));
+		init_copy(scene, selected_obj);
+	}
+	free(selected_obj);
+}
+
+void	set_new_fig_p_light(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_plight();
+	fig.p_light.location = *offset_origin;
+	fig.p_light.radius_shadow = 1.0;
+	init_p_light(scene, fig, mat);
+}
+
+void	set_new_fig_cone(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
 	mat = new_standard_material();
-	camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
-	offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
+	fig.cone.center = *offset_origin;
+	fig.cone.normal = scene->camera.v;
+	fig.cone.radius = 0.5;
+	fig.cone.height = 2.0;
+	init_cone(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_cylinder(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.cylinder.center = *offset_origin;
+	fig.cylinder.normal = scene->camera.v;
+	fig.cylinder.radius = 0.5;
+	fig.cylinder.height = 2.0;
+	init_cylinder(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_disk(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.disk.center = *offset_origin;
+	fig.disk.normal = vect_simple_mult(scene->camera.orientation, -1.0);
+	fig.disk.radius = 0.5;
+	init_disk(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.box.center = *offset_origin;
+	fig.box.u_vect = scene->camera.u;
+	fig.box.v_vect = scene->camera.v;
+	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
+	init_box(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_quad(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.quad.center = *offset_origin;
+	fig.quad.u_vect = scene->camera.u;
+	fig.quad.v_vect = scene->camera.v;
+	init_quad(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_plane(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.plane.center = *offset_origin;
+	fig.plane.normal = vect_simple_mult(scene->camera.orientation, -1.0);
+	init_plane(scene, fig, mat, NULL);
+}
+
+void	set_new_fig_sphere(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.sphere.center = *offset_origin;
+	fig.sphere.radius = 0.5;
+	init_sphere(scene, fig, mat, NULL);
+}
+
+void	add_world_object(t_scene *scene, mlx_key_data_t key_data, t_vect *offset_origin)
+{
 	if (key_data.key == MLX_KEY_1)
-	{
-		fig.sphere.center = offset_origin;
-		fig.sphere.radius = 0.5;
-		init_object(scene, fig, mat, SPHERE);
-	}
+		set_new_fig_sphere(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_2)
-	{
-		fig.plane.center = offset_origin;
-		fig.plane.normal = vect_simple_mult(scene->camera.orientation, -1.0);
-		init_object(scene, fig, mat, PLANE);
-	}
+		set_new_fig_plane(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_3)
-	{
-		fig.quad.center = offset_origin;
-		fig.quad.u_vect = scene->camera.u;
-		fig.quad.v_vect = scene->camera.v;
-		init_object(scene, fig, mat, QUAD);
-	}
+		set_new_fig_quad(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_4)
-	{
-		fig.box.center = offset_origin;
-		fig.box.u_vect = scene->camera.u;
-		fig.box.v_vect = scene->camera.v;
-		fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-		init_object(scene, fig, mat, BOX);
-	}
+		set_new_fig_box(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_5)
-	{
-		fig.disk.center = offset_origin;
-		fig.disk.normal = vect_simple_mult(scene->camera.orientation, -1.0);
-		fig.disk.radius = 0.5;
-		init_object(scene, fig, mat, DISK);
-	}
+		set_new_fig_disk(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_6)
-	{
-		fig.cylinder.center = offset_origin;
-		fig.cylinder.normal = scene->camera.v;
-		fig.cylinder.radius = 0.5;
-		fig.cylinder.height = 2.0;
-		init_object(scene, fig, mat, CYLINDER);
-	}
+		set_new_fig_cylinder(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_7)
-	{
-		fig.cone.center = offset_origin;
-		fig.cone.normal = scene->camera.v;
-		fig.cone.radius = 0.5;
-		fig.cone.height = 2.0;
-		init_object(scene, fig, mat, CONE);
-	}
+		set_new_fig_cone(scene, offset_origin);
 	else if (key_data.key == MLX_KEY_8)
+		set_new_fig_p_light(scene, offset_origin);
+}
+
+void	manage_world_objects(t_scene *scene, mlx_key_data_t key_data)
+{
+	t_ray		camera_ray;
+	t_vect		offset_origin;
+
+	if (is_num_key_down(key_data))
 	{
-		fig.p_light.location = offset_origin;
-		fig.p_light.radius_shadow = 1.0;
-		mat = new_standard_plight();
-		init_object(scene, fig, mat, LIGHT);
+		camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
+		offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
+		add_world_object(scene, key_data, &offset_origin);
 	}
 	else if (key_data.key == MLX_KEY_N && scene->object_selected)
 	{
-		selected_obj = ft_memcpy(selected_obj, get_selected_object(scene->objects, scene->lights), sizeof(t_object));
-		selected_obj->edit_origin(selected_obj, vect_subtract(offset_origin, selected_obj->get_origin(selected_obj)));
-		fig = selected_obj->figure;
-		mat = selected_obj->material;
-		init_object(scene, fig, mat, selected_obj->type);
+		camera_ray = new_ray(scene->camera.orientation, scene->camera.origin);
+		offset_origin = vect_add(ray_at(camera_ray, scene->camera.focus_dist + 1), get_random_uvect(&scene->state));
+		copy_world_object(scene, key_data, &offset_origin);
 	}
-	free(selected_obj);
-	return ;
+	else if (key_data.key == MLX_KEY_BACKSPACE && scene->object_selected)
+	{
+		delete_world_object(scene);
+	}
 }
 
 void	delete_from_objects(t_scene *scene)
@@ -1125,15 +1207,12 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 		main_loop(scene);
 	}
-	else if (is_num_key_down(key_data))
+	else if (is_num_key_down(key_data) || is_copy_delete_key_down(key_data))
 	{
 		set_stop_status(scene);
 		wait_for_threads(scene);
 		scene->stop = false;
-		if (key_data.key == MLX_KEY_BACKSPACE && scene->object_selected)
-			delete_world_object(scene);
-		else
-			add_world_object(scene, key_data);
+		manage_world_objects(scene, key_data);
 		main_loop(scene);
 	}
 	else if (is_camera_key_down(key_data))
@@ -1193,6 +1272,7 @@ void	select_scene(t_scene *scene)
 	}
 	scene->choose_file = 1;
 	init_scene(scene);
+	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	set_new_image(scene);
 	mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 	main_loop(scene);
@@ -3766,152 +3846,33 @@ int	add_object(t_object **objects, t_object *new)
 	return (0);
 }
 
-int	init_object(t_scene *scene, t_figure fig, t_material mat, t_fig_type type)
+void	init_copy(t_scene *scene, t_object *selected_obj)
 {
-	t_object 	*new_obj;
+	t_figure	fig;
+	t_texture	*tx;
+	t_material	mat;
 
-	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
-	if (!new_obj)
-		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
-	new_obj->material = mat;
-	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-	new_obj->selected = true;
-	scene->object_selected = true;
-	if (type == SPHERE)
-	{
-		new_obj->type = type;
-		new_obj->figure.sphere.center = fig.sphere.center;
-		new_obj->figure.sphere.radius = fig.sphere.radius;
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_sphere;
-		new_obj->edit_origin = translate_sphere;
-		new_obj->edit_orientation = rotate_sphere;
-		new_obj->get_origin = get_origin_sphere;
-		new_obj->edit_dimensions = resize_sphere;
-		new_obj->get_visual = get_sphere_pattern;
-		new_obj->get_normal = get_sphere_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == PLANE)
-	{
-		new_obj->type = type;
-		new_obj->figure.plane.center = fig.plane.center;
-		new_obj->figure.plane.normal = unit_vect(fig.plane.normal);
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 1);
-		new_obj->hit_func = hit_plane;
-		new_obj->edit_origin = translate_plane;
-		new_obj->edit_orientation = rotate_plane;
-		new_obj->get_origin = get_origin_plane;
-		new_obj->edit_dimensions = resize_plane;
-		new_obj->get_visual = get_plane_pattern;
-		new_obj->get_normal = get_plane_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == QUAD)
-	{
-		new_obj->type = type;
-		new_obj->figure.quad.center = fig.quad.center;
-		new_obj->figure.quad.u_vect = fig.quad.u_vect;
-		new_obj->figure.quad.v_vect = fig.quad.v_vect;
-		new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_quad;
-		new_obj->edit_origin = translate_quad;
-		new_obj->edit_orientation = rotate_quad;
-		new_obj->get_origin = get_origin_quad;
-		new_obj->edit_dimensions = resize_quad;
-		new_obj->get_visual = get_quad_pattern;
-		new_obj->get_normal = get_quad_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == BOX)
-	{
-		new_obj->type = type;
-		new_obj->figure.box.center = fig.box.center;
-		new_obj->figure.box.u_vect = fig.box.u_vect;
-		new_obj->figure.box.v_vect = fig.box.v_vect;
-		new_obj->figure.box.dimensions = fig.box.dimensions;
-		new_obj->figure.box.faces = NULL;
-		new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_box;
-		new_obj->edit_origin = translate_box;
-		new_obj->edit_orientation = rotate_box;
-		new_obj->get_origin = get_origin_box;
-		new_obj->edit_dimensions = resize_box;
-		new_obj->get_visual = get_box_pattern;
-		new_obj->get_normal = get_box_normal;
-		new_obj->next = NULL;
-		init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
-	}
-	else if (type == DISK)
-	{
-		new_obj->type = type;
-		new_obj->figure.disk.center = fig.disk.center;
-		new_obj->figure.disk.normal = unit_vect(fig.disk.normal);
-		new_obj->figure.disk.radius = fig.disk.radius;
-		new_obj->texture = get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_disk;
-		new_obj->edit_origin = translate_disk;
-		new_obj->edit_orientation = rotate_disk;
-		new_obj->get_origin = get_origin_disk;
-		new_obj->edit_dimensions = resize_disk;
-		new_obj->get_visual = get_disk_pattern;
-		new_obj->get_normal = get_disk_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == CYLINDER)
-	{
-		new_obj->type = type;
-		new_obj->figure.cylinder.center = fig.cylinder.center;
-		new_obj->figure.cylinder.normal = unit_vect(fig.cylinder.normal);
-		new_obj->figure.cylinder.radius = fig.cylinder.radius;
-		new_obj->figure.cylinder.height = fig.cylinder.height;
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_cylinder;
-		new_obj->edit_origin = translate_cylinder;
-		new_obj->edit_orientation = rotate_cylinder;
-		new_obj->get_origin = get_origin_cylinder;
-		new_obj->edit_dimensions = resize_cylinder;
-		new_obj->get_visual = get_cylinder_pattern;
-		new_obj->get_normal = get_cylinder_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == CONE)
-	{
-		new_obj->type = type;
-		new_obj->figure.cone.center = vect_add(fig.cone.center, vect_simple_mult(fig.cone.normal, -fig.cone.height / 2));
-		new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
-		new_obj->figure.cone.radius = fig.cone.radius;
-		new_obj->figure.cone.height = fig.cone.height;
-		new_obj->texture = NULL; //get_texture("./textures/bump_maps/pillow.png", 0.78539816339);
-		new_obj->hit_func = hit_cone;
-		new_obj->edit_origin = translate_cone;
-		new_obj->edit_orientation = rotate_cone;
-		new_obj->get_origin = get_origin_cone;
-		new_obj->edit_dimensions = resize_cone;
-		new_obj->get_visual = get_cone_pattern;
-		new_obj->get_normal = get_cone_normal;
-		new_obj->next = NULL;
-	}
-	else if (type == LIGHT)
-	{
-		new_obj->type = type;
-		new_obj->figure.p_light.location = fig.p_light.location;
-		new_obj->figure.p_light.radius_shadow = fig.p_light.radius_shadow;
-		new_obj->texture = NULL;
-		new_obj->hit_func = hit_point_light;
-		new_obj->edit_origin = translate_point_light;
-		new_obj->edit_orientation = rotate_sphere;
-		new_obj->get_origin = get_origin_point_light;
-		new_obj->edit_dimensions = resize_point_light;
-		new_obj->get_visual = get_light_pattern;
-		new_obj->get_normal = get_light_normal;
-		new_obj->next = NULL;
-		add_object(&scene->lights, new_obj);
-		return (0);
-	}
-	add_object(&scene->objects, new_obj);
-	return (0);
+	tx = NULL;
+	if (selected_obj->texture)
+		tx = get_texture(selected_obj->texture->path, selected_obj->texture->texture_dim);
+	fig = selected_obj->figure;
+	mat = selected_obj->material;
+	if (selected_obj->type == SPHERE)
+		init_sphere(scene, fig, mat, tx);
+	else if (selected_obj->type == PLANE)
+		init_plane(scene, fig, mat, tx);
+	else if (selected_obj->type == QUAD)
+		init_quad(scene, fig, mat, tx);
+	else if (selected_obj->type == BOX)
+		init_box(scene, fig, mat, tx);
+	else if (selected_obj->type == DISK)
+		init_disk(scene, fig, mat, tx);
+	else if (selected_obj->type == CYLINDER)
+		init_cylinder(scene, fig, mat, tx);
+	else if (selected_obj->type == CONE)
+		init_cone(scene, fig, mat, tx);
+	else if (selected_obj->type == LIGHT)
+		init_p_light(scene, fig, mat);
 }
 
 void	add_box_face(t_object *box, t_figure face, t_material mat)
@@ -4026,332 +3987,6 @@ void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
 	add_box_face(box, fig, mat);
-}
-
-void	init_lights(t_scene *scene)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	ft_bzero(&mat, sizeof(mat));
-	ft_bzero(&fig, sizeof(fig));
-
-	mat.pattern_dim = M_PI / 6;
-	mat.pattern = false;
-
-	fig.p_light.location = new_vect(0, 5.0, -7.0);
-	fig.p_light.radius_shadow = 1.0;;
-	mat.color = hexa_to_vect(BLUE);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 5.0;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(2, 6.0, 0.0);
-	fig.p_light.radius_shadow = 1.0;;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(1.2, 7.0, 1.8);
-	fig.p_light.radius_shadow = 1.0;;
-	mat.color = hexa_to_vect(GREEN);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.5;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(-8.0, 0.0, -8.0);
-	fig.p_light.radius_shadow = 1.0;;
-	mat.color = hexa_to_vect(BLUE);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.5;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
-	fig.p_light.location = new_vect(1.0, -5.0, -2.0);
-	fig.p_light.radius_shadow = 1.0;;
-	mat.color = hexa_to_vect(YELLOW);
-	mat.specular = 0.0;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.5;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, LIGHT);
-	(void)scene;
-}
-
-void	init_figures(t_scene *scene)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	ft_bzero(&mat, sizeof(mat));
-	ft_bzero(&fig, sizeof(fig));
-	
-	mat.pattern_dim = M_PI / 6;
-	mat.pattern = false;
-
-	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0, 10, 0);
-	fig.quad.center = new_vect(0, 0.0, -5.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.pattern = true;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0, 0, 10);
-	fig.quad.center = new_vect(0, 5.0, 0.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(10.0, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0, 0, -10);
-	fig.quad.center = new_vect(0, -5.0, 0.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
-	fig.quad.v_vect = new_vect(0, -10, 0);
-	fig.quad.center = new_vect(-5, 0.0, 0.0);
-	mat.color = hexa_to_vect(GREEN);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.quad.u_vect = new_vect(0.0, 0.0, 10.0);
-	fig.quad.v_vect = new_vect(0, 10, 0);
-	fig.quad.center = new_vect(5, 0.0, 0.0);
-	mat.color = hexa_to_vect(RED);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
-	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	fig.box.center = new_vect(0.0, 0, 0.0);
-	fig.box.dimensions = new_vect(4.0, 4.0, 4.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.1;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 2.0;
-	mat.refraction_index = 1.5;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, BOX);
-
-	fig.plane.center = new_vect(2, -1.0, -2.0);
-	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
-	mat.color = hexa_to_vect(RED);
-	mat.pattern = true;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
-	
-	fig.plane.center = new_vect(2, -1.0, -3.0);
-	fig.plane.normal = new_vect(0.0, 0.0, 1.0);
-	mat.color = hexa_to_vect(RED);
-	mat.pattern = true;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, PLANE);
-	
-	fig.plane.center = new_vect(2, -1.0, 4.0);
-	fig.plane.normal = new_vect(0.0, 1.0, 0.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 2.5;
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	init_object(scene, fig, mat, PLANE);
-
-
-	// for (int i = 0; i < 5; i++)
-	// {
-	// 	for (int j = 0; j < 5; j++)
-	// 	{
-	// 		if ((i == 0 || i == 4) && (j == 0 || j == 4))
-	// 		{
-	// 			fig.sphere.center = new_vect(-2 + (1 * i), 2, -5 + j);
-	// 			fig.sphere.radius = 0.15;
-	// 			mat.color = hexa_to_vect(WHITE);
-	// 			mat.albedo = mat.color;
-	// 			mat.emission_intensity = 6.5;
-	// 			mat.type = EMISSIVE;
-	// 			init_object(scene, fig, mat, SPHERE);
-	// 		}
-	// 		if (i == 2 && j == 2)
-	// 		{
-	// 			fig.sphere.center = new_vect(-2 + (1 * i), 2, -5 + j);
-	// 			fig.sphere.radius = 1;
-	// 			mat.color = hexa_to_vect(WHITE);
-	// 			mat.albedo = mat.color;
-	// 			mat.emission_intensity = 10.0;
-	// 			mat.type = EMISSIVE;
-	// 			init_object(scene, fig, mat, SPHERE);
-	// 		}
-	// 		mat.color = hexa_to_vect(BLACK);
-	// 		mat.albedo = mat.color;
-	// 		mat.type = LAMBERTIAN;
-	// 		fig.box.center = new_vect(-2 + (1 * i), -1.0, -5 + j);
-	// 		fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
-	// 		fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	// 		fig.box.dimensions = new_vect(1.0, fast_rand(&scene->state) + 1.75, 1.0);
-	// 		init_object(scene, fig, mat, BOX);
-	// 	}
-	// }
-
-	fig.cylinder.center = new_vect(7.0, -0.01, 7);
-	fig.cylinder.normal = new_vect(0.0, 1.0, 0.0);
-	fig.cylinder.radius = 0.5;
-	fig.cylinder.height = 2;
-	mat.color = hexa_to_vect(WHITE);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.0;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 4.0;
-	mat.refraction_index = 1.52;
-	mat.type = DIELECTRIC;
-	//init_object(scene, fig, mat, CYLINDER);
-
-	mat.color = hexa_to_vect(BLACK);
-	mat.albedo = mat.color;
-	mat.type = LAMBERTIAN;
-	fig.box.center = new_vect(7.0, -0.01, 7);
-	fig.box.dimensions = new_vect(1.0, 1, 1.0);
-	fig.box.u_vect = new_vect(1.0, 0.0, 0.0);
-	fig.box.v_vect = new_vect(0.0, 1.0, 0.0);
-	//init_object(scene, fig, mat, BOX);
-
-	fig.sphere.center = new_vect(0, 1, 0.0);
-	fig.sphere.radius = 1;
-	mat.color = hexa_to_vect(WHITE);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.pattern = false;
-	mat.pattern_dim = M_PI;
-	mat.metal_roughness = 0.0;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 6.5;
-	mat.type = METAL;
-	//init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(0, 0, -5.0);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(BRONZE);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.pattern = false;
-	mat.pattern_dim = M_PI;
-	mat.metal_roughness = 0.4;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 6.5;
-	mat.type = METAL;
-	//init_object(scene, fig, mat, SPHERE);
-	
-	fig.quad.u_vect = new_vect(0.0, 0.0, 0.0);
-	fig.quad.v_vect = new_vect(0, 0, 4);
-	fig.quad.center = new_vect(0, 4.95, 0.0);
-	mat.color = hexa_to_vect(WHITE);
-	mat.pattern = false;
-	mat.specular = 1.0;
-	mat.metal_roughness = 0.0;
-	mat.emission_intensity = 3.5;
-	mat.albedo = mat.color;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, QUAD);
-
-	fig.sphere.center = new_vect(8.0, 0.0, 4);
-	fig.sphere.radius = 1.5;
-	mat.color = hexa_to_vect(WHITE);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
-	mat.refraction_index = 2.5;
-	mat.emission_intensity = 8.0;
-	mat.type = EMISSIVE;
-	//init_object(scene, fig, mat, SPHERE);
-
-	fig.sphere.center = new_vect(-12.0, 0.0, -5);
-	fig.sphere.radius = 3;
-	mat.color = hexa_to_vect(WHITE);
-	mat.albedo = mat.color;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
-	mat.refraction_index = 1.5;
-	mat.emission_intensity = 0.0;
-	mat.type = DIELECTRIC;
-
-	// for (int i = 0; i < 5; i++)
-	// {
-	// 	fig.sphere.center = new_vect(-12 + (6 * i), 0.0, -5);
-	// 	mat.metal_roughness = 0.0 + (0.2 * i);
-	// 	init_object(scene, fig, mat, SPHERE);
-	// }
-
-	fig.cone.center = new_vect(0.0, -7.0, -5);
-	fig.cone.normal = new_vect(0.0, -1.0, 0.0);
-	fig.cone.radius = 2;
-	fig.cone.height = 5;
-	mat.color = hexa_to_vect(RED);
-	mat.specular = 0.1;
-	mat.metal_roughness = 0.2;
-	mat.albedo = mat.color;
-	mat.emission_intensity = 4.0;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, CONE);
-
-	fig.disk.center = new_vect(0.0, 0.0, 0);
-	fig.disk.normal = new_vect(0.0, 0.0, 1);
-	fig.disk.radius = 4;
-	mat.color = hexa_to_vect(WHITE);
-	mat.albedo = mat.color;
-	mat.pattern = true;
-	mat.specular = 0.2;
-	mat.metal_roughness = 0.0;
-	mat.refraction_index = 2.5;
-	mat.emission_intensity = 2.5;
-	mat.type = LAMBERTIAN;
-	//init_object(scene, fig, mat, DISK);
 }
 
 void	init_sky_sphere(t_scene *scene, char *path)
@@ -5291,6 +4926,8 @@ void	load_standard_scene(t_scene *scene)
 {
 	scene->amb_light = AMB_LIGHT;
 	scene->amb_color = AMB_COLOR;
+	scene->max_depth = MAX_DEPTH;
+	scene->samples = SPP;
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
 	init_sky_sphere(scene, STD_SKYSPHERE);	
@@ -5298,15 +4935,14 @@ void	load_standard_scene(t_scene *scene)
 
 void	init_scene(t_scene *scene)
 {
-	if (!scene->path)
+	if (scene->path && (!ft_strcmp(".std", scene->path) || !ft_strcmp(".standard", scene->path)))
 	{
 		load_standard_scene(scene);
 	}
-	else
+	else if (scene->path && scene->choose_file)
 	{
 		load_map_scene(scene);
 		recalculate_view(scene);
-		//init_camera(&scene->camera, scene->width, scene->height);
 		scene->back_up_camera = scene->camera;
 	}
 }
@@ -5433,7 +5069,6 @@ void	close_mlx(void *sc)
 
 int	main(int argc, char **argv)
 {
-	//check exit when clicking x on window
 	t_scene	scene;
 
 	init_minirt(&scene);

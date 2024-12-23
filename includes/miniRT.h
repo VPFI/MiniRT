@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/22 21:12:49 by vpf              ###   ########.fr       */
+/*   Updated: 2024/12/23 18:33:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -523,5 +523,24 @@ char		*get_map_path(int map_index);
 
 int			throw_err(char *msg, char *specifier, int err_code);
 void		exit_err(char *msg, char *specifier, int err_code);
+
+//-----------------------------TO PUT IN LIBFT----------------------------------
+
+int		ft_strcmp(const char *s1, const char *s2);
+
+//------------------------------------------------------------------------------
+
+void		delete_world_object(t_scene *scene);
+
+void		init_copy(t_scene *scene, t_object *selected_obj);
+
+int			init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_quad(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx);
+int			init_p_light(t_scene *scene, t_figure fig, t_material mat);
 
 #endif

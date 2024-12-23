@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/17 17:09:51 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/23 18:28:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,11 +108,17 @@ int	parse_map_path(t_scene *scene, int argc, char **argv)
 		return (10);
 	else if (argc > 2)
 		return (throw_err(ERR_ARGNUM_MSG, NULL, 11));
-	if (check_file_format(argv[1]))
-		return (throw_err(ERR_INCMAP_MSG, argv[1], 12));
-	if (check_file_validity(argv[1]))
-		return (throw_err(ERR_NOFILE_MSG, argv[1], 12));
-	scene->choose_file = 1;
-	scene->path = ft_strdup(argv[1]);
+	if (!(!ft_strcmp(".std", argv[1]) || !ft_strcmp(".standard", argv[1])))
+	{
+		if (check_file_format(argv[1]))
+			return (throw_err(ERR_INCMAP_MSG, argv[1], 12));
+		if (check_file_validity(argv[1]))
+			return (throw_err(ERR_NOFILE_MSG, argv[1], 12));
+	}
+	else
+	{
+		scene->choose_file = 1;
+		scene->path = ft_strdup(argv[1]);
+	}
 	return (0);
 }
