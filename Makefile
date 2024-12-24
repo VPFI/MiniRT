@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/12/17 22:07:20 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/12/24 16:06:10 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,9 +34,9 @@ MLX_VERSION = 2.4.1
 
 MLX_URL = https://github.com/codam-coding-college/MLX42/archive/refs/tags/v2.4.1.tar.gz
 
-DIR_MLX	 = mlx/
+DIR_MLX	 = libraries/mlx/
 
-BUILD_DIR_MLX = mlx/MLX42/build/
+BUILD_DIR_MLX = libraries/mlx/MLX42/build/
 
 PATH_MLX = $(BUILD_DIR_MLX)libmlx42.a
 
@@ -82,7 +82,7 @@ $(DIR_MLX)MLX42:
 
 $(PATH_MLX): $(DIR_MLX)MLX42
 	@echo "Creating MLX"
-	@cd mlx/MLX42 && cmake -B build && cmake --build build --parallel --config Release
+	@cd $(DIR_MLX)MLX42 && cmake -B build && cmake --build build --parallel --config Release
 
 clean:
 	@$(MAKE) -C libft/ clean  --no-print-directory

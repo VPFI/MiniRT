@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/23 18:33:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/24 16:34:06 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,15 @@
 # include <signal.h>
 # include <unistd.h>
 # include <dirent.h>
-# include <pthread.h>
 # include <math.h>
 # include <limits.h>
-# include "../libft/libft.h"
-# include "../printf/ft_printf.h"
-# include "../mlx/MLX42/include/MLX42/MLX42.h"
+# include "src/error_management/error_management.h"
+# include "../libraries/libft/libft.h"
+# include "../libraries/printf/ft_printf.h"
+# include "../libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		800 //1820
-# define WINH 		800 //980
+# define WINW 		1820
+# define WINH 		980
 
 # define THREADS 	8
 
@@ -61,23 +61,7 @@
 
 # define AIR_REF_INDEX	1.0003
 
-# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\"\n\nOpening file selector...\n"
-# define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
-# define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
-# define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."
-# define ERR_NOFILE_MSG		"No such file or dir: %s\n\n"
-# define ERR_PERM_MSG		"Permission denied\n"
-# define ERR_STD_MSG		"Unexpected error\n"
-# define ERR_EMPTY_MSG		"%s\n"
-# define ERR_MEM_MSG		"Memory allocation failed %s\n\n"
-
-# define ERR_ATTR_MSG		"Parsing: %s\n"
-# define ERR_VECT_MSG		"Parsing: %s to vector form\n"
-# define ERR_NOID_MSG		"Invalid identifier %s\n"
-# define ERR_MAT_MSG		"Wrong material type: %s\n"
-
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
-
 
 # define CAMERA_ID			"C"
 # define AMBIENT_ID			"A"
@@ -97,31 +81,6 @@ typedef struct s_vect	t_color;
 typedef struct s_object t_object;
 
 typedef union s_figure	t_figure;
-
-typedef struct s_thread
-{
-	int				id;
-	int				pix_rendered;
-	int				iterations;
-	pthread_t		self;
-	float			time_hit;
-	struct s_scene	*scene;
-	uint32_t		*state;
-	uint32_t		current_x;
-	uint32_t		x_start;
-	uint32_t		x_end;
-	uint32_t		x_increment;
-	uint32_t		current_y;
-	uint32_t		y_start;
-	uint32_t		y_end;
-	bool			sampled;
-}					t_thread;
-
-typedef struct s_thread_backup
-{
-	int				iterations;
-	uint32_t		current_y;
-}					t_thread_backup;
 
 typedef enum e_mat_type
 {

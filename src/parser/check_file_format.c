@@ -1,60 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
+/*   check_file_format.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/23 18:28:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/24 16:37:34 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
 
-void	exit_err(char *msg, char *specifier, int err_code)
-{
-	if (!specifier)
-		fprintf(stderr, "MiniRT | Critical error: %s\n", msg);
-	else
-	{
-		fprintf(stderr, "MiniRT | Critical error: ");
-		fprintf(stderr, msg, specifier);
-	}
-	exit(err_code);
-}
-
-int	throw_err(char *msg, char *specifier, int err_code)
-{
-	if (!specifier)
-		fprintf(stderr, "MiniRT | Error: %s\n", msg);
-	else
-	{
-		fprintf(stderr, "MiniRT | Error: ");
-		fprintf(stderr, msg, specifier);
-	}
-	return (err_code);
-}
-
-char	*get_filename(char *path)
-{
-	int	aux;
-	int	len;
-
-	if (!path)
-	{
-		return (NULL);
-	}
-	len = ft_strlen(path);
-	aux = len;
-	while (aux > 0 && path[aux - 1] != '/')
-	{
-		aux--;
-	}
-	return (ft_substr(path, aux, len));
-}
-
-int	check_extension(char *name)
+static int	check_extension(char *name)
 {
 	int	len;
 
@@ -69,7 +27,7 @@ int	check_extension(char *name)
 	return (1);
 }
 
-int	check_file_format(char *path)
+static int	check_file_format(char *path)
 {
 	char	*filename;
 
@@ -84,7 +42,7 @@ int	check_file_format(char *path)
 	return (0);
 }
 
-int	check_file_validity(char *path)
+static int	check_file_validity(char *path)
 {
 	int	fd;
 

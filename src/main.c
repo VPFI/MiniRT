@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/23 19:05:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/24 17:36:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1272,36 +1272,9 @@ void	select_scene(t_scene *scene)
 	}
 	scene->choose_file = 1;
 	init_scene(scene);
-	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	set_new_image(scene);
 	mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
 	main_loop(scene);
-}
-
-void	key_down(mlx_key_data_t key_data, void *sc)
-{
-	t_scene	*scene;
-
-	scene = sc;
-	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
-	{
-		set_stop_status(scene);
-		close_all(scene);
-	}
-	else if (!scene->choose_file && scene->map_count
-		&& is_movement_key_down(key_data))
-	{
-		move_menu(scene, key_data.key);
-	}
-	else if (!scene->choose_file
-		&& (key_data.key == MLX_KEY_ENTER && key_data.action == MLX_PRESS))
-	{
-		select_scene(scene);
-	}
-	else if (scene->edit_mode == false && scene->choose_file)
-		render_mode_hooks(scene, key_data);
-	else if (scene->edit_mode == true)
-		edit_mode_hooks(scene, key_data);
 }
 
 t_vect	set_pixel_offset(t_camera camera, uint32_t x, uint32_t y, uint32_t *state)
@@ -1837,45 +1810,6 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
 	return (get_sky_color(thread, &ray));
-}
-
-void	set_thread_backup(t_thread *thread, t_thread_backup *back_up)
-{
-	thread->current_y = back_up->current_y;
-	thread->iterations = back_up->iterations;
-}
-
-void	set_thread_default(t_thread *thread)
-{
-	thread->current_y = 0;
-	thread->iterations = 1;
-}
-
-void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup)
-{
-	if (do_backup)
-	{
-		set_thread_backup(thread, back_up);
-	}
-	else
-	{
-		set_thread_default(thread);		
-	}
-	thread->y_start = 0;
-	thread->y_end = thread->scene->height;
-	thread->current_x = 0;
-	thread->x_start = thread->id;
-	thread->x_end = thread->scene->width;
-	thread->x_increment = THREADS;
-	thread->pix_rendered = 0;
-	thread->time_hit = 0;
-	thread->state = malloc(sizeof(uint32_t));
-	if (!thread->state)
-	{
-		return (exit_err(ERR_MEM_MSG, "(malloc)", 2));
-	}
-	*(thread->state) = mlx_get_time() * (thread->id + 1) * 123456;
-	//printf("%i -- %i -- %i -- %i\n", thread->y_start, thread->y_end, thread->x_start, thread->x_end);
 }
 
 void	init_render(t_scene *scene)
@@ -3609,23 +3543,6 @@ void	resize_rendering(t_scene *scene)
 	main_loop(scene);
 }
 
-void	resize_minirt(int32_t width, int32_t height, void *sc)
-{
-	t_scene *scene;
-
-	scene = sc;
-	scene->height = height;
-	scene->width = width;
-	if (!scene->choose_file)
-	{
-		resize_file_selector(scene);
-	}
-	else
-	{
-		resize_rendering(scene);
-	}
-}
-
 void	set_new_image(t_scene *scene)
 {
 	if (scene->image)
@@ -3661,30 +3578,6 @@ void	select_object(t_scene *scene, uint32_t x, uint32_t y)
 	{
 		hit_info.object->selected = true;
 		scene->object_selected = true;
-	}
-}
-
-void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void *sc)
-{
-	int32_t	x;
-	int32_t	y;
-	t_scene *scene;
-
-	scene = sc;
-	(void)mods;
-	if (scene->edit_mode == true
-		&& button == MLX_MOUSE_BUTTON_LEFT
-		&& action == MLX_PRESS)
-	{
-		mlx_get_mouse_pos(scene->mlx, &x, &y);
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-		select_object(scene, x, y);
-	}
-	else if (scene->edit_mode == true
-		&& button == MLX_MOUSE_BUTTON_RIGHT
-		&& action == MLX_PRESS)
-	{
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 	}
 }
 
@@ -4041,145 +3934,6 @@ void	init_minirt(t_scene *scene)
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 }
 
-void	free_arr(char **arr)
-{
-	int	i;
-
-	i = 0;
-	if (arr)
-	{
-		while (arr[i])
-		{
-			free(arr[i]);
-			arr[i] = NULL;
-			i++;
-		}
-		free(arr);
-	}
-}
-
-
-int	ft_strcmp(const char *s1, const char *s2)
-{
-	size_t			i;
-	unsigned char	*ts1;
-	unsigned char	*ts2;
-
-	i = 0;
-	ts1 = (unsigned char *)s1;
-	ts2 = (unsigned char *)s2;
-	while ((ts1[i] != '\0') && (ts2[i] != '\0'))
-	{
-		if (ts1[i] != ts2[i])
-		{
-			return (ts1[i] - ts2[i]);
-		}
-		i++;
-	}
-	return (ts1[i] - ts2[i]);
-}
-
-char	**format_line(char *line)
-{
-	char	**res;
-	char	*temp_line;
-
-	temp_line = ft_strtrim(line, "\n");
-	res = ft_split(temp_line, ' ');
-	free(temp_line);
-	if (res && res[0] && !ft_strncmp(res[0], "#", 1))
-	{
-		free_arr(res);
-		return (NULL);
-	}
-	return (res);
-}
-
-float	sum_parts(int integer_part, float decimal_part, char *array)
-{
-	if (integer_part >= 0 && array[0] != '-')
-	{
-		return ((float)(integer_part + decimal_part));
-	}
-	else
-	{
-		return ((float)(integer_part - decimal_part));
-	}	
-}
-void	check_bounds(float num, float min, float max)
-{
-	if (num > max)
-	{
-		fprintf(stderr, "Maximum threshold: %f || Input --> %f\n", max, num);
-		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
-	}
-	if (num < min)
-	{
-		fprintf(stderr, "Minimum threshold: %f || Input --> %f\n", min, num);
-		exit_err(ERR_EMPTY_MSG, "Minimum value threshold not reached\n", 2);
-	}
-}
-
-float	ft_atof(char *array, float min, float max)
-{
-	int		i;
-	float	res;
-	char	*aux;
-	float	decimal_part;
-
-	i = 0;
-	decimal_part = 0;
-	if (ft_strlen(array) > 10)
-	{
-		fprintf(stderr, "Input --> %s\n", array);
-		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
-	}
-	while (array[i] && array[i] != '.')
-		i++;		
-	if (i != (int)ft_strlen(array) && array[i + 1])
-	{
-		aux = ft_substr(array, (i + 1), ft_strlen(array));
-		if (!aux)
-			exit_err(ERR_MEM_MSG, "(malloc)", 1);
-		decimal_part = (ft_atoi(aux) / powf(10, ft_strlen(aux)));
-		free(aux);
-	}
-	res = sum_parts(ft_atoi(array), decimal_part, array);
-	check_bounds(res, min, max);
-	return (res);
-}
-
-int	count_components(char **components)
-{
-	int	i;
-
-	if (!components)
-		return (0);
-	i = 0;
-	while (components[i])
-	{
-		i++;
-	}
-	return (i);
-}
-
-t_vect	input_to_vect(char *input, float min, float max)
-{
-	t_vect	res;
-	int		count;
-	char	**vec_comp;
-
-	vec_comp = ft_split(input, ',');
-	count = count_components(vec_comp);
-	if (count != 3)
-		exit_err(ERR_VECT_MSG, input, 2);
-	res.x = ft_atof(vec_comp[0], min, max);
-	res.y = ft_atof(vec_comp[1], min, max);
-	res.z = ft_atof(vec_comp[2], min, max);
-	free_arr(vec_comp);
-	return (res);
-}
-
 int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
 	t_object 	*new_obj;
@@ -4205,139 +3959,6 @@ int	init_sphere(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
-}
-
-void	ft_strtolower(char *str)
-{
-	while(*str)
-	{
-		*str = ft_tolower(*str);
-		str++;;
-	}
-}
-
-int	get_material_index(char *id)
-{
-	if (!id)
-		exit_err(ERR_ATTR_MSG, "Wrong material type\n", 2);
-	ft_strtolower(id);
-	if (!ft_strcmp(id, "lambertian") || !ft_strcmp(id, "diffuse"))
-		return (LAMBERTIAN);
-	else if (!ft_strcmp(id, "metal") || !ft_strcmp(id, "metallic"))
-		return (METAL);
-	else if (!ft_strcmp(id, "glossy") || !ft_strcmp(id, "plastic"))
-		return (GLOSSY);
-	else if (!ft_strcmp(id, "glass") || !ft_strcmp(id, "dielectric"))
-		return (DIELECTRIC);
-	else if (!ft_strcmp(id, "emissive"))
-		return (EMISSIVE);
-	else
-		exit_err(ERR_MAT_MSG, id, 2);
-	return (0);
-}
-
-void	parse_material(char **settings, t_material *mat)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 6)
-		exit_err(ERR_EMPTY_MSG, "Missing material components\n", 2);
-	mat->type = get_material_index(settings[1]);		
-	mat->specular = ft_atof(settings[2], 0, 1);
-	mat->metal_roughness = ft_atof(settings[3], 0, 1);
-	mat->refraction_index = ft_atof(settings[4], 0, 100);
-	mat->emission_intensity = ft_atof(settings[5], 0, (float)INT_MAX);
-}
-
-bool	get_pattern_bool(char *id)
-{
-	if (id)
-	{
-		if (!ft_strcmp(id, "0") || !ft_strcmp(id, "false"))
-		{
-			return (false);
-		}
-		else if (!ft_strcmp(id, "1") || !ft_strcmp(id, "true"))
-		{
-			return (true);
-		}
-	}
-	exit_err(ERR_EMPTY_MSG, "Unknown pattern value\n", 2);
-	return (false);
-}
-
-void	parse_pattern(char **settings, t_material *mat)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 3)
-		exit_err(ERR_EMPTY_MSG, "Missing pattern components\n", 2);
-	mat->pattern = get_pattern_bool(settings[1]);
-	mat->pattern_dim = ft_atof(settings[2], 0, (float)INT_MAX);
-}
-void	parse_texture(char **settings, t_texture **tx)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 3)
-		exit_err(ERR_EMPTY_MSG, "Missing texture components\n", 2);
-	*tx = get_texture(settings[1], ft_atof(settings[2], 0, (float)INT_MAX));
-	if (!(*tx))
-	{
-		exit_err(ERR_ATTR_MSG, "texture\n", 2);
-	}
-}
-
-void	parse_extra_material_components(t_material *mat,
-	t_texture **tx, char **components, int i)
-{
-	char	**unit;
-
-	while (components[i])
-	{
-		unit = ft_split(components[i], ':');
-		if (!unit)
-			exit_err(ERR_ATTR_MSG, "extra material components\n", 2);
-		if (!ft_strcmp(unit[0], "material") || !ft_strcmp(unit[0], "mat"))
-		{
-			parse_material(unit, mat);
-		}
-		else if (!ft_strcmp(unit[0], "pattern"))
-		{
-			parse_pattern(unit, mat);
-		}
-		else if (!ft_strcmp(unit[0], "texture") || !ft_strcmp(unit[0], "tx"))
-		{
-			parse_texture(unit, tx);
-		}
-		else
-			exit_err(ERR_ATTR_MSG, "Unknown extra attribute identifier\n", 2);
-		free_arr(unit);
-		i++;
-	}	
-}
-
-void	load_sphere(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 4)
-	{
-		exit_err(ERR_ATTR_MSG, "sphere | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.sphere.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.sphere.radius = ft_atof(components[2], 0, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 4);
-	init_sphere(scene, fig, mat, texture);
 }
 
 int	init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
@@ -4367,27 +3988,6 @@ int	init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	return (0);
 }
 
-void	load_plane(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 4)
-	{
-		exit_err(ERR_ATTR_MSG, "plane | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.plane.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.plane.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	if (zero_vect(fig.plane.normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 4);
-	init_plane(scene, fig, mat, texture);
-}
 int	init_quad(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
 	t_object 	*new_obj;
@@ -4417,31 +4017,6 @@ int	init_quad(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	return (0);
 }
 
-void	load_quad(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_vect		normal;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 5)
-	{
-		exit_err(ERR_ATTR_MSG, "quad | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.quad.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.quad.u_vect = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	fig.quad.v_vect = input_to_vect(components[3], (float)INT_MIN, (float)INT_MAX);
-	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-	if (zero_vect(normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	mat.color = vect_simple_div(input_to_vect(components[4], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 5);
-	init_quad(scene, fig, mat, texture);
-}
-
 int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
 	t_object 	*new_obj;
@@ -4468,29 +4043,6 @@ int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
-}
-
-void	load_disk(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 5)
-	{
-		exit_err(ERR_ATTR_MSG, "disk | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.disk.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.disk.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	if (zero_vect(fig.disk.normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	fig.disk.radius = ft_atof(components[3], 0, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[4], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 5);
-	init_disk(scene, fig, mat, texture);
 }
 
 int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
@@ -4524,32 +4076,6 @@ int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	return (0);
 }
 
-void	load_box(t_scene *scene, char **cmp, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_vect		normal;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 6)
-	{
-		exit_err(ERR_ATTR_MSG, "box | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.box.center = input_to_vect(cmp[1], (float)INT_MIN, (float)INT_MAX);
-	fig.box.u_vect = input_to_vect(cmp[2], (float)INT_MIN, (float)INT_MAX);
-	fig.box.v_vect = input_to_vect(cmp[3], (float)INT_MIN, (float)INT_MAX);
-	normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-	if (zero_vect(normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	fig.box.dimensions = input_to_vect(cmp[4], (float)INT_MIN, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(cmp[5], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, cmp, 6);
-	init_box(scene, fig, mat, texture);
-}
-
 int	init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
 	t_object 	*new_obj;
@@ -4577,30 +4103,6 @@ int	init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
-}
-
-void	load_cylinder(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 6)
-	{
-		exit_err(ERR_ATTR_MSG, "cylinder | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.cylinder.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.cylinder.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	if (zero_vect(fig.cylinder.normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	fig.cylinder.radius = ft_atof(components[3], 0, (float)INT_MAX);
-	fig.cylinder.height = ft_atof(components[4], 0, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 6);
-	init_cylinder(scene, fig, mat, texture);
 }
 
 int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
@@ -4632,30 +4134,6 @@ int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	return (0);
 }
 
-void	load_cone(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-	t_texture	*texture;
-
-	texture = NULL;
-	if (amount < 6)
-	{
-		exit_err(ERR_ATTR_MSG, "cone | missing essential attributes\n", 2);
-	}
-	mat = new_standard_material();
-	fig.cone.center = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.cone.normal = input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX);
-	if (zero_vect(fig.cone.normal))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	fig.cone.radius = ft_atof(components[3], 0, (float)INT_MAX);
-	fig.cone.height = ft_atof(components[4], 0, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[5], 0, 255), 255.0);
-	mat.albedo = mat.color;
-	parse_extra_material_components(&mat, &texture, components, 6);
-	init_cone(scene, fig, mat, texture);
-}
-
 int	init_p_light(t_scene *scene, t_figure fig, t_material mat)
 {
 	t_object 	*new_obj;
@@ -4683,388 +4161,16 @@ int	init_p_light(t_scene *scene, t_figure fig, t_material mat)
 	return (0);
 }
 
-void	load_p_light(t_scene *scene, char **components, int amount)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	if (amount < 5)
-	{
-		exit_err(ERR_ATTR_MSG, "point light | missing essential attributes\n", 2);
-	}
-	mat = new_standard_plight();
-	fig.p_light.location = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	fig.p_light.radius_shadow = ft_atof(components[2], 0, (float)INT_MAX);
-	mat.color = vect_simple_div(input_to_vect(components[3], 0, 255), 255.0);
-	mat.emission_intensity = ft_atof(components[4], 0, (float)INT_MAX);
-	mat.albedo = mat.color;
-	init_p_light(scene, fig, mat);
-}
-
-int	parse_objects(t_scene *scene, char **components, int amount)
-{
-	if (!ft_strcmp(components[0], SPHERE_ID))
-		load_sphere(scene, components, amount);
-	else if (!ft_strcmp(components[0], PLANE_ID))
-		load_plane(scene, components, amount);
-	else if (!ft_strcmp(components[0], QUAD_ID))
-		load_quad(scene, components, amount);
-	else if (!ft_strcmp(components[0], DISK_ID))
-		load_disk(scene, components, amount);
-	else if (!ft_strcmp(components[0], BOX_ID))
-		load_box(scene, components, amount);
-	else if (!ft_strcmp(components[0], CYLINDER_ID))
-		load_cylinder(scene, components, amount);
-	else if (!ft_strcmp(components[0], CONE_ID))
-		load_cone(scene, components, amount);
-	else if (!ft_strcmp(components[0], P_LIGHT_ID))
-		load_p_light(scene, components, amount);
-	else
-		return (1);
-	return (0);
-}
-
-void	parse_camera(char **settings, t_scene *scene)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 3)
-		exit_err(ERR_EMPTY_MSG, "Missing material components\n", 2);
-	scene->camera.focus_dist = ft_atof(settings[1], 1, (float)INT_MAX);
-	scene->camera.defocus_angle = ft_atof(settings[2], 0, 100);	
-}
-
-void	parse_extra_camera_components(t_scene *scene, char **components, int i)
-{
-	char	**unit;
-
-	while (components[i])
-	{
-		unit = ft_split(components[i], ':');
-		if (!unit)
-			exit_err(ERR_ATTR_MSG, "extra camera components\n", 2);
-		if (!ft_strcmp(unit[0], "camera") || !ft_strcmp(unit[0], "cam"))
-		{
-			parse_camera(unit, scene);
-		}
-		free_arr(unit);
-		i++;
-	}	
-}
-
-void	load_camera(t_scene *scene, char **components, int amount)
-{
-	if (amount < 4)
-	{
-		exit_err(ERR_ATTR_MSG, "camera | missing essential attributes\n", 2);
-	}
-	if (!zero_vect(scene->camera.orientation) || !zero_vect(scene->camera.origin) || scene->camera.fov)
-		exit_err(ERR_EMPTY_MSG, "Cannot define camera multiple times\n", 2);
-	scene->camera.origin = input_to_vect(components[1], (float)INT_MIN, (float)INT_MAX);
-	scene->camera.orientation = unit_vect(input_to_vect(components[2], (float)INT_MIN, (float)INT_MAX));
-	if (zero_vect(scene->camera.orientation))
-		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
-	scene->camera.fov = ft_atof(components[3], 0, 180);
-	scene->camera.focus_dist = FOCUS_DIST;
-	scene->camera.defocus_angle = DEFOCUS;
-	parse_extra_camera_components(scene, components, 4);
-}
-
-void	load_ambient(t_scene *scene, char **components, int amount)
-{
-	if (amount < 3)
-	{
-		exit_err(ERR_ATTR_MSG, "ambient | missing essential attributes\n", 2);
-	}
-	if (scene->amb_light != -1)
-		exit_err(ERR_EMPTY_MSG, "Cannot define ambient multiple times\n", 2);
-	scene->amb_light = ft_atof(components[1], 0, 1);
-	scene->amb_color = vect_to_int(vect_simple_div(input_to_vect(components[2], 0, 255), 255.0));
-}
-
-void	parse_spp(char **settings, t_scene *scene)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 2)
-		exit_err(ERR_EMPTY_MSG, "Missing samples components\n", 2);
-	scene->samples = (int)ft_atof(settings[1], 0, (float)INT_MAX);
-}
-
-void	parse_depth(char **settings, t_scene *scene)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 2)
-		exit_err(ERR_EMPTY_MSG, "Missing depth components\n", 2);
-	scene->max_depth = (int)ft_atof(settings[1], 0, (float)INT_MAX);
-}
-
-void	parse_skysphere(char **settings, t_scene *scene)
-{
-	int	amount;
-
-	amount = count_components(settings);
-	if (amount != 2)
-		exit_err(ERR_EMPTY_MSG, "Missing skyphere components\n", 2);
-	init_sky_sphere(scene, settings[1]);
-}
-
-void	parse_extra_scene_components(t_scene *scene, char **components, int i)
-{
-	char	**unit;
-
-	while (components[i])
-	{
-		unit = ft_split(components[i], ':');
-		if (!unit)
-			exit_err(ERR_ATTR_MSG, "extra scene components\n", 2);
-		if (!ft_strcmp(unit[0], "spp"))
-		{
-			parse_spp(unit, scene);
-		}
-		else if (!ft_strcmp(unit[0], "depth"))
-		{
-			parse_depth(unit, scene);
-		}
-		else if (!ft_strcmp(unit[0], "skysphere") || !ft_strcmp(unit[0], "skybox"))
-		{
-			parse_skysphere(unit, scene);
-		}
-		free_arr(unit);
-		i++;
-	}	
-}
-
-void	load_settings(t_scene *scene, char **components, int amount)
-{
-	if (amount < 1)
-	{
-		exit_err(ERR_ATTR_MSG, "scene | missing essential attributes\n", 2);
-	}
-	parse_extra_scene_components(scene, components, 1);
-}
-
-int	parse_scene(t_scene *scene, char **components, int amount)
-{
-	//put camera and ambient as mandatory 
-	if (!ft_strcmp(components[0], CAMERA_ID))
-		load_camera(scene, components, amount);
-	else if (!ft_strcmp(components[0], AMBIENT_ID))
-		load_ambient(scene, components, amount);
-	else if (!ft_strcmp(components[0], SETTINGS_ID))
-		load_settings(scene, components, amount);
-	else
-		return (1);
-	return (0);
-}
-
-int	parse_components(t_scene *scene, char **components)
-{
-	int	amount;
-
-	amount = count_components(components);
-	if (!amount)
-		return (1);
-	if (parse_objects(scene, components, amount)
-		&& parse_scene(scene, components, amount))
-	{
-		return (throw_err(ERR_NOID_MSG, components[0], 1));
-	}
-	return (0);
-}
-
-int	is_space(char c)
-{
-	return ((c >= '\a' && c <= '\r') || c == ' ');
-}
-
 char	*check_spaces_and_comments(char *line)
 {
 	int	i;
 
 	i = 0;
-	while (line[i] && is_space(line[i]))
+	while (line[i] && ft_isspace(line[i]))
 	{
 		i++;
 	}
 	return (0);
-}
-
-void	load_map_scene(t_scene *scene)
-{
-	int		map;
-	char	*line;
-	char	**components;
-
-	map = open(scene->path, O_RDONLY);
-	if (map < 0)	
-		return (exit_err(ERR_NOFILE_MSG, scene->path, 2));
-	line = get_next_line(map);
-	while (line)	
-	{
-		components = format_line(line);
-		if (components && components[0])
-		{
-			if (parse_components(scene, components))
-			{
-				free(line);
-				free_arr(components);
-				return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
-			}
-		}
-		free(line);
-		free_arr(components);
-		line = get_next_line(map);		
-	}
-}
-
-void	load_standard_scene(t_scene *scene)
-{
-	scene->amb_light = AMB_LIGHT;
-	scene->amb_color = AMB_COLOR;
-	scene->max_depth = MAX_DEPTH;
-	scene->samples = SPP;
-	init_camera(&scene->camera, scene->width, scene->height);
-	scene->back_up_camera = scene->camera;
-	init_sky_sphere(scene, STD_SKYSPHERE);	
-}
-
-void	init_scene(t_scene *scene)
-{
-	if (scene->path && (!ft_strcmp(".std", scene->path) || !ft_strcmp(".standard", scene->path)))
-	{
-		load_standard_scene(scene);
-	}
-	else if (scene->path && scene->choose_file)
-	{
-		load_map_scene(scene);
-		recalculate_view(scene);
-		scene->back_up_camera = scene->camera;
-	}
-}
-
-void	free_texture(t_texture **texture)
-{
-	if (texture)
-	{
-		if ((*texture) && (*texture)->path)
-			free((*texture)->path);
-		if ((*texture) && (*texture)->texture)
-		{
-			mlx_delete_texture((*texture)->texture);
-			free((*texture));
-		}
-	}
-}
-
-void	free_primitive(t_object **object)
-{
-	if ((*object)->type == BOX)
-	{
-		free_objects(&(*object)->figure.box.faces);
-	}
-	if ((*object)->texture)
-	{
-		free_texture(&(*object)->texture);
-	}
-	free(*object);
-}
-
-void	free_objects(t_object **objects)
-{
-	t_object *temp;
-
-	if (objects)
-	{
-		while ((*objects))
-		{
-			if ((*objects)->texture)
-			{
-				free_texture(&(*objects)->texture);
-			}
-			temp = (*objects)->next;
-			free((*objects));
-			(*objects) = temp;
-		}
-	}
-}
-
-void	free_boxes(t_object *objects)
-{
-	while (objects)
-	{
-		if (objects->type == BOX)
-			free_objects(&objects->figure.box.faces);
-		objects = objects->next;
-	}
-}
-
-void	wait_for_threads(t_scene *scene)
-{
-	int i;
-	
-	i = 0;
-	while (i < THREADS)
-	{
-		if (pthread_join(scene->threads[i].self, NULL))
-		{
-			exit (200);
-		}
-		i++;
-	}
-}
-
-void	unset_stop_status(t_scene *scene)
-{
-	pthread_mutex_lock(&scene->stop_mutex);
-	scene->stop = false;
-	pthread_mutex_unlock(&scene->stop_mutex);
-}
-
-void	set_stop_status(t_scene *scene)
-{
-	pthread_mutex_lock(&scene->stop_mutex);
-	scene->stop = true;
-	pthread_mutex_unlock(&scene->stop_mutex);
-}
-
-bool	get_stop_status(t_scene *scene)
-{
-	bool res;
-
-	pthread_mutex_lock(&scene->stop_mutex);
-	res = scene->stop;
-	pthread_mutex_unlock(&scene->stop_mutex);
-	return (res);
-}
-
-void	clean_memory(t_scene *scene)
-{
-	pthread_mutex_destroy(&scene->stop_mutex);
-	if (scene->mlx)
-		mlx_terminate(scene->mlx);
-	free(scene->cumulative_image);
-	free(scene->path);
-	free_boxes(scene->objects);
-	free_objects(&scene->objects);
-	free_objects(&scene->lights);
-	free_objects(&scene->sky_sphere);
-	free_texture(&scene->menu_tx);
-	free_buttons(scene->buttons, scene->map_count);
-	return ;
-}
-
-void	close_mlx(void *sc)
-{
-	t_scene *scene;
-
-	scene = sc;
-	set_stop_status(scene);
-	close_all(scene);
 }
 
 int	main(int argc, char **argv)
@@ -5075,12 +4181,11 @@ int	main(int argc, char **argv)
 	if (parse_map_path(&scene, argc, argv))
 		draw_file_menu(&scene);
 	init_scene(&scene);
-	deselect_objects(scene.objects, scene.lights, &scene.object_selected);
 	main_loop(&scene);
 	mlx_close_hook(scene.mlx, close_mlx, &scene);
 	mlx_key_hook(scene.mlx, key_down, &scene);
 	mlx_mouse_hook(scene.mlx, mouse_handle, &scene);
-	mlx_resize_hook(scene.mlx, resize_minirt, &scene);
+	mlx_resize_hook(scene.mlx, resize_handle, &scene);
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
 	wait_for_threads(&scene);
