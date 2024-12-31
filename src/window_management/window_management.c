@@ -3,14 +3,58 @@
 /*                                                        :::      ::::::::   */
 /*   window_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:23:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2024/12/31 02:18:01 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "window_management.h"
+
+
+void	resize_file_selector(t_scene *scene)
+{
+	if (scene->map_count)
+	{
+		free_buttons(scene->buttons, scene->map_count);
+	}
+	if (scene->cumulative_image)
+	{
+		free(scene->cumulative_image);
+	}
+	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	if (!scene->cumulative_image)
+	{
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
+	}
+	draw_file_menu(scene);
+}
+
+void	resize_rendering(t_scene *scene)
+{
+	set_stop_status(scene);
+	wait_for_threads(scene);
+	scene->stop = false;
+	if (scene->cumulative_image)
+	{
+		free(scene->cumulative_image);
+	}
+	recalculate_view(scene);
+	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
+	if (!scene->cumulative_image)
+	{
+		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
+	}
+	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	main_loop(scene);
+}
+
+void	close_all(t_scene *scene)
+{
+	mlx_close_window(scene->mlx);
+}
 
 void	close_mlx(void *sc)
 {

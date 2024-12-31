@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
+#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/12/24 16:06:10 by vperez-f         ###   ########.fr        #
+#    Updated: 2024/12/24 19:50:03 by vpf              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,13 +22,13 @@ OBJ = $(addprefix $(OBJ_DIR),$(OFILES))
 
 OBJ_DIR = obj/
 
-DIR_LIBFT = libft/ 
+DIR_LIBFT = libraries/libft/ 
 
-PATH_LFT = libft/libft.a
+PATH_LFT = libraries/libft/libft.a
 
-DIR_PTF = printf/
+DIR_PTF = libraries/printf/
 
-PATH_PTF = printf/libftprintf.a
+PATH_PTF = libraries/printf/libftprintf.a
 
 MLX_VERSION = 2.4.1
 
