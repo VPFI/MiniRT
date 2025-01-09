@@ -6,22 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:02:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:02:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 22:34:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/parser/utils/numerical_utils.h"
+#include "src/error_management/error_management.h"
 
-float	sum_parts(int integer_part, float decimal_part, char *array)
-{
-	if (integer_part >= 0 && array[0] != '-')
-	{
-		return ((float)(integer_part + decimal_part));
-	}
-	else
-	{
-		return ((float)(integer_part - decimal_part));
-	}	
-}
 void	check_bounds(float num, float min, float max)
 {
 	if (num > max)
@@ -34,6 +25,18 @@ void	check_bounds(float num, float min, float max)
 		fprintf(stderr, "Minimum threshold: %f || Input --> %f\n", min, num);
 		exit_err(ERR_EMPTY_MSG, "Minimum value threshold not reached\n", 2);
 	}
+}
+
+static float	sum_parts(int integer_part, float decimal_part, char *array)
+{
+	if (integer_part >= 0 && array[0] != '-')
+	{
+		return ((float)(integer_part + decimal_part));
+	}
+	else
+	{
+		return ((float)(integer_part - decimal_part));
+	}	
 }
 
 float	ft_atof(char *array, float min, float max)

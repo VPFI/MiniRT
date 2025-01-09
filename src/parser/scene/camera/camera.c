@@ -1,17 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   p_camera.c                                         :+:      :+:    :+:   */
+/*   camera.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:50:35 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 22:39:36 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-
+#include "src/parser/scene/camera/camera.h"
+#include "src/parser/utils/numerical_utils.h"
+#include "src/parser/utils/lexical_utils.h"
+#include "src/error_management/error_management.h"
+#include "libraries/libft/libft.h"
+#include <limits.h>
 
 static void	load_extra_camera_components(char **settings, t_scene *scene)
 {

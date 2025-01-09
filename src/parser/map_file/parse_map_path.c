@@ -1,16 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
+/*   parse_map_path.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 15:57:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 22:06:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/miniRT.h"
+#include "libraries/libft/libft.h"
+#include "parse_map_path.h"
+#include "src/error_management/error_management.h"
+#include <fcntl.h>
+#include <unistd.h>
 
 static int	check_extension(char *name)
 {

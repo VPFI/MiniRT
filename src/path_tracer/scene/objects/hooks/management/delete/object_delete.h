@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:53:19 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:53:20 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:48:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef OBJECT_DELETE_H
+# define OBJECT_DELETE_H
+
+#endif

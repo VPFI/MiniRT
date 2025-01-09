@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:46:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:46:45 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:48:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef OBJECT_COPY_H
+# define OBJECT_COPY_H
+
+#endif

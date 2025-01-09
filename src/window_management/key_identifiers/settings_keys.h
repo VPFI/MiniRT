@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:25:13 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:25:14 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:54:09 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef SETTINGS_KEYS_H
+# define SETTINGS_KEYS_H
+
+#endif

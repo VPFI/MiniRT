@@ -1,16 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   p_ambient.c                                        :+:      :+:    :+:   */
+/*   ambient.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:49:10 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 22:34:45 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/path_tracer/vectors/vectors.h"
+#include "src/path_tracer/utils/color/vect_color_utils.h"
+#include "src/parser/utils/numerical_utils.h"
+#include "src/parser/scene/ambient/ambient.h"
+#include "src/error_management/error_management.h"
 
 void	load_ambient(t_scene *scene, char **components, int amount)
 {

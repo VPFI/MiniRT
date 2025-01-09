@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:23:09 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:23:10 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:28:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef SHARED_H
+# define SHARED_H
+
+#endif

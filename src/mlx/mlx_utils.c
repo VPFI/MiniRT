@@ -6,9 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:45:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 13:47:43 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 21:56:09 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+//#include "src/path_tracer/scene/scene.h"
+#include "mlx_utils.h"
 
 void	set_new_image(t_scene *scene)
 {

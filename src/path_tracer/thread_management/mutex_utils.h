@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:38:41 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:38:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:51:41 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef MUTEX_UTILS_H
+# define MUTEX_UTILS_H
+
+#endif

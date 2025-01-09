@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:24 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 17:34:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:26:03 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef EDIT_MODE_H
+# define EDIT_MODE_H
+
+#endif

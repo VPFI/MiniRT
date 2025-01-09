@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:20:59 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:21:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:27:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef EXPORT_H
+# define EXPORT_H
+
+#endif

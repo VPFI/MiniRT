@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2025/01/09 15:22:22 by vperez-f         ###   ########.fr        #
+#    Updated: 2025/01/09 21:44:27 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,8 @@ CFILES = main.c mlx_utils.c bresenham_font.c font.c vect_functions.c file_select
 HEADERS = includes/miniRT.h
 
 OFILES = $(CFILES:%.c=%.o)
+
+SRC_DIR = src/
 
 OBJ = $(addprefix $(OBJ_DIR),$(OFILES))
 
@@ -64,9 +66,9 @@ extra_make: $(PATH_MLX)
 	@printf "MINILIBX: COMPILING...\n"
 	@$(MAKE) -C $(BUILD_DIR_MLX) --no-print-directory
 
-$(OBJ_DIR)%.o: src/%.c $(HEADERS) Makefile
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c $(HEADERS) Makefile
 	@mkdir -p $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 $(DIR_MLX)MLX42:
 	@printf "Downloading MLX...\n"

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:23:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 15:34:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 21:54:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define ERROR_MANAGEMENT_H
 
 # include <stdio.h>
+# include <stdlib.h>
 
 # define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\"\n\nOpening file selector...\n"
 # define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
@@ -28,5 +29,9 @@
 # define ERR_VECT_MSG		"Parsing: %s to vector form\n"
 # define ERR_NOID_MSG		"Invalid identifier %s\n"
 # define ERR_MAT_MSG		"Wrong material type: %s\n"
+
+int		throw_err(char *msg, char *specifier, int err_code);
+
+void	exit_err(char *msg, char *specifier, int err_code);
 
 #endif

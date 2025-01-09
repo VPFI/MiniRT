@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:37:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 22:20:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,55 +26,9 @@
 # include "../libraries/printf/ft_printf.h"
 # include "../libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
-# define WINW 		1820
-# define WINH 		980
-
-# define THREADS 	8
-
-# define MAX_DEPTH  8
-# define SPP 		1
-
-# define TEST 		1
-
-# define DEFOCUS	0.0
-# define FOCUS_DIST	5
-# define FOV		40
-
-# define AMB		1
-
-# define AMB_LIGHT	0.7
-# define AMB_COLOR	0xF1F1F1FF
-# define BG_COLOR	0x101010FF
-
-# define DEF_COLOR	0xFF6720FF
-# define BRONZE		0xCD7F32FF
-# define CYAN_GULF	0xC9DFECFF
-# define TURQUOISE	0x40E0D0FF
-# define RED		0xFF4364FF
-# define GREEN		0x43FF64FF 
-# define BLUE		0x1C1CFFFF 
-# define YELLOW		0xEEEE9BFF
-# define SILVER		0xC0C0C0FF
-# define BLACK		0x505050FF
-# define TRUE_BLACK	0x000000FF
-# define WHITE		0xF1F1F1FF
-
 # define AIR_REF_INDEX	1.0003
 
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
-
-# define CAMERA_ID			"C"
-# define AMBIENT_ID			"A"
-# define SETTINGS_ID		"S"
-
-# define SPHERE_ID			"sp"
-# define PLANE_ID			"pl"
-# define QUAD_ID			"qu"
-# define DISK_ID			"di"
-# define BOX_ID				"bx"
-# define CYLINDER_ID		"cy"
-# define CONE_ID			"co"
-# define P_LIGHT_ID			"l"
 
 typedef struct s_vect	t_color;
 
@@ -82,14 +36,6 @@ typedef struct s_object t_object;
 
 typedef union s_figure	t_figure;
 
-typedef enum e_mat_type
-{
-	LAMBERTIAN = 0,
-	METAL = 1,
-	GLOSSY = 2,
-	DIELECTRIC = 3,
-	EMISSIVE = 4,
-}			t_mat_type;
 
 typedef enum e_bounds
 {
@@ -119,30 +65,11 @@ typedef struct s_pattern_vars
 	int		pattern_index;
 }			t_pattern_vars;
 
-typedef enum e_fig_type
-{
-	SPHERE = 0,
-	PLANE = 1,
-	QUAD = 2,
-	BOX = 3,
-	DISK = 4,
-	CYLINDER = 5,
-	CONE = 6,
-	LIGHT = 7,
-}			t_fig_type;
-
 typedef struct s_2dpoint
 {
 	float	x;
 	float	y;
 }			t_2dpoint;
-
-typedef struct s_vect
-{
-	float	x;
-	float	y;
-	float	z;
-}			t_vect;
 
 typedef struct s_base_params
 {
@@ -160,12 +87,6 @@ typedef struct s_coords
 	int 	color;
 }       	t_coords;
 
-typedef struct s_ray
-{
-	t_vect		origin;
-	t_vect		dir;
-}				t_ray;
-
 typedef struct s_button
 {
 	t_coords	i_pt;
@@ -174,189 +95,7 @@ typedef struct s_button
 	int 		color;
 }       		t_button;
 
-typedef struct s_reference_system
-{
-	t_ray	ray;
-	t_vect	center;
-}			t_reference_system;
 
-typedef struct s_camera
-{
-	t_vect		origin;
-	t_vect		orientation;
-	float		viewport_width;
-	float		viewport_height;
-	float		fov;
-	float		focus_dist;
-	float		defocus_angle;
-	float		defocus_radius;
-	t_vect		w;
-	t_vect		u;
-	t_vect		v;
-	t_vect		defocus_disk_u;
-	t_vect		defocus_disk_v;
-	t_vect		vp_edge_vert;
-	t_vect		vp_edge_horizntl;
-	t_vect		pixel_delta_v;
-	t_vect		pixel_delta_h;
-	t_vect		viewport_origin;
-	t_vect		viewport_pixel0;
-}				t_camera;
-
-typedef struct s_hit_info
-{
-	t_vect		point;
-	t_vect		normal;
-	t_object	*object;
-	float		t;
-}				t_hit_info;
-
-typedef struct s_material
-{
-	t_color		color;
-	t_color		albedo;
-	t_mat_type	type;
-	float		specular;
-	float		metal_roughness;
-	float		refraction_index;
-	float		emission_intensity;
-	float		pattern_dim;
-	bool		pattern;
-}				t_material;
-
-typedef struct s_point_light
-{
-	t_vect		location;
-	float		radius_shadow;
-}				t_point_light;
-
-typedef struct s_cylinder
-{
-	t_vect		center;
-	t_vect		normal;
-	float		radius;
-	float		height;
-}				t_cylinder;
-
-typedef struct s_cone
-{
-	t_vect		center;
-	t_vect		normal;
-	float		radius;
-	float		height;
-}				t_cone;
-
-typedef struct s_sphere
-{
-	t_vect		center;
-	float		radius;
-}				t_sphere;
-
-typedef struct s_plane
-{
-	t_vect		center;
-	t_vect		normal;
-}				t_plane;
-
-typedef struct s_quad
-{
-	t_vect		u_vect;
-	t_vect		v_vect;
-	t_vect		normal;
-	t_vect		center;
-}				t_quad;
-
-typedef struct s_box
-{
-	t_vect		u_vect;
-	t_vect		v_vect;
-	t_vect		dimensions;
-	t_vect		center;
-	t_object	*faces;
-}				t_box;
-
-typedef struct s_disk
-{
-	t_vect		center;
-	t_vect		normal;
-	float		radius;
-}				t_disk;
-
-typedef struct s_texel
-{
-	int	x;
-	int	y;
-}		t_texel;
-
-typedef struct s_texture
-{
-	char			*path;
-	mlx_texture_t	*texture;
-	float			texture_dim;
-}					t_texture;
-
-typedef union s_figure
-{
-	t_sphere		sphere;
-	t_plane			plane;
-	t_quad			quad;
-	t_box			box;
-	t_disk			disk;
-	t_cylinder		cylinder;
-	t_cone			cone;
-	t_point_light	p_light;
-}					t_figure;
-
-typedef struct s_object
-{
-	union s_figure 	figure;
-	t_material		material;
-	t_texture		*texture;
-	t_fig_type		type;
-	struct s_object	*next;
-	bool			selected;
-	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
-	t_vect			(*get_origin)(t_object *object);
-	t_vect			(*get_visual)(t_hit_info *hit_info);
-	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
-	void			(*edit_origin)(t_object *object, t_vect transformation);
-	void			(*edit_orientation)(t_object *object, t_camera *camera, t_vect transformation);
-	void			(*edit_dimensions)(t_object *object, t_vect transformation);
-}					t_object;
-
-typedef struct s_scene
-{
-	mlx_t			*mlx;
-	mlx_image_t		*image;
-	t_vect			*cumulative_image;
-	t_thread		threads[THREADS];
-	t_thread_backup	threads_backup[THREADS];
-	char			*path;
-	int				samples;
-	int				max_depth;
-	uint32_t		state;
-	bool			stop;
-	bool			edit_mode;
-	bool			do_backup;
-	bool			object_selected;
-	pthread_mutex_t	stop_mutex;
-	float			time;
-	t_camera		camera;
-	t_camera		back_up_camera;
-	int				amb_color;
-	float			amb_light;
-	t_object		*sky_sphere;
-	t_object		*objects;
-	t_object		*lights;
-	uint32_t		height;
-	uint32_t		width;
-	float			aspect_ratio;
-	t_button		*buttons;
-	t_texture		*menu_tx;
-	int				map_count;
-	int				choose_file;
-	int				current_file;
-}					t_scene;
 
 typedef struct s_bresenham
 {

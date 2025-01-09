@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:52:36 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:52:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:52:47 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef VECT_FUNCTIONS_H
+# define VECT_FUNCTIONS_H
+
+#endif

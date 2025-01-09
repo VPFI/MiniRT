@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 17:34:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:26:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef RENDER_MODE_H
+# define RENDER_MODE_H
+
+#endif

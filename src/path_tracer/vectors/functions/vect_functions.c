@@ -6,11 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:51:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 21:36:07 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/miniRT.h"
+#include "vect_functions.h"
 
 t_vect	unit_vect(t_vect vect)
 {
@@ -53,3 +53,37 @@ t_vect	clamp_vect( t_vect vect, float min, float max)
 		vect.z = max;
 	return (vect);
 }
+
+t_vect	get_random_uvect(uint32_t *state)
+{
+	t_vect	res;
+	float	a;
+	float	r;
+
+	a = fast_rand(state) * 2.0 * M_PI;
+	res.z = (fast_rand(state) * 2.0) - 1.0;
+	r = sqrtf(1.0 - (res.z * res.z));
+	res.x = r * cosf(a);
+	res.y = r * sinf(a);
+	return (res);
+}
+
+/*
+t_vect	get_random_uvect(uint32_t *state)
+{
+	t_vect	res;
+	float	bound;
+
+	while (1)
+	{
+		res.x = (fast_rand(state) - 0.5) * 2;
+		res.y = (fast_rand(state) - 0.5) * 2;
+		res.z = (fast_rand(state) - 0.5) * 2;
+		bound = vect_dot(res, res);
+		if (1e-40 < bound && bound <= 1)
+		{
+			res = vect_simple_div(res, sqrtf(bound));
+			return (res);
+		}
+	}
+}*/

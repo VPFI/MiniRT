@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:54:53 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:54:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:53:33 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef BRESENHAM_FONT_H
+# define BRESENHAM_FONT_H
+
+#endif

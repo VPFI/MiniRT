@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:15:45 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:15:46 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:49:30 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef METALLIC_SCATTER_H
+# define METALLIC_SCATTER_H
+
+#endif

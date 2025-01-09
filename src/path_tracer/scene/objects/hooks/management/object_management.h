@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:46:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:46:04 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:47:47 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef OBJECT_MANAGEMENT_H
+# define OBJECT_MANAGEMENT_H
+
+#endif

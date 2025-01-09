@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:29:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:29:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:50:14 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef RAY_SCATTER_H
+# define RAY_SCATTER_H
+
+#endif

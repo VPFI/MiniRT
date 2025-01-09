@@ -6,7 +6,45 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:22:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 21:36:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef OBJECTS_H
+# define OBJECTS_H
+
+# include "src/path_tracer/vectors/vectors.h"
+# include "src/path_tracer/scene/ray/ray.h"
+# include "src/path_tracer/scene/camera/camera.h"
+# include "src/path_tracer/scene/objects/figures/figures.h"
+# include "src/path_tracer/scene/objects/material/material.h"
+# include "src/path_tracer/scene/objects/texture/texture.h"
+
+typedef struct s_object t_object;
+
+typedef struct s_hit_info
+{
+	t_vect		point;
+	t_vect		normal;
+	t_object	*object;
+	float		t;
+}				t_hit_info;
+
+typedef struct s_object
+{
+	union s_figure 	figure;
+	t_material		material;
+	t_texture		*texture;
+	t_fig_type		type;
+	struct s_object	*next;
+	bool			selected;
+	bool			(*hit_func)(t_ray ray, t_figure figure, t_hit_info *hit_info, float *bounds);
+	t_vect			(*get_origin)(t_object *object);
+	t_vect			(*get_visual)(t_hit_info *hit_info);
+	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
+	void			(*edit_origin)(t_object *object, t_vect transformation);
+	void			(*edit_orientation)(t_object *object, t_camera *camera, t_vect transformation);
+	void			(*edit_dimensions)(t_object *object, t_vect transformation);
+}					t_object;
+
+#endif

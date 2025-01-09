@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:29:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:29:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:50:28 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef RAY_UTILS_H
+# define RAY_UTILS_H
+
+#endif

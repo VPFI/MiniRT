@@ -6,7 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:28:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:28:53 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:51:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef LIGHT_SAMPLING_H
+# define LIGHT_SAMPLING_H
+
+#endif
