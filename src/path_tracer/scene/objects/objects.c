@@ -3,14 +3,286 @@
 /*                                                        :::      ::::::::   */
 /*   objects.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/30 22:13:31 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/09 15:14:42 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
+int	check_object_rotations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_W)
+	{
+		transformation.x -= 0.0873;
+	}
+	else if (key_data.key == MLX_KEY_A)
+	{
+		transformation.y -= 0.0873;
+	}
+	else if (key_data.key == MLX_KEY_S)
+	{
+		transformation.x += 0.0873;
+	}
+	else if (key_data.key == MLX_KEY_D)
+	{
+		transformation.y += 0.0873;
+	}
+	else if (key_data.key == MLX_KEY_Q)
+	{
+		transformation.z -= 0.0873;
+	}
+	else if (key_data.key == MLX_KEY_E)
+	{
+		transformation.z += 0.0873;
+	}
+	if (!zero_vect(transformation))
+	{
+		if (key_data.modifier == MLX_CONTROL)
+		{
+			transformation = vect_simple_mult(transformation, 1 / 0.0873 * M_PI / 2);
+		}
+		target_object->edit_orientation(target_object, camera, transformation);
+		return (1);
+	}
+	return (0);
+}
+
+
+t_vect	relative_translate(t_camera *camera, mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_UP)
+	{
+		transformation = vect_simple_mult(camera->orientation, 0.1);
+	}
+	else if (key_data.key == MLX_KEY_DOWN)
+	{
+		transformation = vect_simple_mult(camera->orientation, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_RIGHT)
+	{
+		transformation = vect_simple_mult(camera->u, 0.1);
+	}
+	else if (key_data.key == MLX_KEY_LEFT)
+	{
+		transformation = vect_simple_mult(camera->u, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
+	{
+		transformation = vect_simple_mult(camera->v, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation = vect_simple_mult(camera->v, 0.1);
+	}
+	return (transformation);
+}
+
+t_vect	absolute_translate(mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	if (key_data.key == MLX_KEY_UP)
+	{
+		transformation = new_vect(0.0, 0.0, 0.1);
+	}
+	else if (key_data.key == MLX_KEY_DOWN)
+	{
+		transformation = new_vect(0.0, 0.0, -0.1);
+	}
+	else if (key_data.key == MLX_KEY_RIGHT)
+	{
+		transformation = new_vect(0.1, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_LEFT)
+	{
+		transformation = new_vect(-0.1, 0.0, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_LEFT_SHIFT)
+	{
+		transformation = new_vect(0.0, -0.1, 0.0);
+	}
+	else if (key_data.key == MLX_KEY_SPACE)
+	{
+		transformation = new_vect(0.0, 0.1, 0.0);
+	}
+	return (transformation);
+}
+
+t_vect	clamp_object_coords(t_object *target_object)
+{
+	t_vect	transformation;
+	t_vect	obj_origin;
+
+	transformation = new_vect(0.0, 0.0, 0.0);
+	obj_origin = target_object->get_origin(target_object);
+	transformation.x = roundf(obj_origin.x);
+	transformation.y = roundf(obj_origin.y);
+	transformation.z = roundf(obj_origin.z);
+	transformation = vect_subtract(transformation, obj_origin);
+	return (transformation);
+}
+
+int	check_object_translations(t_object *target_object, t_camera *camera, mlx_key_data_t key_data)
+{
+	//Adapt object movements to camer orientation
+	t_vect	transformation;
+
+	if (key_data.key == MLX_KEY_ENTER)
+		transformation = clamp_object_coords(target_object);
+	else if (key_data.modifier == MLX_CONTROL)
+		transformation = absolute_translate(key_data);
+	else
+		transformation = relative_translate(camera, key_data);
+	if (!zero_vect(transformation))
+	{
+		target_object->edit_origin(target_object, transformation);
+		return (1);
+	}
+	return (0);
+}
+
+int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
+{
+	if (is_rgb_key_down(key_data))
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			decrement_color(target_object, key_data);
+		else
+			increment_color(target_object, key_data);
+		print_vec_s(target_object->material.color, "NEW COLOR:");
+
+		return (1);
+	}
+	else if (is_material_key_down(key_data))
+	{
+		if (key_data.modifier == MLX_CONTROL)
+			decrement_material_component(target_object, key_data);
+		else
+			increment_material_component(target_object, key_data);
+		printf("Material components:\n Specular: %f Roughness: %f Refraction index: %f Light intensity: %f\n\n",
+			target_object->material.specular, target_object->material.metal_roughness,
+			target_object->material.refraction_index, target_object->material.emission_intensity);
+		return (1);		
+	}
+	else if (key_data.key == MLX_KEY_TAB)
+	{
+		cicle_material_type(target_object);
+	}
+	return (0);
+}
+
+int	check_object_resize(t_object *target_object, mlx_key_data_t key_data)
+{
+	t_vect	transformation;
+
+	
+	if (key_data.key == MLX_KEY_EQUAL)
+	{
+		transformation = new_vect(1.15, 1.15, 1.15);
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_MINUS)
+	{
+		transformation = new_vect(0.85, 0.85, 0.85);
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_P)
+	{
+		transformation = new_vect(1.15, 1.0, 1.0);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.x = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_LEFT_BRACKET)
+	{
+		transformation = new_vect(1.0, 1.15, 1.0);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.y = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	else if (key_data.key == MLX_KEY_RIGHT_BRACKET)
+	{
+		transformation = new_vect(1.0, 1.0, 1.15);
+		if (key_data.modifier == MLX_CONTROL)
+			transformation.z = 0.85;
+		target_object->edit_dimensions(target_object, transformation);
+		return (1);
+	}
+	return (0);
+}
+
+int	check_object_focus(t_object *target_object, t_scene *scene, mlx_key_data_t key_data)
+{
+	t_vect	obj_origin;
+
+	if (key_data.key == MLX_KEY_B)
+	{
+		obj_origin = target_object->get_origin(target_object);
+		scene->camera.orientation = unit_vect(vect_subtract(obj_origin, scene->camera.origin));
+		recalculate_view(scene);
+		return (1);
+	}
+	return (0);
+}
+
+t_object	*get_selected_object(t_object *objects, t_object *lights)
+{
+	while (objects)
+	{
+		if (objects->selected == true)
+			return(objects);
+		objects = objects->next;	
+	}
+	while (lights)
+	{
+		if (lights->selected == true)
+			return(lights);
+		lights = lights->next;	
+	}
+	return (NULL);
+}
+
+void	transform_object(t_object *objects, t_object *lights, t_scene *scene, mlx_key_data_t key_data)
+{
+	t_object	*target_object;
+
+	target_object = get_selected_object(objects, lights);
+	if (!target_object)
+		return ;
+	if (is_movement_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
+		check_object_translations(target_object, &scene->camera, key_data);
+	else if (is_rotation_key_down(key_data) || key_data.key == MLX_KEY_ENTER)
+		check_object_rotations(target_object, &scene->camera, key_data);
+	else if (is_aspect_key_down(key_data))
+		check_object_aspect(target_object, key_data);
+	else if (check_object_focus(target_object, scene, key_data))
+		return ;
+	else if (check_object_resize(target_object, key_data))
+		return ;
+	return ;
+}
+
+bool	is_2d(t_object *object)
+{
+	if (object->type == PLANE || object->type == QUAD || object->type == DISK)
+	{
+		return (true);
+	}
+	return (false);
+}
 
 void	copy_world_object(t_scene *scene, mlx_key_data_t key_data, t_vect *offset_origin)
 {

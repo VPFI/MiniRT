@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vect_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:47:24 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:47:25 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/09 14:09:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,20 @@ t_vect	get_random_uvect(uint32_t *state)
 			return (res);
 		}
 	}
+}
+
+int	vect_to_int(t_color color)
+{
+	return (get_rgba((int)(color.x * 255.9),
+		(int)(color.y * 255.9), (int)(color.z * 255.9), 255));
+}
+
+t_color	hexa_to_vect(int color)
+{
+	t_color	res;
+
+	res.x = get_r(color) / 255.0;
+	res.y = get_g(color) / 255.0;
+	res.z = get_b(color) / 255.0;
+	return (res);
 }

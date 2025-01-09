@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/11/19 18:55:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 14:14:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,19 +41,6 @@ t_vect	new_vect(float v1, float v2, float v3)
 	return (vect);
 }
 
-t_ray	new_ray(t_vect dir, t_vect origin)
-{
-	t_ray	res;
-
-	res.dir.x = dir.x;
-	res.dir.y = dir.y;
-	res.dir.z = dir.z;
-	res.origin.x = origin.x;
-	res.origin.y = origin.y;
-	res.origin.z = origin.z;
-	return (res);
-}
-
 t_vect	unit_vect(t_vect vect)
 {
 	t_vect 	res;
@@ -66,13 +53,6 @@ t_vect	unit_vect(t_vect vect)
 	return (res);
 }
 
-t_vect	ray_at(t_ray ray, float pos)
-{
-	t_vect	res;
-
-	res = vect_add(ray.origin,(vect_simple_mult(ray.dir, pos)));
-	return (res);
-}
 
 t_vect	vect_simple_div(t_vect vec, float num)
 {

@@ -3,14 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   camera.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:41:19 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/31 02:29:23 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/09 15:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
+void	move_camera(t_camera *camera, t_camera *backup, t_object *skysphere, mlx_key_data_t key_data)
+{
+	if (is_reset_key_down(key_data))
+		check_reset(camera, backup, key_data);
+	else if (is_rotation_key_down(key_data))
+		check_rotations(camera, key_data);
+	else if (is_movement_key_down(key_data))
+		check_translations(camera, skysphere, key_data);
+	else if (is_settings_key_down(key_data))
+		check_settings(camera, key_data);
+	return ;
+}
 
 t_vect	get_random_disk_sample(uint32_t *state)
 {

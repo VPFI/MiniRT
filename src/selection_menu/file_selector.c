@@ -3,15 +3,56 @@
 /*                                                        :::      ::::::::   */
 /*   file_selector.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/16 01:45:49 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/09 15:18:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/miniRT.h"
 
+void	move_menu(t_scene *scene, keys_t key)
+{
+	if (key == MLX_KEY_UP)
+	{
+		if (scene->current_file > 0)
+			scene->current_file--;
+	}
+	else if (key == MLX_KEY_DOWN)
+	{
+		if (scene->current_file < scene->map_count - 1) 
+			scene->current_file++;
+	}
+	else if (key == MLX_KEY_LEFT)
+	{
+		if (scene->current_file >= 10)
+			scene->current_file -= 10;
+	}
+	else if (key == MLX_KEY_RIGHT)
+	{
+		if ((scene->current_file + 10) < scene->map_count)
+			scene->current_file += 10;
+		else if ((int)(scene->current_file / 20) < (int)(scene->map_count) / 20)
+			scene->current_file = ((scene->current_file / 20) + 1) * 20;
+	}
+	draw_buttons(scene->buttons, scene);
+}
+
+void	select_scene(t_scene *scene)
+{
+	if (scene->map_count)
+	{
+		scene->path = get_map_path(scene->current_file);
+		if (!scene->path)
+			return (exit_err(ERR_MEM_MSG, "while retrieving map path", 1));
+	}
+	scene->choose_file = 1;
+	init_scene(scene);
+	set_new_image(scene);
+	mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
+	main_loop(scene);
+}
 
 void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 {
