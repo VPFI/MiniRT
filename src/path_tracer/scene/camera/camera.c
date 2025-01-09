@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:41:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 15:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 17:06:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,30 +22,6 @@ void	move_camera(t_camera *camera, t_camera *backup, t_object *skysphere, mlx_ke
 	else if (is_settings_key_down(key_data))
 		check_settings(camera, key_data);
 	return ;
-}
-
-t_vect	get_random_disk_sample(uint32_t *state)
-{
-	t_vect	res;
-
-	while (true)
-	{
-		res = new_vect((fast_rand(state) * 2.0) - 1.0, (fast_rand(state) * 2.0) - 1.0, 0.0);
-		if (vect_length(res) < 1.0) //sample from -1,1 square | keep only the ones inside disk
-			return (res);
-	}
-}
-
-t_vect	defocus_sample(t_camera camera, uint32_t *state)
-{
-	t_vect	disk_sample;
-	t_vect	res;
-
-	if (camera.defocus_angle <= 0)
-		return (camera.origin);
-	disk_sample = get_random_disk_sample(state);
-	res = vect_add(vect_simple_mult(camera.defocus_disk_u, disk_sample.x), vect_simple_mult(camera.defocus_disk_v, disk_sample.y));
-	return (vect_add(camera.origin, res));
 }
 
 void	recalculate_view(t_scene *scene)

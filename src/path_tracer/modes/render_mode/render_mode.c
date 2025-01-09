@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 14:24:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 16:37:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), get_obj_color(&hit_info)), emittance), 1 / rr_coef_test));
 	}
 	thread->time_hit += mlx_get_time() - time_aux;
-	return (get_sky_color(thread, &ray));
+	return (get_background_color(thread, &ray));
 }
 
 void	render_mode(t_thread *thread, uint32_t x, uint32_t y)

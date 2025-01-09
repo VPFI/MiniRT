@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+         #
+#    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2024/12/24 19:50:03 by vpf              ###   ########.fr        #
+#    Updated: 2025/01/09 15:22:22 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,8 +50,6 @@ ARLIB = ar rc
 
 RM = rm -f
 
-VERBOSE = false;
-
 all: $(NAME)
 
 $(NAME): extra_make $(OBJ) $(PATH_LFT) $(PATH_PTF) $(PATH_MLX)
@@ -85,14 +83,14 @@ $(PATH_MLX): $(DIR_MLX)MLX42
 	@cd $(DIR_MLX)MLX42 && cmake -B build && cmake --build build --parallel --config Release
 
 clean:
-	@$(MAKE) -C libft/ clean  --no-print-directory
-	@$(MAKE) -C printf/ clean --no-print-directory
+	@$(MAKE) -C $(DIR_LIBFT) clean  --no-print-directory
+	@$(MAKE) -C $(DIR_PTF) clean --no-print-directory
 	@$(RM) $(OBJ)
 	@printf "MiniRT: Object files removal successful!\n"
 
 fclean:
-	@$(MAKE) -C libft/ fclean --no-print-directory
-	@$(MAKE) -C printf/ fclean --no-print-directory
+	@$(MAKE) -C $(DIR_LIBFT) fclean --no-print-directory
+	@$(MAKE) -C $(DIR_PTF) fclean --no-print-directory
 	@$(RM) $(OBJ)
 	@$(RM) $(NAME)
 	@rm -rf $(OBJ_DIR)

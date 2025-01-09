@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:34:06 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/09 16:37:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -427,7 +427,7 @@ t_vect		translate_texture_to_normal(uint8_t *pixel);
 void		set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal);
 void		set_bump_map_normal_base(t_vect *point, t_vect *normal, t_texture *tx, float radius, float base_distance);
 
-t_color		get_sky_color(t_thread *thread, t_ray *ray);
+t_color		get_background_color(t_thread *thread, t_ray *ray);
 
 t_vect		calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray);
 t_vect		get_obj_color(t_hit_info *hit_info);

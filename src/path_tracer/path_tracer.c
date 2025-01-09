@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path_tracer.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:44:57 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:45:27 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/09 17:22:32 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ void	*set_rendering(void *args)
 	}
 	return (NULL);
 }
-
 
 void	init_render(t_scene *scene)
 {
