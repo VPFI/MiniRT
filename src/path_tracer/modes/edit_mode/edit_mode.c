@@ -3,13 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   edit_mode.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:37:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 20:28:37 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/modes/edit_mode/edit_mode.h"
 
 t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
 {

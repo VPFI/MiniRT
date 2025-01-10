@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   mlx_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:45:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:56:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:55:18 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //#include "src/path_tracer/scene/scene.h"
-#include "mlx_utils.h"
+#include "src/mlx/mlx_utils.h"
 
 void	set_new_image(t_scene *scene)
 {

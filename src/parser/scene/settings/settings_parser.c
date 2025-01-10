@@ -1,16 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   settings.c                                         :+:      :+:    :+:   */
+/*   settings_parser.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:54 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:55:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 17:53:15 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/parser/scene/settings/settings_parser.h"
+#include "src/error_management/error_management.h"
+#include "src/parser/utils/numerical_utils.h"
+#include "src/parser/utils/lexical_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "libraries/libft/libft.h"
+#include <limits.h>
 
 static void	parse_spp(char **settings, t_scene *scene)
 {

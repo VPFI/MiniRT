@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   material.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:15:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 18:14:55 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,8 @@ typedef struct s_material
 	float		pattern_dim;
 	bool		pattern;
 }				t_material;
+
+t_material	new_standard_plight(void);
+t_material	new_standard_material(void);
 
 #endif

@@ -1,15 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   texture.c                                          :+:      :+:    :+:   */
+/*   texture_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:12:10 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 17:12:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 18:50:35 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/objects/texture/texture.h"
+#include "src/error_management/error_management.h"
+#include "src/parser/utils/numerical_utils.h"
+#include "src/parser/utils/lexical_utils.h"
+#include <limits.h>
 
 void	parse_texture(char **settings, t_texture **tx)
 {

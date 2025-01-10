@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   memory_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:37:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 15:49:14 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 20:18:56 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+# include <stdlib.h>
 #include "memory_management.h"
+#include "src/selection_menu/file_selector.h"
 
 void	free_texture(t_texture **texture)
 {

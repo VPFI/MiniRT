@@ -3,13 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   numerical_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:02:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:34:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 18:53:25 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
 #include "src/parser/utils/numerical_utils.h"
 #include "src/error_management/error_management.h"
 

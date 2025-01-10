@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:28:21 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/10 18:06:03 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,10 @@ t_vect	get_box_pattern(t_hit_info *hit_info)
 	}
 }
 
-
 t_vect	get_origin_box(t_object *object)
 {
 	return (object->figure.box.center);
 }
-
 
 t_vect	get_box_normal(t_hit_info *hit_info, t_figure *fig)
 {

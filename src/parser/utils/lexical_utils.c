@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   lexical_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:36:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:02:48 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 18:52:57 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.h"
+#include "libraries/libft/libft.h"
 
 int	count_components(char **components)
 {

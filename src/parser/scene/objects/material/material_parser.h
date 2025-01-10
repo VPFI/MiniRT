@@ -1,16 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   settings.h                                         :+:      :+:    :+:   */
+/*   material_parser.h                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 16:19:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 18:25:06 by vperez-f         ###   ########.fr       */
+/*   Created: 2025/01/09 16:04:15 by vperez-f          #+#    #+#             */
+/*   Updated: 2025/01/10 18:50:57 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SETTINGS_H
-# define SETTINGS_H
+#ifndef MATERIAL_PARSER_H
+# define MATERIAL_PARSER_H
+
+# include "src/path_tracer/scene/objects/material/material.h"
+
+void	parse_material(char **settings, t_material *mat);
+void	parse_pattern(char **settings, t_material *mat);
+
 
 #endif

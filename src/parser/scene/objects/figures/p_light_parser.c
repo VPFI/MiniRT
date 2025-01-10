@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   p_light.c                                          :+:      :+:    :+:   */
+/*   p_light_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:57:11 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 17:00:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 18:41:34 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../parser.h"
+#include "src/parser/scene/objects/figures/figures_parser.h"
+#include "src/path_tracer/scene/objects/figures/p_light/setters.h"
 
 void	load_p_light(t_scene *scene, char **components, int amount)
 {

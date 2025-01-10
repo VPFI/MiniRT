@@ -1,16 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cylinder .h                                        :+:      :+:    :+:   */
+/*   camera_parser.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 18:21:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 18:21:40 by vperez-f         ###   ########.fr       */
+/*   Created: 2025/01/09 16:19:47 by vperez-f          #+#    #+#             */
+/*   Updated: 2025/01/10 17:46:15 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONE_H
-# define CONE_H
+#ifndef CAMERA_PARSER_H
+# define CAMERA_PARSER_H
+
+# include "src/path_tracer/scene/scene.h"
+
+void	load_camera(t_scene *scene, char **components, int amount);
 
 #endif

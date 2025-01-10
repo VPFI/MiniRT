@@ -3,14 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   scene_parser.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:45:58 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:20:20 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 17:41:15 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
 #include "src/parser/scene/scene_parser.h"
+#include "src/parser/scene/ambient/ambient_parser.h"
+#include "src/parser/scene/camera/camera_parser.h"
+#include "src/parser/scene/settings/settings_parser.h"
 
 int	parse_scene(t_scene *scene, char **components, int amount)
 {

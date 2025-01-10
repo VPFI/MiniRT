@@ -1,20 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   camera.h                                           :+:      :+:    :+:   */
+/*   ray_utils.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 16:19:47 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:24:13 by vperez-f         ###   ########.fr       */
+/*   Created: 2025/01/09 16:29:15 by vperez-f          #+#    #+#             */
+/*   Updated: 2025/01/10 20:29:21 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CAMERA_H
-# define CAMERA_H
+#ifndef RAY_UTILS_H
+# define RAY_UTILS_H
 
-#include "src/path_tracer/scene/scene.h"
 
-void	load_camera(t_scene *scene, char **components, int amount);
+
+t_vect	ray_at(t_ray ray, float pos);
+
+void	check_normal(t_vect *normal, t_vect *ray_dir);
 
 #endif

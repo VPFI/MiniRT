@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   camera.c                                           :+:      :+:    :+:   */
+/*   camera_parser.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:39:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/10 17:48:57 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/parser/scene/camera/camera.h"
+#include "src/parser/scene/camera/camera_parser.h"
 #include "src/parser/utils/numerical_utils.h"
 #include "src/parser/utils/lexical_utils.h"
 #include "src/error_management/error_management.h"
