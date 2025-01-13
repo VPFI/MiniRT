@@ -6,14 +6,14 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 21:18:43 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 20:28:57 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RAY_H
 # define RAY_H
 
-#include "src/path_tracer/vectors/vectors.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
 
 typedef struct s_ray
 {

@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   figures.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 20:37:39 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:12:14 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FIGURES_H
 # define FIGURES_H
 
-# include "src/path_tracer/vectors/vectors.h"
+# include "src/path_tracer/utils/vectors/vectors.h"
 
 struct t_object;
 

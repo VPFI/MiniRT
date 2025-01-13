@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   mutex_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 13:46:36 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 15:21:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/11 23:11:52 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "thread_management.h"
+#include "src/path_tracer/scene/scene.h"
 
 void	unset_stop_status(t_scene *scene)
 {

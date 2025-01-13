@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   vectors.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:59:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:27:34 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/11 23:05:59 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef VECTORS_H
 # define VECTORS_H
+
+# include <stdint.h>
+# include <stdbool.h>
 
 typedef struct s_vect	t_color;
 
@@ -21,7 +24,6 @@ typedef struct s_vect
 	float	y;
 	float	z;
 }			t_vect;
-
 
 t_vect	unit_vect(t_vect vect);
 bool	zero_vect(t_vect vect);

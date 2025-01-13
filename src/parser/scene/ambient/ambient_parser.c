@@ -6,11 +6,11 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 17:28:48 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/vectors/vectors.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
 #include "src/path_tracer/utils/color/vect_color_utils.h"
 #include "src/parser/utils/numerical_utils.h"
 #include "src/parser/scene/ambient/ambient.h"

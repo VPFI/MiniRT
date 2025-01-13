@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   thread_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 20:15:08 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/11 23:09:31 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "thread_management.h"
 #include "src/error_management/error_management.h"
-#include "src/miniRT.h"
+#include "src/path_tracer/scene/scene.h"
 
 void	wait_for_threads(t_scene *scene)
 {

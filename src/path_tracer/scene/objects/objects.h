@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   objects.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:36:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/11 23:14:19 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef OBJECTS_H
 # define OBJECTS_H
 
-# include "src/path_tracer/vectors/vectors.h"
+# include "src/path_tracer/utils/vectors/vectors.h"
 # include "src/path_tracer/scene/ray/ray.h"
 # include "src/path_tracer/scene/camera/camera.h"
 # include "src/path_tracer/scene/objects/figures/figures.h"
