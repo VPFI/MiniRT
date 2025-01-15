@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   thread_management.h                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:08:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 20:30:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/14 23:54:41 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,5 +41,8 @@ typedef struct s_thread_backup
 	int				iterations;
 	uint32_t		current_y;
 }					t_thread_backup;
+
+void	wait_for_threads(t_scene *scene);
+void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup);
 
 #endif

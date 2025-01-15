@@ -3,15 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   object_copy.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:46:35 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:48:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:11:07 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/error_management/error_management.h"
 
-void	init_copy(t_scene *scene, t_object *selected_obj)
+static void	init_copy(t_scene *scene, t_object *selected_obj)
 {
 	t_figure	fig;
 	t_texture	*tx;

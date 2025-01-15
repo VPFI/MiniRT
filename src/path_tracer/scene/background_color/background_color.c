@@ -3,15 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   background_color.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:02:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:37:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/14 23:46:42 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/scene/ray/utils/ray_utils.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/sphere/utils.h"
+#include "src/path_tracer/utils/color/color_utils.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-void	set_sky_texture_color(t_vect *point, t_figure *fig,
+static void	set_sky_texture_color(t_vect *point, t_figure *fig,
 	t_texture *tx, t_color *color)
 {
 	float		polar_coords[2];
@@ -41,7 +50,7 @@ void	set_sky_texture_color(t_vect *point, t_figure *fig,
 	color->z = *(pixel + 2) / 255.0;
 }
 
-t_color	get_skysphere_color(t_thread *thread, t_hit_info *ht)
+static t_color	get_skysphere_color(t_thread *thread, t_hit_info *ht)
 {
 	t_color	scene_sky_color;
 	t_vect	translated_point;

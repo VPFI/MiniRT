@@ -3,13 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   hooks.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:49:05 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 17:03:35 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:55:21 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/path_tracer.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/window_management/window_management.h"
+#include "src/path_tracer/thread_management/mutex_utils.h"
+#include "src/path_tracer/scene/camera/utils/camera_utils.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include "src/window_management/key_identifiers/extra_keys.h"
+#include "src/window_management/key_identifiers/settings_keys.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
 
 void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
@@ -40,7 +49,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		else
 		{
 			move_camera(&scene->camera, &scene->back_up_camera, scene->sky_sphere, key_data);
-			recalculate_view(scene);
+			recalculate_view(&scene->camera, scene->width, scene->height);
 		}
 		main_loop(scene);
 	}

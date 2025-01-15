@@ -3,15 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   render_mode.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:37:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 01:19:29 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/camera/utils/camera_utils.h"
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/scene/ray/utils/ray_utils.h"
+#include "src/path_tracer/scene/ray/scatter/ray_scatter.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include "src/path_tracer/utils/color/color_utils.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include "src/path_tracer/scene/background_color/background_color.h"
 
-void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
+static void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
 {
 	t_color		final_color;
 	t_vect		*prev_color_index;
@@ -30,7 +42,7 @@ void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
 		255));
 }
 
-t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
+static t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 {
 	t_color		emittance;
 	float		time_aux;

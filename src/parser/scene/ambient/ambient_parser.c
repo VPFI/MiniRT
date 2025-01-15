@@ -6,15 +6,15 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/14 19:37:18 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/color/vect_color_utils.h"
+# include "src/path_tracer/scene/scene.h"
 #include "src/parser/utils/numerical_utils.h"
-#include "src/parser/scene/ambient/ambient.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
 #include "src/error_management/error_management.h"
+#include "src/path_tracer/utils/color/color_utils.h"
 
 void	load_ambient(t_scene *scene, char **components, int amount)
 {

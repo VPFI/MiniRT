@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:25:52 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 01:12:10 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,20 +50,10 @@ t_vect	get_plane_pattern(t_hit_info *hit_info)
 	return (get_plane_pattern_color(&rotated_point, hit_info->object->material.pattern_dim, &hit_info->object->material.color));
 }
 
-t_vect	get_obj_color(t_hit_info *hit_info)
-{
-	if (hit_info->object->material.pattern)
-		return (hit_info->object->get_visual(hit_info));
-	else
-		return (hit_info->object->material.color);
-}
-
-
 t_vect	get_origin_plane(t_object *object)
 {
 	return (object->figure.plane.center);
 }
-
 
 t_vect	get_plane_normal(t_hit_info *hit_info, t_figure *fig)
 {

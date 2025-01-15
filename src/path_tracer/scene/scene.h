@@ -6,13 +6,12 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 00:54:43 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SCENE_H
 # define SCENE_H
-
 
 # include <stdint.h>
 # include <stdbool.h>
@@ -87,5 +86,9 @@ typedef struct s_scene
 	int				choose_file;
 	int				current_file;
 }					t_scene;
+
+void	init_scene(t_scene *scene);
+void	init_sky_sphere(t_scene *scene, char *path);
+void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data);
 
 #endif

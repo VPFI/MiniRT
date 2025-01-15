@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   object_delete.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:53:10 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:55:04 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:14:44 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/memory_management/memory_management.h"
+#include <stdlib.h>
 
-void	delete_from_objects(t_scene *scene)
+static void	delete_from_objects(t_scene *scene)
 {
 	t_object	*obj;
 	t_object	*prev_object;
@@ -37,7 +41,7 @@ void	delete_from_objects(t_scene *scene)
 		free_primitive(&obj);
 }
 
-void	delete_from_lights(t_scene *scene)
+static void	delete_from_lights(t_scene *scene)
 {
 	t_object	*obj;
 	t_object	*prev_object;

@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   math_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:48:08 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 15:35:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/14 19:28:15 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "stdint.h"
 
 // Xorshift || https://en.wikipedia.org/wiki/Xorshift || [0,1]
 float fast_rand(uint32_t *state)

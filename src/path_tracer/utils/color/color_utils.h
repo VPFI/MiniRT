@@ -1,22 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ray_utils.h                                        :+:      :+:    :+:   */
+/*   color_utils.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 16:29:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 19:39:56 by vpf              ###   ########.fr       */
+/*   Created: 2025/01/14 19:32:56 by vpf               #+#    #+#             */
+/*   Updated: 2025/01/14 19:35:20 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef RAY_UTILS_H
-# define RAY_UTILS_H
+#ifndef COLOR_UTILS_H
+# define COLOR_UTILS_H
 
-# include "src/path_tracer/scene/ray/ray.h"
+# include "src/path_tracer/utils/vectors/vectors.h"
 
-t_vect	ray_at(t_ray ray, float pos);
+int		get_r(int rgba);
+int		get_g(int rgba);
+int		get_b(int rgba);
+int		get_a(int rgba);
+int		get_rgba(int r, int g, int b, int a);
 
-void	check_normal(t_vect *normal, t_vect *ray_dir);
+int		vect_to_int(t_color color);
+t_color	hexa_to_vect(int color);
 
 #endif

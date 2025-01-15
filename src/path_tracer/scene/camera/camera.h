@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:21:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 00:40:00 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,5 +37,8 @@ typedef struct s_camera
 	t_vect		viewport_origin;
 	t_vect		viewport_pixel0;
 }				t_camera;
+
+void	init_camera(t_camera *camera, uint32_t width, uint32_t height);
+void	recalculate_view(t_camera *camera, uint32_t width, uint32_t height);
 
 #endif

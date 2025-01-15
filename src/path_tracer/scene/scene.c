@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   scene.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:28:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 14:42:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:54:58 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "scene.h"
+#include "src/path_tracer/scene/scene.h"
 
 void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 {
@@ -54,7 +54,7 @@ void	init_sky_sphere(t_scene *scene, char *path)
 	add_object(&scene->sky_sphere, new_obj);
 }
 
-void	load_map_scene(t_scene *scene)
+static void	load_map_scene(t_scene *scene)
 {
 	int		map;
 	char	*line;
@@ -82,7 +82,7 @@ void	load_map_scene(t_scene *scene)
 	}
 }
 
-void	load_standard_scene(t_scene *scene)
+static void	load_standard_scene(t_scene *scene)
 {
 	scene->amb_light = AMB_LIGHT;
 	scene->amb_color = AMB_COLOR;
@@ -90,7 +90,7 @@ void	load_standard_scene(t_scene *scene)
 	scene->samples = SPP;
 	init_camera(&scene->camera, scene->width, scene->height);
 	scene->back_up_camera = scene->camera;
-	init_sky_sphere(scene, STD_SKYSPHERE);	
+	init_sky_sphere(scene, STD_SKYSPHERE);
 }
 
 void	init_scene(t_scene *scene)
@@ -102,7 +102,7 @@ void	init_scene(t_scene *scene)
 	else if (scene->path && scene->choose_file)
 	{
 		load_map_scene(scene);
-		recalculate_view(scene);
+		recalculate_view(&scene->camera, scene->width, scene->height);
 		scene->back_up_camera = scene->camera;
 	}
 	deselect_objects(scene->objects, scene->lights, &scene->object_selected);

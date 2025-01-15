@@ -3,13 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:48:26 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 17:12:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/14 22:15:17 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/math/math_utils.h"
+#include "src/path_tracer/scene/objects/figures/sphere/utils.h"
+#include <math.h>
 
 void	set_polar_coords(t_vect *point, t_figure *fig, float *polar_coords)
 {

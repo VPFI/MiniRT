@@ -3,13 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   object_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:45:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:54:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:02:54 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/ray/hit/ray_hit.h"
+#include "src/path_tracer/scene/ray/utils/ray_utils.h"
+#include "src/path_tracer/scene/camera/utils/camera_utils.h"
+#include "src/path_tracer/scene/objects/hooks/management/add/object_add.h"
+#include "src/path_tracer/scene/objects/hooks/management/copy/object_copy.h"
+#include "src/path_tracer/scene/objects/hooks/management/delete/object_delete.h"
+#include "src/path_tracer/scene/objects/objects.h"
 
 void	deselect_objects(t_object *objects, t_object *lights, bool *object_selected)
 {

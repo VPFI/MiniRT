@@ -3,14 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   objects.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:55:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 01:09:08 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
+t_vect	get_obj_color(t_hit_info *hit_info)
+{
+	if (hit_info->object->material.pattern)
+		return (hit_info->object->get_visual(hit_info));
+	else
+		return (hit_info->object->material.color);
+}
 
 bool	is_2d(t_object *object)
 {

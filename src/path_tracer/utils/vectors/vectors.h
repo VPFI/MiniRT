@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:59:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 23:05:59 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/14 19:19:04 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ typedef struct s_vect
 	float	y;
 	float	z;
 }			t_vect;
+
+t_vect	new_vect(float v1, float v2, float v3);
+t_vect	new_color(float v1, float v2, float v3);
 
 t_vect	unit_vect(t_vect vect);
 bool	zero_vect(t_vect vect);

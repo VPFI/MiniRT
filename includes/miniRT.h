@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:20:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/14 22:13:28 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,6 @@ typedef enum e_bounds
 	MIN = 0,
 	MAX = 1,
 }			t_bounds;
-
-typedef enum e_polar
-{
-	LONGITUDE = 0,
-	LATITUDE = 1,
-}			t_polar;
 
 typedef struct s_eq_params
 {

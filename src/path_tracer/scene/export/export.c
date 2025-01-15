@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:30:09 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 17:06:57 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 01:16:52 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-void	write_ppm(mlx_image_t *image, int fd, char *filename)
+static void	write_ppm(mlx_image_t *image, int fd, char *filename)
 {
 	uint32_t	x;
 	uint32_t	y;

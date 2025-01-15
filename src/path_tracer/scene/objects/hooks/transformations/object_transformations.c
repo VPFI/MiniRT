@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   object_transformations.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:32:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:51:08 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:24:54 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int	check_object_focus(t_object *target_object, t_scene *scene, mlx_key_data_t k
 	{
 		obj_origin = target_object->get_origin(target_object);
 		scene->camera.orientation = unit_vect(vect_subtract(obj_origin, scene->camera.origin));
-		recalculate_view(scene);
+		recalculate_view(&scene->camera, scene->width, scene->height);
 		return (1);
 	}
 	return (0);

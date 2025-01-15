@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   path_tracer.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:50:40 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 18:53:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 00:48:16 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PATH_TRACER_H
 # define PATH_TRACER_H
+
+void	main_loop(void *sc);
 
 #endif

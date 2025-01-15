@@ -6,7 +6,7 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/31 02:18:01 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 00:25:05 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void	resize_rendering(t_scene *scene)
 	{
 		free(scene->cumulative_image);
 	}
-	recalculate_view(scene);
+	recalculate_view(&scene->camera, scene->width, scene->height);
 	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
 	if (!scene->cumulative_image)
 	{

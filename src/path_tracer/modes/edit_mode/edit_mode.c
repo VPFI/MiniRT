@@ -6,14 +6,23 @@
 /*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 20:28:37 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 00:58:08 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/mlx/mlx_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/ray/ray.h"
 #include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/modes/edit_mode/edit_mode.h"
+#include "src/path_tracer/utils/color/color_utils.h"
+#include "src/path_tracer/scene/ray/hit/ray_hit.h"
+#include "src/path_tracer/scene/ray/utils/ray_utils.h"
+#include "src/path_tracer/scene/camera/utils/camera_utils.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include "src/path_tracer/scene/background_color/background_color.h"
+#include <math.h>
 
-t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
+static t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
 {
 	t_color		color;
 	t_hit_info	hit_info;
