@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path_tracer.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:44:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 00:48:04 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 20:36:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "src/path_tracer/scene/scene.h"
 #include "src/path_tracer/modes/edit_mode/edit_mode.h"
 #include "src/path_tracer/modes/render_mode/render_mode.h"
-#include "src/path_tracer/thread_management/mutex_utils.h"
+#include "src/path_tracer/thread_management/thread_management.h"
 #include <stdio.h>
 #include <stdlib.h>
 

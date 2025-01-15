@@ -6,9 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:24:55 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:28:12 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 21:00:33 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
 int	is_reset_key_down(mlx_key_data_t key_data)
 {

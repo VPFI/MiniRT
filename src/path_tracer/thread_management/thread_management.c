@@ -3,25 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   thread_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 23:09:31 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 20:26:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "thread_management.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 #include "src/error_management/error_management.h"
-#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/thread_management/thread_management.h"
 
-void	wait_for_threads(t_scene *scene)
+void	wait_for_threads(t_thread *threads)
 {
 	int i;
 
 	i = 0;
 	while (i < THREADS)
 	{
-		if (pthread_join(scene->threads[i].self, NULL))
+		if (pthread_join(threads[i].self, NULL))
 		{
 			return (exit_err(ERR_MEM_MSG, "(malloc)", 2));
 		}

@@ -6,12 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:51:12 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 19:59:37 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SELECTOR_UTILS_H
 # define SELECTOR_UTILS_H
+
+# include "src/path_tracer/scene/objects/texture/texture.h"
+# include <stdint.h>
 
 typedef struct s_coords
 {
@@ -20,5 +23,9 @@ typedef struct s_coords
 	float	z;
 	int		color;
 }			t_coords;
+
+int		count_maps(void);
+char	*get_map_path(int map_index);
+int		get_texture_color(t_texture *tx, uint32_t x, uint32_t y);
 
 #endif

@@ -6,9 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:46:44 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 20:04:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/utils/color/color_utils.h"
+#include "src/path_tracer/scene/objects/texture/texture.h"
+#include <dirent.h>
+#include <stdint.h>
+#include <unistd.h>
 
 int	get_texture_color(t_texture *tx, uint32_t x, uint32_t y)
 {
@@ -20,7 +27,7 @@ int	get_texture_color(t_texture *tx, uint32_t x, uint32_t y)
 	return (get_rgba(*pixel, *(pixel + 1), *(pixel + 2), 0xFF));
 }
 
-char	*get_full_path_name(char *name)
+static char	*get_full_path_name(char *name)
 {
 	char	*path;
 

@@ -6,10 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:25:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:28:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 21:01:26 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "src/window_management/key_identifiers/key_identifiers.h"
 
 int	is_extra_key_down(mlx_key_data_t key_data)
 {

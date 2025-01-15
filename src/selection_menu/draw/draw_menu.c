@@ -1,20 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   draw.c                                             :+:      :+:    :+:   */
+/*   draw_menu.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:39:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:46:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 19:54:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "libraries/libft/libft.h"
+#include "src/mlx/mlx_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/selection_menu/buttons/buttons.h"
+#include "src/selection_menu/utils/selector_utils.h"
+#include "src/selection_menu/custom_writer/writer.h"
+#include <math.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 void	draw_no_maps_found(t_scene *scene)
 {
-	uint32_t	x;
+	uint32_t	x;	
 	uint32_t	y;
 	int			offset_x;
 	int			offset_y;
@@ -42,7 +50,7 @@ void	draw_no_maps_found(t_scene *scene)
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 }
 
-void	draw_headers(t_scene *scene)
+static void	draw_headers(t_scene *scene)
 {
 	char	*aux;
 	int		coords[3];
@@ -64,7 +72,7 @@ void	draw_headers(t_scene *scene)
 	free(pagination);
 }
 
-void	draw_center_line(t_scene *scene)
+static void	draw_center_line(t_scene *scene)
 {
 	int		x;
 	int		y;

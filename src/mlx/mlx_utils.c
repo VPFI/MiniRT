@@ -3,15 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   mlx_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:45:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 16:55:18 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 20:11:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //#include "src/path_tracer/scene/scene.h"
 #include "src/mlx/mlx_utils.h"
+
+void	close_mlx(void *sc)
+{
+	t_scene *scene;
+
+	scene = sc;
+	set_stop_status(scene);
+	mlx_close_window(scene->mlx);
+}
 
 void	set_new_image(t_scene *scene)
 {

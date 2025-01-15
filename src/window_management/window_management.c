@@ -6,14 +6,24 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:46:03 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 21:21:25 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "window_management.h"
+#include "libraries/libft/libft.h"
+#include "mlx/mlx_utils.h"
+#include "src/selection_menu/file_selector.h"
+#include "src/path_tracer/path_tracer.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/path_tracer/scene/camera/camera.h"
+#include "src/path_tracer/modes/edit_mode/edit_mode.h"
+#include "src/path_tracer/modes/render_mode/render_mode.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include "src/window_management/key_identifiers/key_identifiers.h"
+#include "src/error_management/error_management.h"
 
-
-void	resize_file_selector(t_scene *scene)
+static void	resize_file_selector(t_scene *scene)
 {
 	if (scene->map_count)
 	{
@@ -31,10 +41,10 @@ void	resize_file_selector(t_scene *scene)
 	display_file_menu(scene);
 }
 
-void	resize_rendering(t_scene *scene)
+static void	resize_rendering(t_scene *scene)
 {
 	set_stop_status(scene);
-	wait_for_threads(scene);
+	wait_for_threads(scene->threads);
 	scene->stop = false;
 	if (scene->cumulative_image)
 	{
@@ -49,20 +59,6 @@ void	resize_rendering(t_scene *scene)
 	set_new_image(scene);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	main_loop(scene);
-}
-
-void	close_all(t_scene *scene)
-{
-	mlx_close_window(scene->mlx);
-}
-
-void	close_mlx(void *sc)
-{
-	t_scene *scene;
-
-	scene = sc;
-	set_stop_status(scene);
-	close_all(scene);
 }
 
 void	resize_handle(int32_t width, int32_t height, void *sc)
@@ -113,8 +109,7 @@ void	key_down(mlx_key_data_t key_data, void *sc)
 	scene = sc;
 	if (key_data.key == MLX_KEY_ESCAPE && key_data.action == MLX_PRESS)
 	{
-		set_stop_status(scene);
-		close_all(scene);
+		close_mlx(scene);
 	}
 	else if (!scene->choose_file && scene->map_count
 		&& is_movement_key_down(key_data))

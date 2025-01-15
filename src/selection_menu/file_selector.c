@@ -6,11 +6,18 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 18:47:17 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 20:08:57 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/miniRT.h"
+#include "libraries/libft/libft.h"
+#include "src/mlx/mlx_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/path_tracer.h"
+#include "src/selection_menu/draw/draw_menu.h"
+#include "src/error_management/error_management.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include <dirent.h>
 
 void	select_scene(t_scene *scene)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   thread_management.h                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:08:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 23:54:41 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 21:20:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <stdint.h>
 # include <stdbool.h>
 # include <pthread.h>
+# include "src/path_tracer/scene/scene.h"
+# include "src/path_tracer/thread_management/mutex_utils.h"
 
 typedef struct s_thread
 {
@@ -42,7 +44,8 @@ typedef struct s_thread_backup
 	uint32_t		current_y;
 }					t_thread_backup;
 
-void	wait_for_threads(t_scene *scene);
+
+void	wait_for_threads(t_thread *threads);
 void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup);
 
 #endif

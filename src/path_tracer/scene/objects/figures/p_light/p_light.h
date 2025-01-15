@@ -1,20 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   hooks.h                                            :+:      :+:    :+:   */
+/*   p_light.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 16:21:22 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 01:13:39 by vpf              ###   ########.fr       */
+/*   Created: 2025/01/09 18:40:14 by vperez-f          #+#    #+#             */
+/*   Updated: 2025/01/15 21:40:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HOOKS_H
-# define HOOKS_H
-
-# include "src/path_tracer/scene/scene.h"
-
-void    render_mode_hooks(t_scene *scene, mlx_key_data_t key_data);
+#ifndef P_LIGHT_H
+# define P_LIGHT_H
 
 #endif

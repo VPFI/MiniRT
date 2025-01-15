@@ -6,11 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:37:25 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 18:29:44 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 21:40:08 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
 float	get_point_angle(t_vect *point)
 {

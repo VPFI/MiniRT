@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:42:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:50:06 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 20:47:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 #include "src/path_tracer/scene/objects/objects.h"
 #include "src/path_tracer/scene/objects/material/material.h"
-#include "src/window_management/key_identifiers/transformation_keys.h"
+#include "src/window_management/key_identifiers/key_identifiers.h"
 #include "src/path_tracer/utils/print/print_utils.h"
 #include <stdio.h>
 
