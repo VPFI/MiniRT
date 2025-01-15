@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:34:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 21:45:49 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@
 # define BLACK		0x505050FF
 # define TRUE_BLACK	0x000000FF
 # define WHITE		0xF1F1F1FF
+
+# define STD_SKYSPHERE	"textures/sky_sphere/table_mountain_2_puresky_4k.png"
 
 typedef struct s_scene
 {
