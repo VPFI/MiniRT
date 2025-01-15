@@ -6,10 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:52:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:54:45 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 17:43:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
 void	add_world_object(t_scene *scene, mlx_key_data_t key_data, t_vect *offset_origin)
 {

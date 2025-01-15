@@ -6,12 +6,19 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:36:21 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:20:31 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 17:26:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include <math.h>
 
-float	p_light_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
+static float	p_light_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
 {
 	t_vect		bounce_dir;
 	float		test;
@@ -25,7 +32,7 @@ float	p_light_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientatio
 	return (test);
 }
 
-t_vect	test_sample_area(uint32_t *state, t_object *light)
+static t_vect	test_sample_area(uint32_t *state, t_object *light)
 {
 	return (vect_add(light->get_origin(light), vect_simple_mult(get_random_uvect(state), light->figure.p_light.radius_shadow)));
 }

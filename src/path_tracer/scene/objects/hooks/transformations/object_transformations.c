@@ -3,14 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   object_transformations.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:32:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:24:54 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:09:31 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/camera/camera.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "src/window_management/key_identifiers/transformation_keys.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include <math.h>
 
 t_vect	clamp_object_coords(t_object *target_object)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   miniRT.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 22:13:28 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:51:31 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 # include "../libraries/printf/ft_printf.h"
 # include "../libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
-# define AIR_REF_INDEX	1.0003
+
 
 # define STD_SKYSPHERE		"textures/sky_sphere/table_mountain_2_puresky_4k.png"
 
@@ -37,11 +37,7 @@ typedef struct s_object t_object;
 typedef union s_figure	t_figure;
 
 
-typedef enum e_bounds
-{
-	MIN = 0,
-	MAX = 1,
-}			t_bounds;
+
 
 typedef struct s_eq_params
 {
@@ -72,40 +68,6 @@ typedef struct s_base_params
 	float	point_radius;
 	t_vect	point_to_base;
 }			t_base_params;
-
-typedef struct s_coords
-{
-	float   x;
-	float   y;
-	float   z;
-	int 	color;
-}       	t_coords;
-
-typedef struct s_button
-{
-	t_coords	i_pt;
-	t_coords	f_pt;
-	char		*text;
-	int 		color;
-}       		t_button;
-
-
-
-typedef struct s_bresenham
-{
-	t_coords	i_pt;
-	t_coords	f_pt;
-	int			d;
-	int			d2;
-	int			dx;
-	int			dy;
-	int			i_one;
-	int			i_two;
-	int			n;
-	int			max;
-	int			color;
-	float		fade_comp[4];
-}           	t_bresenham;
 
 int 		get_rgba(int r, int g, int b, int a);
 
@@ -148,7 +110,7 @@ void		init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt, i
 void		calculate_bresenham_font(t_scene *scene, t_bresenham *bres);
 void		write_str(t_scene *scene, char *msg, int *xys, int color);
 
-void		draw_file_menu(t_scene *scene);
+void		display_file_menu(t_scene *scene);
 void		free_buttons(t_button *buttons, int n);
 void		draw_buttons(t_button *buttons, t_scene *scene);
 

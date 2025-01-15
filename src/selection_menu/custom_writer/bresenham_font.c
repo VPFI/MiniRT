@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   bresenham_font.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/25 16:49:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/14 19:37:37 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:53:56 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/miniRT.h"
+#include "src/mlx/mlx_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/selection_menu/utils/selector_utils.h"
+#include "src/selection_menu/custom_writer/bresenham_font.h"
+#include <math.h>
 
-void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)
+static void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)
 {
 	int	res_x;
 	int	res_y;

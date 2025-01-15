@@ -6,9 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:50:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:25:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 16:44:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
 
 void	check_normal(t_vect *normal, t_vect *ray_dir)
 {	

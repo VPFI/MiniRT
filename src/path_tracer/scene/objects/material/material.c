@@ -3,13 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   material.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:12:16 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 01:09:44 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:08:49 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include <math.h>
+#include <stdbool.h>
 
 t_material	new_standard_material(void)
 {

@@ -1,18 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   font.c                                             :+:      :+:    :+:   */
+/*   writer.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 13:41:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2024/12/24 16:15:26 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 18:57:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/miniRT.h"
+#include "libraries/libft/libft.h"
+#include "libraries/libft/get_next_line.h"
+#include "src/mlx/mlx_utils.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/selection_menu/utils/selector_utils.h"
+#include "src/selection_menu/custom_writer/bresenham_font.h"
+#include <fcntl.h>
+#include <stdlib.h>
+#include <math.h>
 
-void	free_arr_font(char **arr)
+static void	free_arr_font(char **arr)
 {
 	int	i;
 
@@ -30,7 +38,7 @@ void	free_arr_font(char **arr)
 	}
 }
 
-void	draw_letter(t_scene *scene, char *points, int prm[4], int color)
+static void	draw_letter(t_scene *scene, char *points, int prm[4], int color)
 {
 	int			strt;
 	float		size;
@@ -53,7 +61,7 @@ void	draw_letter(t_scene *scene, char *points, int prm[4], int color)
 	free_arr_font(list);
 }
 
-void	set_params(int x, int y, int size, int param[4])
+static void	set_params(int x, int y, int size, int param[4])
 {
 	param[0] = x;
 	param[1] = y;

@@ -1,16 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   decrements.h                                       :+:      :+:    :+:   */
+/*   buttons.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/09 17:15:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 18:48:38 by vperez-f         ###   ########.fr       */
+/*   Created: 2025/01/15 18:30:21 by vperez-f          #+#    #+#             */
+/*   Updated: 2025/01/15 18:39:15 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DECREMENTS_H
-# define DECREMENTS_H
+#include "src/selection_menu/buttons/buttons.h"
+#include <stdlib.h>
 
-#endif
+void	free_buttons(t_button *buttons, int n)
+{
+	int	i;
+
+	i = 0;
+	if (!buttons)
+		return ;
+	while (i < n)
+	{
+		if (buttons[i].text)
+			free(buttons[i].text);
+		i++;
+	}
+	free(buttons);
+}

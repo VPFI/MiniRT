@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render_mode.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 01:19:29 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:25:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "src/path_tracer/scene/scene.h"
 #include "src/path_tracer/scene/camera/utils/camera_utils.h"
 #include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/ray/utils/ray_utils.h"
 #include "src/path_tracer/scene/ray/scatter/ray_scatter.h"
 #include "src/path_tracer/scene/objects/objects.h"
 #include "src/path_tracer/utils/vectors/vectors.h"

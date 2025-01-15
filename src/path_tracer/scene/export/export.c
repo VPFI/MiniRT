@@ -3,13 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:30:09 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 01:16:52 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 16:42:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "libraries/printf/ft_printf.h"
+#include "src/error_management/error_management.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdint.h>
 
 static void	write_ppm(mlx_image_t *image, int fd, char *filename)
 {

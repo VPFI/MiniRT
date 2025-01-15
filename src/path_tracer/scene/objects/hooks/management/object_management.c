@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   object_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:45:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:02:54 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:43:41 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/ray/hit/ray_hit.h"
-#include "src/path_tracer/scene/ray/utils/ray_utils.h"
+#include "src/path_tracer/scene/ray/ray.h"
 #include "src/path_tracer/scene/camera/utils/camera_utils.h"
 #include "src/path_tracer/scene/objects/hooks/management/add/object_add.h"
 #include "src/path_tracer/scene/objects/hooks/management/copy/object_copy.h"

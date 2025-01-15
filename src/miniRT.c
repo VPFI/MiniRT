@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:09:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 18:46:03 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int	main(int argc, char **argv)
 
 	init_minirt(&scene);
 	if (parse_map_path(&scene, argc, argv))
-		draw_file_menu(&scene);
+		display_file_menu(&scene);
 	init_scene(&scene);
 	main_loop(&scene);
 	mlx_close_hook(scene.mlx, close_mlx, &scene);

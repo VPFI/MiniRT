@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   window_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:25:05 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:46:03 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	resize_file_selector(t_scene *scene)
 	{
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	}
-	draw_file_menu(scene);
+	display_file_menu(scene);
 }
 
 void	resize_rendering(t_scene *scene)

@@ -6,10 +6,17 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:16:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 14:17:14 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 16:58:43 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/sampling/light_sampling.h"
+#include "src/path_tracer/thread_management/thread_management.h"
+#include <stdint.h>
+#include <math.h>
 
 t_ray	lambertian_scatter(uint32_t *state, t_hit_info hit_info, t_color *emittance, t_thread *thread)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   scene.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:54:43 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:34:18 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,10 @@
 # include <stdint.h>
 # include <stdbool.h>
 # include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+# include "src/selection_menu/buttons/buttons.h"
 # include "src/path_tracer/scene/camera/camera.h"
 # include "src/path_tracer/utils/vectors/vectors.h"
+# include "src/path_tracer/scene/objects/objects.h"
 # include "src/path_tracer/thread_management/thread_management.h"
 
 # define WINW 		1820

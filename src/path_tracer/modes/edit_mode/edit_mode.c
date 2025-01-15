@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   edit_mode.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:58:08 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:24:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 #include "src/path_tracer/scene/ray/ray.h"
 #include "src/path_tracer/scene/objects/objects.h"
 #include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/scene/ray/hit/ray_hit.h"
-#include "src/path_tracer/scene/ray/utils/ray_utils.h"
 #include "src/path_tracer/scene/camera/utils/camera_utils.h"
 #include "src/path_tracer/thread_management/thread_management.h"
 #include "src/path_tracer/scene/background_color/background_color.h"

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vectors.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:59:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 19:19:04 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:21:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ float	vect_dot(t_vect vec, t_vect vec2);
 t_vect	vect_add(t_vect vec, t_vect vec2);
 t_vect	vect_div(t_vect vec, t_vect vec2);
 t_vect	vect_mult(t_vect vec, t_vect vec2);
-t_vect	vect_subtract(t_vect vec, t_vect vec2);
 t_vect	vect_cross(t_vect vec, t_vect vec2);
+t_vect	vect_subtract(t_vect vec, t_vect vec2);
 
 #endif

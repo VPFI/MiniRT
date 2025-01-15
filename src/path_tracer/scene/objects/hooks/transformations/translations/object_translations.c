@@ -6,11 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:41:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 17:50:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/15 18:00:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/path_tracer/scene/camera/camera.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 
 t_vect	relative_translate(t_camera *camera, mlx_key_data_t key_data)
 {

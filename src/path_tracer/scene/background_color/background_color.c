@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   background_color.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:02:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 23:46:42 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 17:25:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "src/path_tracer/scene/scene.h"
 #include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/ray/utils/ray_utils.h"
 #include "src/path_tracer/scene/objects/objects.h"
 #include "src/path_tracer/scene/objects/figures/sphere/utils.h"
 #include "src/path_tracer/utils/color/color_utils.h"

@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   objects.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 01:09:37 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/15 18:29:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef OBJECTS_H
 # define OBJECTS_H
 
-# include "src/path_tracer/utils/vectors/vectors.h"
 # include "src/path_tracer/scene/ray/ray.h"
 # include "src/path_tracer/scene/camera/camera.h"
+# include "src/path_tracer/utils/vectors/vectors.h"
 # include "src/path_tracer/scene/objects/figures/figures.h"
 # include "src/path_tracer/scene/objects/material/material.h"
 # include "src/path_tracer/scene/objects/texture/texture.h"
@@ -47,9 +47,9 @@ typedef struct s_object
 	void			(*edit_dimensions)(t_object *object, t_vect transformation);
 }					t_object;
 
-t_vect		get_obj_color(t_hit_info *hit_info);
 bool		is_2d(t_object *object);
 t_object	*last_object(t_object *objects);
+t_vect		get_obj_color(t_hit_info *hit_info);
 int			add_object(t_object **objects, t_object *new);
 
 #endif
