@@ -1,15 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   texture.c                                          :+:      :+:    :+:   */
+/*   texture_objects.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:40:48 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:42:48 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libft/libft.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/memory_management/memory_management.h"
+#include "error_management/error_management.h"
+#include <math.h>
 
 void	rotate_texture_normal(t_vect *point_normal, t_vect *normal)
 {

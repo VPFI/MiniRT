@@ -6,15 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:08 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:40:57 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:48:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/camera/camera.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/print/print_utils.h"
-#include "src/path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/print/print_utils.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include <stdio.h>
 
 void	resize_cone(t_object *object, t_vect transformation)
 {

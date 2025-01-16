@@ -6,12 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:13:13 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:35:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:40:40 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/objects/material/material.h"
+#include "libft/libft.h"
+#include "printf/ft_printf.h"
+#include "path_tracer/scene/objects/material/material.h"
 
 void	cicle_material_type(t_material *material)
 {

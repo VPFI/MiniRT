@@ -6,12 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:00:43 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:58:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:01:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.h"
-#include "src/error_management/error_management.h"
+#include "path_tracer/scene/scene.h"
+#include "parser/utils/lexical_utils.h"
+#include "parser/scene/scene_parser.h"
+#include "parser/scene/objects/objects_parser.h"
+#include "error_management/error_management.h"
 
 int	parse_components(t_scene *scene, char **components)
 {

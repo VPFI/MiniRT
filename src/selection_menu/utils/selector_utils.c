@@ -6,13 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:12:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "libft/libft.h"
+#include "path_tracer/utils/color/color_utils.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
 #include <dirent.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -32,7 +32,7 @@ static char	*get_full_path_name(char *name)
 	char	*path;
 
 	path = ft_strdup(name);
-	path = ft_strattach("./maps/", &path);
+	path = ft_strattach("./assets/maps/", &path);
 	return (path);
 }
 
@@ -43,7 +43,7 @@ char	*get_map_path(int map_index)
 	struct dirent	*dir;
 
 	i = 0;
-	d = opendir("./maps");
+	d = opendir("./assets/maps");
 	if (d)
 	{
 		while ((dir = readdir(d)) != NULL)
@@ -71,7 +71,7 @@ int	count_maps(void)
 	struct dirent	*dir;
 
 	i = 0;
-	d = opendir("./maps");
+	d = opendir("./assets/maps");
 	if (d)
 	{
 		while ((dir = readdir(d)) != NULL)

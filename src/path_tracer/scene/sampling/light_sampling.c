@@ -6,16 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:36:21 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:26:35 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:37:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/thread_management/thread_management.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/thread_management/thread_management.h"
 #include <math.h>
 
 static float	p_light_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_orientation)
@@ -55,7 +55,7 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 		shadow_ray.origin = hit_info.point;
 		bound_to_light = vect_subtract(temp->figure.p_light.location, hit_info.point);
 		shadow_ray.dir = vect_subtract(test_sample_area(thread->state, temp), hit_info.point);
-		if (!shadow_hit(thread->scene, shadow_ray, &test_hit, vect_length(bound_to_light)))
+		if (!shadow_hit(thread->scene->objects, shadow_ray, &test_hit, vect_length(bound_to_light)))
 		{
 			mod2 = 1 / vect_length(bound_to_light);
 			if (scatter_type == LAMBERTIAN)

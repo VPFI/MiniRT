@@ -6,21 +6,21 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 17:13:28 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FIGURES_PARSER_H
 # define FIGURES_PARSER_H
 
-# include "src/path_tracer/scene/scene.h"
-# include "src/path_tracer/scene/objects/figures/figures.h"
-# include "src/path_tracer/scene/objects/material/material.h"
-# include "src/path_tracer/scene/objects/texture/texture_objects.h"
-# include "src/error_management/error_management.h"
-# include "src/parser/utils/numerical_utils.h"
-# include "src/parser/utils/lexical_utils.h"
-# include "src/parser/scene/objects/objects_parser.h"
+# include "path_tracer/scene/scene.h"
+# include "path_tracer/scene/objects/figures/figures.h"
+# include "path_tracer/scene/objects/material/material.h"
+# include "path_tracer/scene/objects/texture/texture_objects.h"
+# include "error_management/error_management.h"
+# include "parser/utils/numerical_utils.h"
+# include "parser/utils/lexical_utils.h"
+# include "parser/scene/objects/objects_parser.h"
 # include <limits.h>
 
 void	load_box(t_scene *scene, char **cmp, int amount);

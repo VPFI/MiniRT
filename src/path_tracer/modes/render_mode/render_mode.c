@@ -6,25 +6,25 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:56:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:54:54 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "libraries/printf/ft_printf.h"
-#include "src/path_tracer/path_tracer.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/export/export.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/ray/scatter/ray_scatter.h"
-#include "src/path_tracer/scene/camera/utils/camera_utils.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/math/math_utils.h"
-#include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/thread_management/thread_management.h"
-#include "src/path_tracer/scene/background_color/background_color.h"
-#include "src/window_management/key_identifiers/key_identifiers.h"
+#include "libft/libft.h"
+#include "printf/ft_printf.h"
+#include "path_tracer/path_tracer.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/export/export.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/scene/ray/scatter/ray_scatter.h"
+#include "path_tracer/scene/camera/utils/camera_utils.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include "path_tracer/utils/color/color_utils.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include "path_tracer/scene/background_color/background_color.h"
+#include "window_management/key_identifiers/key_identifiers.h"
 
 void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
@@ -35,7 +35,7 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		scene->do_backup = true;
 		scene->stop = false;
 		if (export_to_ppm(scene->image))
-			ft_printf(stderr, "Unexpected error exporting image |--> Resuming render\n");
+			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
 		main_loop(scene);
 	}
 	else if (key_data.key == MLX_KEY_E && is_press_and_ctrl(key_data))

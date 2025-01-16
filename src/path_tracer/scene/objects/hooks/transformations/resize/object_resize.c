@@ -6,13 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:42:22 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:53:32 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
 
 int	check_object_resize(t_object *target_object, mlx_key_data_t key_data)
 {

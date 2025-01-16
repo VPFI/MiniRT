@@ -6,19 +6,20 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:02:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:25:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:44:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/figures/sphere/utils.h"
-#include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/thread_management/thread_management.h"
-#include "src/path_tracer/utils/math/math_utils.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/figures/sphere/utils/utils.h"
+#include "path_tracer/utils/color/color_utils.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
-
+	
 static void	set_sky_texture_color(t_vect *point, t_figure *fig,
 	t_texture *tx, t_color *color)
 {

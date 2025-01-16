@@ -6,36 +6,23 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:50:04 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:33:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/figures/figures.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/error_management/error_management.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/figures/figures.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "error_management/error_management.h"
 
-#include "src/path_tracer/scene/objects/figures/cone/getters/getters.h"
-#include "src/path_tracer/scene/objects/figures/cone/hit/hit.h"
-#include "src/path_tracer/scene/objects/figures/cone/transformations/transformations.h"
-#include "src/path_tracer/scene/objects/figures/cone/utils/utils.h"
-
-void	set_new_fig_cone(t_scene *scene, t_vect *offset_origin)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	mat = new_standard_material();
-	fig.cone.center = *offset_origin;
-	fig.cone.normal = scene->camera.v;
-	fig.cone.radius = 0.5;
-	fig.cone.height = 2.0;
-	init_cone(scene, fig, mat, NULL);
-}
+#include "path_tracer/scene/objects/figures/cone/getters/getters.h"
+#include "path_tracer/scene/objects/figures/cone/hit/hit.h"
+#include "path_tracer/scene/objects/figures/cone/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/cone/utils/utils.h"
 
 int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
@@ -64,4 +51,17 @@ int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
+}
+
+void	set_new_fig_cone(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.cone.center = *offset_origin;
+	fig.cone.normal = scene->camera.v;
+	fig.cone.radius = 0.5;
+	fig.cone.height = 2.0;
+	init_cone(scene, fig, mat, NULL);
 }

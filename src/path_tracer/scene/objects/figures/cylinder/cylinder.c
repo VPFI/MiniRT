@@ -6,36 +6,23 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 17:20:13 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:34:06 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/figures/figures.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/error_management/error_management.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/figures/figures.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "error_management/error_management.h"
 
-#include "src/path_tracer/scene/objects/figures/cylinder/hit/hit.h"
-#include "src/path_tracer/scene/objects/figures/cylinder/utils/utils.h"
-#include "src/path_tracer/scene/objects/figures/cylinder/getters/getters.h"
-#include "src/path_tracer/scene/objects/figures/cylinder/transformations/transformations.h"
-
-void	set_new_fig_cylinder(t_scene *scene, t_vect *offset_origin)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	mat = new_standard_material();
-	fig.cylinder.center = *offset_origin;
-	fig.cylinder.normal = scene->camera.v;
-	fig.cylinder.radius = 0.5;
-	fig.cylinder.height = 2.0;
-	init_cylinder(scene, fig, mat, NULL);
-}
+#include "path_tracer/scene/objects/figures/cylinder/hit/hit.h"
+#include "path_tracer/scene/objects/figures/cylinder/utils/utils.h"
+#include "path_tracer/scene/objects/figures/cylinder/getters/getters.h"
+#include "path_tracer/scene/objects/figures/cylinder/transformations/transformations.h"
 
 int	init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
@@ -64,4 +51,17 @@ int	init_cylinder(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
+}
+
+void	set_new_fig_cylinder(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.cylinder.center = *offset_origin;
+	fig.cylinder.normal = scene->camera.v;
+	fig.cylinder.radius = 0.5;
+	fig.cylinder.height = 2.0;
+	init_cylinder(scene, fig, mat, NULL);
 }

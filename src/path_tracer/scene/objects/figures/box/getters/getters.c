@@ -6,19 +6,19 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:07:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/figures/shared.h"
-#include "src/path_tracer/scene/objects/figures/box/utils/utils.h"
-#include "src/error_management/error_management.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/figures/shared.h"
+#include "path_tracer/scene/objects/figures/box/utils/utils.h"
+#include "error_management/error_management.h"
 #include <math.h>
 
 t_object	*get_box_face(t_hit_info *hit_info, int *face_index)

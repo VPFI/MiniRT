@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   vectors.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:46:53 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 22:58:46 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/vectors/vectors.h"
 
 t_vect	new_color(float v1, float v2, float v3)
 {

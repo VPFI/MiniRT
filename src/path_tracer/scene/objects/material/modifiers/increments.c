@@ -6,12 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:13:32 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:35:06 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
-#include "src/path_tracer/scene/objects/material/material.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/scene/objects/material/material.h"
 
 void	increment_material_component(t_material *material, mlx_key_data_t key_data)
 {

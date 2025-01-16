@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 21:45:49 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:05:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,11 @@
 
 # include <stdint.h>
 # include <stdbool.h>
-# include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
-# include "src/selection_menu/buttons/buttons.h"
-# include "src/path_tracer/scene/camera/camera.h"
-# include "src/path_tracer/utils/vectors/vectors.h"
-# include "src/path_tracer/scene/objects/objects.h"
-# include "src/path_tracer/thread_management/thread_management.h"
+# include "mlx/MLX42/include/MLX42/MLX42.h"
+# include "selection_menu/buttons/buttons.h"
+# include "path_tracer/scene/camera/camera.h"
+# include "path_tracer/utils/vectors/vectors.h"
+# include "path_tracer/thread_management/thread_management.h"
 
 # define WINW 		1820
 # define WINH 		980
@@ -78,9 +77,9 @@ typedef struct s_scene
 	t_camera		back_up_camera;
 	int				amb_color;
 	float			amb_light;
-	t_object		*sky_sphere;
-	t_object		*objects;
-	t_object		*lights;
+	struct s_object	*sky_sphere;
+	struct s_object	*objects;
+	struct s_object	*lights;
 	uint32_t		height;
 	uint32_t		width;
 	float			aspect_ratio;

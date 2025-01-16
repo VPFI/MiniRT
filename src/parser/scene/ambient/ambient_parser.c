@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   ambient_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/14 19:37:18 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "src/path_tracer/scene/scene.h"
-#include "src/parser/utils/numerical_utils.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/error_management/error_management.h"
-#include "src/path_tracer/utils/color/color_utils.h"
+# include "path_tracer/scene/scene.h"
+#include "parser/utils/numerical_utils.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "error_management/error_management.h"
+#include "path_tracer/utils/color/color_utils.h"
 
 void	load_ambient(t_scene *scene, char **components, int amount)
 {

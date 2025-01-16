@@ -6,20 +6,19 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:25:44 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 17:26:40 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:40:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/scene/objects/objects.h"
 #include <stdint.h>
 #include <stdbool.h>
 
 bool	ray_hit(t_object *objects, t_ray ray, t_hit_info *hit_info, t_object *sky_sphere)
 {
-	float		bounds[2];
 	bool		hit;
+	float		bounds[2];
 
 	hit = false;
 	bounds[MIN] = 0.001;
@@ -71,7 +70,7 @@ bool	ray_hit_plus_lights(t_object *objects, t_object *plights, t_ray ray, t_hit_
 	return (hit);
 }
 
-bool	shadow_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info, float max)
+bool	shadow_hit(t_object *objects, t_ray ray, t_hit_info *hit_info, float max)
 {
 	t_object	*temp;
 	float		bounds[2];
@@ -85,7 +84,7 @@ bool	shadow_hit(t_scene *scene, t_ray ray, t_hit_info *hit_info, float max)
 		bounds[MAX] = max;
 	}
 	ray.dir = unit_vect(ray.dir);
-	temp = scene->objects;
+	temp = objects;
 	while (temp)
 	{
 		if (temp->hit_func(ray, temp->figure, hit_info, bounds))

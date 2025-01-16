@@ -6,11 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:30:21 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:39:15 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/selection_menu/buttons/buttons.h"
+#include "selection_menu/buttons/buttons.h"
 #include <stdlib.h>
 
 void	free_buttons(t_button *buttons, int n)

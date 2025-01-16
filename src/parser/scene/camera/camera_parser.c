@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   camera_parser.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 17:48:57 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/parser/scene/camera/camera_parser.h"
-#include "src/parser/utils/numerical_utils.h"
-#include "src/parser/utils/lexical_utils.h"
-#include "src/error_management/error_management.h"
-#include "libraries/libft/libft.h"
+#include "parser/scene/camera/camera_parser.h"
+#include "parser/utils/numerical_utils.h"
+#include "parser/utils/lexical_utils.h"
+#include "error_management/error_management.h"
+#include "libft/libft.h"
 #include <limits.h>
 
 static void	load_extra_camera_components(char **settings, t_scene *scene)

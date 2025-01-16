@@ -6,22 +6,22 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 21:21:25 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
+#include "libft/libft.h"
 #include "mlx/mlx_utils.h"
-#include "src/selection_menu/file_selector.h"
-#include "src/path_tracer/path_tracer.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/path_tracer/scene/camera/camera.h"
-#include "src/path_tracer/modes/edit_mode/edit_mode.h"
-#include "src/path_tracer/modes/render_mode/render_mode.h"
-#include "src/path_tracer/thread_management/thread_management.h"
-#include "src/window_management/key_identifiers/key_identifiers.h"
-#include "src/error_management/error_management.h"
+#include "selection_menu/file_selector.h"
+#include "path_tracer/path_tracer.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/modes/edit_mode/edit_mode.h"
+#include "path_tracer/modes/render_mode/render_mode.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include "window_management/key_identifiers/key_identifiers.h"
+#include "error_management/error_management.h"
 
 static void	resize_file_selector(t_scene *scene)
 {

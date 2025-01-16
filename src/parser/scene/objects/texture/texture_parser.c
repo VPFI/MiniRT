@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:12:10 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
-#include "src/error_management/error_management.h"
-#include "src/parser/utils/numerical_utils.h"
-#include "src/parser/utils/lexical_utils.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "error_management/error_management.h"
+#include "parser/utils/numerical_utils.h"
+#include "parser/utils/lexical_utils.h"
 #include <limits.h>
 
 void	parse_texture(char **settings, t_texture **tx)

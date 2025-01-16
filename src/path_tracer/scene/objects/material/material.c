@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:12:16 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 17:08:49 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
-#include "src/path_tracer/utils/math/math_utils.h"
-#include "src/path_tracer/scene/objects/material/material.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include "path_tracer/scene/objects/material/material.h"
 #include <math.h>
 #include <stdbool.h>
 

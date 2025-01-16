@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:37:25 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 14:47:42 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/rotations/rotations.h"
-#include "src/path_tracer/utils/math/math_utils.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
 
 t_vect	get_rotated_point_quad(t_hit_info *hit_info)

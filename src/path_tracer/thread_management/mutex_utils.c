@@ -6,11 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 13:46:36 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:36:49 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 20:33:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
+#include "path_tracer/scene/scene.h"
 
 void	unset_stop_status(t_scene *scene)
 {

@@ -1,27 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   setters.c                                          :+:      :+:    :+:   */
+/*   disk.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 22:10:28 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:38:09 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/figures/figures.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "error_management/error_management.h"
 
-void	set_new_fig_disk(t_scene *scene, t_vect *offset_origin)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	mat = new_standard_material();
-	fig.disk.center = *offset_origin;
-	fig.disk.normal = vect_simple_mult(scene->camera.orientation, -1.0);
-	fig.disk.radius = 0.5;
-	init_disk(scene, fig, mat, NULL);
-}
+#include "path_tracer/scene/objects/figures/disk/hit/hit.h"
+#include "path_tracer/scene/objects/figures/disk/getters/getters.h"
+#include "path_tracer/scene/objects/figures/disk/textures/texture.h"
+#include "path_tracer/scene/objects/figures/disk/transformations/transformations.h"
 
 int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
@@ -49,4 +50,16 @@ int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->next = NULL;
 	add_object(&scene->objects, new_obj);
 	return (0);
+}
+
+void	set_new_fig_disk(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.disk.center = *offset_origin;
+	fig.disk.normal = vect_simple_mult(scene->camera.orientation, -1.0);
+	fig.disk.radius = 0.5;
+	init_disk(scene, fig, mat, NULL);
 }

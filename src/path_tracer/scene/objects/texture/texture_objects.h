@@ -6,14 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:13 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 15:39:27 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TEXTURE_OBJECTS_H
 # define TEXTURE_OBJECTS_H
 
-# include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+# include "mlx/MLX42/include/MLX42/MLX42.h"
+# include "path_tracer/utils/vectors/vectors.h"
+# include <stdint.h>
 
 typedef struct s_texel
 {

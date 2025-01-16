@@ -6,15 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 17:09:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:37:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATERIALS_H
 # define MATERIALS_H
 
-# include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
-# include "src/path_tracer/scene/objects/material/material.h"
+# include "mlx/MLX42/include/MLX42/MLX42.h"
+# include "path_tracer/scene/objects/material/material.h"
 
 void	cicle_material_type(t_material *material);
 void	increment_color(t_material *material, mlx_key_data_t key_data);

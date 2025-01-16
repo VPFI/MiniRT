@@ -6,22 +6,23 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:58:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:54:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/mlx/mlx_utils.h"
-#include "src/path_tracer/path_tracer.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/ray/ray.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/camera/utils/camera_utils.h"
-#include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/thread_management/thread_management.h"
-#include "src/path_tracer/scene/background_color/background_color.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/window_management/window_management.h"
-#include "src/window_management/key_identifiers/key_identifiers.h"
+#include "mlx/mlx_utils.h"
+#include "path_tracer/path_tracer.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "path_tracer/scene/camera/utils/camera_utils.h"
+#include "path_tracer/utils/color/color_utils.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include "path_tracer/scene/background_color/background_color.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "window_management/window_management.h"
+#include "window_management/key_identifiers/key_identifiers.h"
 #include <math.h>
 
 void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)

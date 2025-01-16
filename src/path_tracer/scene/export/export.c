@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:30:09 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 16:42:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:14:08 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "libraries/printf/ft_printf.h"
-#include "src/error_management/error_management.h"
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "libft/libft.h"
+#include "printf/ft_printf.h"
+#include "error_management/error_management.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -56,7 +56,7 @@ int	export_to_ppm(mlx_image_t *image)
 
 	fd = 0;
 	filename = ft_itoa((int)(mlx_get_time() * 1000));
-	filename = ft_strattach("img/exported/", &filename);
+	filename = ft_strattach("./assets/img/exported/", &filename);
 	filename = ft_strappend(&filename, ".ppm");
 	fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fd < 0)

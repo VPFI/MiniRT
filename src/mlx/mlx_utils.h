@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:56:23 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:11:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MLX_UTILS_H
 # define MLX_UTILS_H
 
-# include "src/path_tracer/scene/scene.h"
+# include "path_tracer/scene/scene.h"
 
 void	close_mlx(void *sc);
 void	set_new_image(t_scene *scene);

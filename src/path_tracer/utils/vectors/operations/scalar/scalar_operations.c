@@ -6,10 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:42:37 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:44:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:00:52 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "path_tracer/utils/vectors/vectors.h"
 
 t_vect	vect_simple_div(t_vect vec, float num)
 {

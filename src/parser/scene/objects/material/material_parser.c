@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   material_parser.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:11:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 18:50:04 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/error_management/error_management.h"
-#include "src/parser/utils/numerical_utils.h"
-#include "src/parser/utils/lexical_utils.h"
-#include "libraries/libft/libft.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "error_management/error_management.h"
+#include "parser/utils/numerical_utils.h"
+#include "parser/utils/lexical_utils.h"
+#include "libft/libft.h"
 #include <stdbool.h>
 #include <limits.h>
 

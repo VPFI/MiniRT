@@ -3,17 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   objects_parser.h                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:01:53 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 17:58:26 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:05:52 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef OBJECTS_PARSER_H
 # define OBJECTS_PARSER_H
 
-# include "src/path_tracer/scene/scene.h"
+# include "path_tracer/scene/scene.h"
+# include "path_tracer/scene/objects/material/material.h"
 
 # define SPHERE_ID			"sp"
 # define PLANE_ID			"pl"

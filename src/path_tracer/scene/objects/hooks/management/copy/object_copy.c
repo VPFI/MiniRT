@@ -3,19 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   object_copy.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:46:35 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:11:07 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:42:40 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/error_management/error_management.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "error_management/error_management.h"
+
+#include "path_tracer/scene/objects/figures/sphere/sphere.h"
+#include "path_tracer/scene/objects/figures/plane/plane.h"
+#include "path_tracer/scene/objects/figures/quad/quad.h"
+#include "path_tracer/scene/objects/figures/box/box.h"
+#include "path_tracer/scene/objects/figures/disk/disk.h"
+#include "path_tracer/scene/objects/figures/cylinder/cylinder.h"
+#include "path_tracer/scene/objects/figures/cone/cone.h"
+#include "path_tracer/scene/objects/figures/p_light/p_light.h"
 
 static void	init_copy(t_scene *scene, t_object *selected_obj)
 {

@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   camera.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:21:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:40:00 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CAMERA_H
 # define CAMERA_H
 
-# include "src/path_tracer/utils/vectors/vectors.h"
+# include "path_tracer/utils/vectors/vectors.h"
 
 typedef struct s_camera
 {

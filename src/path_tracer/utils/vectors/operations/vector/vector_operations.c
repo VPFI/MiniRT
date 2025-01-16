@@ -6,10 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:43:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 16:45:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:01:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "path_tracer/utils/vectors/vectors.h"
 
 t_vect	vect_add(t_vect vec, t_vect vec2)
 {

@@ -3,18 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   camera_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:51:33 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:38:41 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:23:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/camera/camera.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/math/math_utils.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/scene/camera/hooks/camera_hooks.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "window_management/key_identifiers/key_identifiers.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
 
 void	move_camera(t_camera *camera, t_camera *backup, t_object *skysphere, mlx_key_data_t key_data)
 {

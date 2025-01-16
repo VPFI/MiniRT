@@ -6,14 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:08 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:12:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:30:53 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/camera/camera.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/print/print_utils.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/scene/objects/figures/quad/quad.h"
+#include "path_tracer/utils/print/print_utils.h"
 
 static void	recalculate_faces(t_object *box, t_vect dimensions)
 {

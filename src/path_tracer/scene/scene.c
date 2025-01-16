@@ -6,11 +6,25 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:28:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 21:45:53 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:19:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
+#include "libft/libft.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+
+#include "parser/parser.h"
+#include "parser/utils/lexical_utils.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "selection_menu/buttons/buttons.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "error_management/error_management.h"
+#include "path_tracer/scene/objects/figures/sphere/sphere.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 {
@@ -31,29 +45,6 @@ void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 	return ;
 }
 
-void	init_sky_sphere(t_scene *scene, char *path)
-{
-	t_object 	*new_obj;
-
-	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
-	if (!new_obj)
-		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
-	new_obj->material = new_standard_material();
-	new_obj->type = SPHERE;
-	new_obj->figure.sphere.center = scene->camera.origin;
-	new_obj->texture = get_texture(path, 1);
-	new_obj->figure.sphere.radius = new_obj->texture->texture->width / (M_PI * 2.0);
-	new_obj->hit_func = hit_sphere;
-	new_obj->edit_origin = translate_sphere;
-	new_obj->edit_orientation = rotate_sphere;
-	new_obj->get_origin = get_origin_sphere;
-	new_obj->edit_dimensions = resize_sphere;
-	new_obj->get_visual = get_sphere_pattern;
-	new_obj->get_normal = get_sphere_normal;
-	new_obj->next = NULL;
-	add_object(&scene->sky_sphere, new_obj);
-}
-
 static void	load_map_scene(t_scene *scene)
 {
 	int		map;
@@ -72,12 +63,12 @@ static void	load_map_scene(t_scene *scene)
 			if (parse_components(scene, components))
 			{
 				free(line);
-				free_arr(components);
+				ft_free_arr(components);
 				return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
 			}
 		}
 		free(line);
-		free_arr(components);
+		ft_free_arr(components);
 		line = get_next_line(map);		
 	}
 }

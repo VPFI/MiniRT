@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   object_delete.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:53:10 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:14:44 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/memory_management/memory_management.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/memory_management/memory_management.h"
 #include <stdlib.h>
 
 static void	delete_from_objects(t_scene *scene)

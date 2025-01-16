@@ -6,11 +6,11 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:11:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/objects.h"
 #include <stdbool.h>
 
 t_vect	get_obj_color(t_hit_info *hit_info)

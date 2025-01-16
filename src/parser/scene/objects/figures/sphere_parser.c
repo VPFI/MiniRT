@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   sphere_parser.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:51:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 18:41:54 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:32:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/parser/scene/objects/figures/figures_parser.h"
-#include "src/path_tracer/scene/objects/figures/sphere/setters.h"
+#include "parser/scene/objects/figures/figures_parser.h"
+#include "path_tracer/scene/objects/figures/sphere/sphere.h"
 
 void	load_sphere(t_scene *scene, char **components, int amount)
 {

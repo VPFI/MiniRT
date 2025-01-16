@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SELECTOR_UTILS_H
 # define SELECTOR_UTILS_H
 
-# include "src/path_tracer/scene/objects/texture/texture_objects.h"
+# include "path_tracer/scene/objects/texture/texture_objects.h"
 # include <stdint.h>
 
 typedef struct s_coords

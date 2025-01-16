@@ -6,13 +6,24 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:22:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:18:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "miniRT.h"
+#include "libft/libft.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+#include "mlx/mlx_utils.h"
+#include "parser/map_file/parse_map_path.h"
+#include "path_tracer/path_tracer.h"
+#include "path_tracer/thread_management/thread_management.h"
+#include "path_tracer/memory_management/memory_management.h"
+#include "window_management/window_management.h"
+#include "error_management/error_management.h"
+#include "selection_menu/file_selector.h"
+#include <stdint.h>
+#include <stdio.h>
 
-void	init_minirt(t_scene *scene)
+static void	init_minirt(t_scene *scene)
 {
 	ft_bzero(scene, sizeof(t_scene));
 	scene->width = WINW;
@@ -37,7 +48,7 @@ void	init_minirt(t_scene *scene)
 	scene->do_backup = false;
 	scene->object_selected = false;
 	scene->path = NULL;
-	scene->menu_tx = get_texture("./textures/menu/Sad_face1.png", 1);
+	scene->menu_tx = get_texture("./assets/textures/menu/Sad_face1.png", 1);
 	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 }
 

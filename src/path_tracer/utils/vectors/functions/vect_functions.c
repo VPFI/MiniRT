@@ -6,11 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:36:07 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:00:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "vect_functions.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
 t_vect	unit_vect(t_vect vect)
 {

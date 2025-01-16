@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   memory_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:37:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 20:18:56 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:13:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include <stdlib.h>
-#include "memory_management.h"
-#include "src/selection_menu/file_selector.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/figures/figures.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include <stdlib.h>
 
 void	free_texture(t_texture **texture)
 {
@@ -26,19 +28,6 @@ void	free_texture(t_texture **texture)
 			free((*texture));
 		}
 	}
-}
-
-void	free_primitive(t_object **object)
-{
-	if ((*object)->type == BOX)
-	{
-		free_objects(&(*object)->figure.box.faces);
-	}
-	if ((*object)->texture)
-	{
-		free_texture(&(*object)->texture);
-	}
-	free(*object);
 }
 
 void	free_objects(t_object **objects)
@@ -58,6 +47,19 @@ void	free_objects(t_object **objects)
 			(*objects) = temp;
 		}
 	}
+}
+
+void	free_primitive(t_object **object)
+{
+	if ((*object)->type == BOX)
+	{
+		free_objects(&(*object)->figure.box.faces);
+	}
+	if ((*object)->texture)
+	{
+		free_texture(&(*object)->texture);
+	}
+	free(*object);
 }
 
 void	free_boxes(t_object *objects)

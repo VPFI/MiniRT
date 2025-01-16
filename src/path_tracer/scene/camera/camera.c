@@ -6,12 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:41:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 17:16:49 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
 #include <math.h>
 
 void	recalculate_view(t_camera *camera, uint32_t width, uint32_t height)

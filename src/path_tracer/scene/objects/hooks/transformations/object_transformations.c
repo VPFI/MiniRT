@@ -6,18 +6,18 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:32:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:47:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/camera/camera.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/path_tracer/scene/objects/hooks/transformations/object_transformations.h"
-#include "src/window_management/key_identifiers/key_identifiers.h"
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "window_management/key_identifiers/key_identifiers.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
 #include <math.h>
 
 t_vect	clamp_object_coords(t_object *target_object)

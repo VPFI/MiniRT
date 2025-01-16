@@ -6,11 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:43:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 21:30:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:58:42 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "rotations.h"
+#include "path_tracer/scene/ray/ray.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
 //Euler-Rodrigues rotation formula  || https://en.wikipedia.org/wiki/Rodrigues_rotation_formula
 void	rotate_vector(t_vect *vec, t_vect axis, float ang)

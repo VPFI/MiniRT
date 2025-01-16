@@ -6,21 +6,21 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 15:14:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:31:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
-#include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/error_management/error_management.h"
-#include "src/path_tracer/scene/objects/figures/box/getters/getters.h"
-#include "src/path_tracer/scene/objects/figures/box/hit/hit.h"
-#include "src/path_tracer/scene/objects/figures/box/transformations/transformations.h"
-#include "src/path_tracer/scene/objects/figures/box/utils/utils.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/hooks/management/object_management.h"
+#include "path_tracer/scene/objects/material/material.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "error_management/error_management.h"
+#include "path_tracer/scene/objects/figures/box/getters/getters.h"
+#include "path_tracer/scene/objects/figures/box/hit/hit.h"
+#include "path_tracer/scene/objects/figures/box/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/box/utils/utils.h"
 
 static void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 {
@@ -62,19 +62,6 @@ static void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 	add_box_face(box, fig, mat);
 }
 
-void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	mat = new_standard_material();
-	fig.box.center = *offset_origin;
-	fig.box.u_vect = scene->camera.u;
-	fig.box.v_vect = scene->camera.v;
-	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-	init_box(scene, fig, mat, NULL);
-}
-
 int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
 	t_object 	*new_obj;
@@ -104,4 +91,17 @@ int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
 	add_object(&scene->objects, new_obj);
 	return (0);
+}
+
+void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.box.center = *offset_origin;
+	fig.box.u_vect = scene->camera.u;
+	fig.box.v_vect = scene->camera.v;
+	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
+	init_box(scene, fig, mat, NULL);
 }

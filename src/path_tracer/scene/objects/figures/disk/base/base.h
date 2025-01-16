@@ -6,17 +6,17 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:45:35 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 16:34:32 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef BASE_H
 # define BASE_H
 
-# include "src/path_tracer/utils/vectors/vectors.h"
-# include "src/path_tracer/scene/objects/figures/shared.h"
-# include "src/path_tracer/scene/objects/figures/figures.h"
-# include "src/path_tracer/scene/objects/texture/texture_objects.h"
+# include "path_tracer/utils/vectors/vectors.h"
+# include "path_tracer/scene/objects/figures/shared.h"
+# include "path_tracer/scene/objects/figures/figures.h"
+# include "path_tracer/scene/objects/texture/texture_objects.h"
 
 void	set_base_params(t_base_params *params, t_vect *point, float radius);
 int		belongs_to_base(t_vect point, t_vect center, t_vect normal, float height);

@@ -6,12 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:45:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:11:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:02:58 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include "src/path_tracer/scene/scene.h"
-#include "src/mlx/mlx_utils.h"
+#include "mlx/mlx_utils.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/utils/color/int_color/int_color_utils.h"
 
 void	close_mlx(void *sc)
 {

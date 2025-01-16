@@ -6,15 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 17:36:25 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/rotations/rotations.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/figures/shared.h"
-#include "src/path_tracer/scene/objects/figures/quad/textures/texture.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/figures/shared.h"
+#include "path_tracer/scene/objects/figures/quad/textures/texture.h"
 #include <math.h>
 
 static t_vect	get_quad_pattern_color(t_vect *rotated_point, float pattern_dim, t_vect *material_color)

@@ -6,15 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:15:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 19:56:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FILE_SELECTOR_H
 # define FILE_SELECTOR_H
 
-# include "src/path_tracer/scene/scene.h"
-# include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
+# include "path_tracer/scene/scene.h"
+# include "mlx/MLX42/include/MLX42/MLX42.h"
 
 void	select_scene(t_scene *scene);
 void	display_file_menu(t_scene *scene);

@@ -6,15 +6,26 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:33:10 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 16:34:35 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:34:47 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/figures/shared.h"
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
-#include "src/path_tracer/utils/math/math_utils.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/figures/shared.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
+
+void	set_base_params(t_base_params *params, t_vect *point, float radius)
+{
+	params->point_to_base = *point;
+	params->point_to_base.z = 0.0;
+	params->point_radius = vect_length(params->point_to_base);
+	params->point_to_base = unit_vect(params->point_to_base);
+	params->point_to_base = clamp_vect(params->point_to_base, -1.0, 1.0);
+	params->point_arc = acosf(params->point_to_base.y) * params->point_radius;
+	params->base_height = radius - params->point_radius;
+}
 
 t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color)
 {	
@@ -58,17 +69,6 @@ int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 		return (1);
 	else
 		return (-1);
-}
-
-void	set_base_params(t_base_params *params, t_vect *point, float radius)
-{
-	params->point_to_base = *point;
-	params->point_to_base.z = 0.0;
-	params->point_radius = vect_length(params->point_to_base);
-	params->point_to_base = unit_vect(params->point_to_base);
-	params->point_to_base = clamp_vect(params->point_to_base, -1.0, 1.0);
-	params->point_arc = acosf(params->point_to_base.y) * params->point_radius;
-	params->base_height = radius - params->point_radius;
 }
 
 void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims, t_base_params *bp, float base_distance)

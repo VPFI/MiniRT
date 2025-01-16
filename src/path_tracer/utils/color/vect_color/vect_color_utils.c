@@ -6,10 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:29:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 22:35:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:56:37 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/color/int_color/int_color_utils.h"
 
 int	vect_to_int(t_color color)
 {

@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/25 16:49:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:53:56 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/mlx/mlx_utils.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/selection_menu/utils/selector_utils.h"
-#include "src/selection_menu/custom_writer/bresenham_font.h"
+#include "mlx/mlx_utils.h"
+#include "path_tracer/scene/scene.h"
+#include "selection_menu/utils/selector_utils.h"
+#include "selection_menu/custom_writer/bresenham_font.h"
 #include <math.h>
 
 static void	calculate_bresenham_font(t_scene *scene, t_bresenham *bres)

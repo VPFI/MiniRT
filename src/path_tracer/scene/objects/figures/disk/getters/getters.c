@@ -6,18 +6,18 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 16:36:42 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/figures/figures.h"
-#include "src/path_tracer/scene/objects/figures/shared.h"
-#include "src/path_tracer/scene/objects/figures/disk/base/base.h"
-#include "src/path_tracer/scene/objects/texture/texture_objects.h"
-#include "src/path_tracer/scene/objects/figures/disk/textures/texture.h"
-#include "src/path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/figures/figures.h"
+#include "path_tracer/scene/objects/figures/shared.h"
+#include "path_tracer/scene/objects/figures/disk/base/base.h"
+#include "path_tracer/scene/objects/texture/texture_objects.h"
+#include "path_tracer/scene/objects/figures/disk/textures/texture.h"
+#include "path_tracer/utils/rotations/rotations.h"
 #include <math.h>
 
 t_vect	get_disk_pattern(t_hit_info *hit_info)

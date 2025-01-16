@@ -6,13 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 22:06:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:10:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
+#include "libft/libft.h"
 #include "parse_map_path.h"
-#include "src/error_management/error_management.h"
+#include "error_management/error_management.h"
+#include "parser/utils/lexical_utils.h"
 #include <fcntl.h>
 #include <unistd.h>
 

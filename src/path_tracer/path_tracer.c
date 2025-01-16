@@ -6,15 +6,15 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:44:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 20:36:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/path_tracer/modes/edit_mode/edit_mode.h"
-#include "src/path_tracer/modes/render_mode/render_mode.h"
-#include "src/path_tracer/thread_management/thread_management.h"
+#include "libft/libft.h"
+#include "path_tracer/scene/scene.h"
+#include "path_tracer/modes/edit_mode/edit_mode.h"
+#include "path_tracer/modes/render_mode/render_mode.h"
+#include "path_tracer/thread_management/thread_management.h"
 #include <stdio.h>
 #include <stdlib.h>
 

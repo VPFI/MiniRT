@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:32:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATERIAL_H
 # define MATERIAL_H
 
-# include "src/path_tracer/utils/vectors/vectors.h"
+# include "path_tracer/utils/vectors/vectors.h"
 
 typedef enum e_mat_type
 {
@@ -37,8 +37,8 @@ typedef struct s_material
 	bool		pattern;
 }				t_material;
 
-# include "src/path_tracer/scene/objects/material/scatters/scatters.h"
-# include "src/path_tracer/scene/objects/material/modifiers/modifiers.h"
+# include "path_tracer/scene/objects/material/scatters/scatters.h"
+# include "path_tracer/scene/objects/material/modifiers/modifiers.h"
 
 t_material	new_standard_plight(void);
 t_material	new_standard_material(void);

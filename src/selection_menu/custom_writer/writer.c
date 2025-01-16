@@ -6,16 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 13:41:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:57:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "libraries/libft/get_next_line.h"
-#include "src/mlx/mlx_utils.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/selection_menu/utils/selector_utils.h"
-#include "src/selection_menu/custom_writer/bresenham_font.h"
+#include "libft/libft.h"
+#include "libft/get_next_line.h"
+#include "mlx/mlx_utils.h"
+#include "path_tracer/scene/scene.h"
+#include "selection_menu/utils/selector_utils.h"
+#include "selection_menu/custom_writer/bresenham_font.h"
 #include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>

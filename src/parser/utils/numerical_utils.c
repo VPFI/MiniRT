@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   numerical_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:02:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 18:53:25 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 20:57:04 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/parser/utils/numerical_utils.h"
-#include "src/error_management/error_management.h"
+#include "libft/libft.h"
+#include "parser/utils/lexical_utils.h"
+#include "parser/utils/numerical_utils.h"
+#include "error_management/error_management.h"
+#include <math.h>
 
 void	check_bounds(float num, float min, float max)
 {

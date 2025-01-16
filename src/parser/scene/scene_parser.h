@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   scene_parser.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:19:19 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 17:46:49 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SCENE_PARSER_H
 # define SCENE_PARSER_H
 
-# include "src/path_tracer/scene/scene.h"
+# include "path_tracer/scene/scene.h"
 
 # define CAMERA_ID			"C"
 # define AMBIENT_ID			"A"

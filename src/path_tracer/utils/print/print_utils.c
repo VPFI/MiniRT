@@ -6,12 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:44:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 17:48:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:55:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include <stdio.h>
 
 void	print_vec_s(t_vect vect, char*msg)
 {

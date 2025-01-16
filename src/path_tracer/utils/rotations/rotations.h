@@ -6,14 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:34:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 16:34:35 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ROTATIONS_H
 # define ROTATIONS_H
 
-#include "src/path_tracer/scene/ray/ray.h"
+#include "path_tracer/scene/ray/ray.h"
 
 typedef struct s_reference_system
 {

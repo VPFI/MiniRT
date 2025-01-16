@@ -6,11 +6,9 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 18:10:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 15:30:10 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:55:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include "../includes/miniRT.h"
 
 //From MLX42 Documenation.
 // 'Encodes' four individual bytes into an int.

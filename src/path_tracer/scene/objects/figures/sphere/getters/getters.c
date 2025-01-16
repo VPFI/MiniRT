@@ -6,16 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 17:40:27 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/utils/vectors/vectors.h"
-#include "src/path_tracer/utils/rotations/rotations.h"
-#include "src/path_tracer/scene/objects/objects.h"
-#include "src/path_tracer/scene/objects/figures/shared.h"
-#include "src/path_tracer/scene/objects/figures/sphere/utils/utils.h"
-#include "src/path_tracer/scene/objects/figures/sphere/textures/texture.h"
+#include "path_tracer/utils/vectors/vectors.h"
+#include "path_tracer/utils/rotations/rotations.h"
+#include "path_tracer/scene/objects/objects.h"
+#include "path_tracer/scene/objects/figures/shared.h"
+#include "path_tracer/scene/objects/figures/sphere/utils/utils.h"
+#include "path_tracer/scene/objects/figures/sphere/textures/texture.h"
 #include <math.h>
 
 t_vect	get_sphere_pattern(t_hit_info *hit_info)

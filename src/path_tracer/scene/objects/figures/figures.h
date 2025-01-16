@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   figures.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 20:37:39 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/11 22:57:58 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 21:20:12 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FIGURES_H
 # define FIGURES_H
 
-# include "src/path_tracer/utils/vectors/vectors.h"
+# include "path_tracer/utils/vectors/vectors.h"
 
 struct t_object;
 
@@ -77,7 +77,7 @@ typedef struct s_box
 	t_vect		v_vect;
 	t_vect		dimensions;
 	t_vect		center;
-	struct t_object	*faces;
+	struct s_object	*faces;
 }				t_box;
 
 typedef struct s_disk

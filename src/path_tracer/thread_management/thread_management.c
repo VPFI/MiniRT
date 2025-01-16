@@ -6,13 +6,14 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:26:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 21:21:25 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
-#include "src/error_management/error_management.h"
-#include "src/path_tracer/thread_management/thread_management.h"
+#include "mlx/MLX42/include/MLX42/MLX42.h"
+#include "path_tracer/scene/scene.h"
+#include "error_management/error_management.h"
+#include "path_tracer/thread_management/thread_management.h"
 
 void	wait_for_threads(t_thread *threads)
 {

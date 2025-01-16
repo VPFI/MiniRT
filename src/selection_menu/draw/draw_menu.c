@@ -6,16 +6,16 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:39:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 19:54:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 22:17:38 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libraries/libft/libft.h"
-#include "src/mlx/mlx_utils.h"
-#include "src/path_tracer/scene/scene.h"
-#include "src/selection_menu/buttons/buttons.h"
-#include "src/selection_menu/utils/selector_utils.h"
-#include "src/selection_menu/custom_writer/writer.h"
+#include "libft/libft.h"
+#include "mlx/mlx_utils.h"
+#include "path_tracer/scene/scene.h"
+#include "selection_menu/buttons/buttons.h"
+#include "selection_menu/utils/selector_utils.h"
+#include "selection_menu/custom_writer/writer.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
