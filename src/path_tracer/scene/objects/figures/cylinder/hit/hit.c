@@ -3,15 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   hit.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:42:02 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:14:54 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/disk/hit/hit.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/cylinder/utils/utils.h"
+#include <math.h>
 
-bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
 {
 	t_figure		disk_figure;
 	t_vect			base_center;
@@ -28,7 +38,7 @@ bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *in
 	return (true);
 }
 
-bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+static bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
 {
 	t_vect		ray_to_cyl;
 
@@ -47,7 +57,7 @@ bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq
 	return (true);
 }
 
-bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
 {
 	t_eq_params			params;
 	t_vect				point;

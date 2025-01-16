@@ -6,13 +6,13 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 20:04:53 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libraries/libft/libft.h"
 #include "src/path_tracer/utils/color/color_utils.h"
-#include "src/path_tracer/scene/objects/texture/texture.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
 #include <dirent.h>
 #include <stdint.h>
 #include <unistd.h>

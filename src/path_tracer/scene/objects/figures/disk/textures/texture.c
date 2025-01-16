@@ -3,16 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   texture.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:32:22 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:42:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/figures/disk/base/base.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-
-void	remove_point_texture_offset_disk(t_vect *point, t_vect *texture_dims, float *point_arc, float base_height)
+static void	remove_point_texture_offset_disk(t_vect *point, t_vect *texture_dims, float *point_arc, float base_height)
 {
 	if (point->x < 0.0)
 	{
@@ -32,7 +40,7 @@ void	remove_point_texture_offset_disk(t_vect *point, t_vect *texture_dims, float
 	}
 }
 
-void	set_bump_map_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_texture *tx)
+static void	set_bump_map_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_texture *tx)
 {
 	t_base_params	bp;
 	t_texel			texel;
@@ -47,4 +55,17 @@ void	set_bump_map_normal_disk(t_figure *fig, t_vect *point, t_vect *normal, t_te
 	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
+}
+
+t_vect	get_disk_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
+{
+	float			angle;
+	t_vect			rotated_point;
+	t_vect			texture_normal;
+
+	rotated_point = vect_subtract(hit_info->point, fig->disk.center);
+	angle = rotate_reference_system(fig->disk.normal, NULL, &rotated_point);
+	set_bump_map_normal_disk(fig, &rotated_point, &texture_normal, tx);
+	rotate_by_angle(&texture_normal, &fig->disk.normal, -angle);
+	return (texture_normal);
 }

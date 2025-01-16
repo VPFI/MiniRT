@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   texture_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:12:10 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 18:50:35 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/path_tracer/scene/objects/texture/texture.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
 #include "src/error_management/error_management.h"
 #include "src/parser/utils/numerical_utils.h"
 #include "src/parser/utils/lexical_utils.h"

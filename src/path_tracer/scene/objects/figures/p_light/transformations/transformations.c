@@ -3,14 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   transformations.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:08 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/24 23:45:28 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:53:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/print/print_utils.h"
 
+void	rotate_point_light(t_object *object, t_camera *camera, t_vect transformation)
+{
+	(void)object;
+	(void)transformation;
+	(void)camera;
+	return ;
+}
 
 void	translate_point_light(t_object *object, t_vect transformation)
 {

@@ -6,72 +6,23 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 21:40:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 15:14:38 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/error_management/error_management.h"
+#include "src/path_tracer/scene/objects/figures/box/getters/getters.h"
+#include "src/path_tracer/scene/objects/figures/box/hit/hit.h"
+#include "src/path_tracer/scene/objects/figures/box/transformations/transformations.h"
+#include "src/path_tracer/scene/objects/figures/box/utils/utils.h"
 
-void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)
-{
-	t_figure	fig;
-	t_material	mat;
-
-	mat = new_standard_material();
-	fig.box.center = *offset_origin;
-	fig.box.u_vect = scene->camera.u;
-	fig.box.v_vect = scene->camera.v;
-	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
-	init_box(scene, fig, mat, NULL);
-}
-
-void	recalculate_faces(t_object *box, t_vect dimensions)
-{
-	t_object	*face;
-	t_vect		normal;
-	t_vect		anti_normal;
-
-	face = box->figure.box.faces;
-	normal = unit_vect(vect_cross(box->figure.box.u_vect, box->figure.box.v_vect));
-	anti_normal = vect_simple_mult(normal, -1);
-
-	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(normal, dimensions.z * 0.5));
-	face = face->next;
-
-	face->figure.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(anti_normal, dimensions.z * 0.5));
-	face = face->next;
-
-	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
-	face = face->next;
-
-	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
-	face = face->next;
-
-	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
-	face = face->next;
-
-	face->figure.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	face->figure.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	face->figure.quad.normal = unit_vect(vect_cross(face->figure.quad.u_vect, face->figure.quad.v_vect));
-	face->figure.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
-	face = face->next;
-}
-
-void	init_faces(t_object *box, t_material mat, t_vect dimensions)
+static void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 {
 	t_figure	fig;
 	t_vect		normal;
@@ -109,6 +60,19 @@ void	init_faces(t_object *box, t_material mat, t_vect dimensions)
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
 	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
 	add_box_face(box, fig, mat);
+}
+
+void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)
+{
+	t_figure	fig;
+	t_material	mat;
+
+	mat = new_standard_material();
+	fig.box.center = *offset_origin;
+	fig.box.u_vect = scene->camera.u;
+	fig.box.v_vect = scene->camera.v;
+	fig.box.dimensions = new_vect(1.0, 1.0, 1.0);
+	init_box(scene, fig, mat, NULL);
 }
 
 int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)

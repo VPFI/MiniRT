@@ -3,15 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   texture.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:40:36 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:42:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/figures/disk/base/base.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-void	rotate_texture_normal_cylinder(t_vect *point, t_vect *normal)
+static void	rotate_texture_normal_cylinder(t_vect *point, t_vect *normal)
 {
 	t_vect	point_normal;
 
@@ -21,7 +30,7 @@ void	rotate_texture_normal_cylinder(t_vect *point, t_vect *normal)
 	rotate_texture_normal(&point_normal, normal);
 }
 
-void	remove_point_texture_offset_cylinder(t_vect *point, float *arc, t_vect *texture_dims)
+static void	remove_point_texture_offset_cylinder(t_vect *point, float *arc, t_vect *texture_dims)
 {
 	if (point->x < 0.0)
 		*arc = -*arc + texture_dims->x + (texture_dims->x * (int)(*arc / texture_dims->x));
@@ -33,7 +42,7 @@ void	remove_point_texture_offset_cylinder(t_vect *point, float *arc, t_vect *tex
 		point->z = point->z	- (texture_dims->y * (int)(point->z / texture_dims->y));
 }
 
-void	set_bump_map_normal_cylinder(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
+static void	set_bump_map_normal_cylinder(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
 {
 	float	arc;
 	float	angle;
@@ -51,4 +60,30 @@ void	set_bump_map_normal_cylinder(t_vect *point, t_vect *normal, t_texture *tx, 
 	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 	rotate_texture_normal_cylinder(point, normal);
+}
+
+t_vect	get_cylinder_texture(t_hit_info *ht, t_texture *tx, t_figure *fig, int is_base)
+{
+	float	angle;
+	t_vect	axis;
+	t_vect	rotated_point;
+	t_vect	reverse_normal;
+	t_vect	texture_normal;
+
+	rotated_point = vect_subtract(ht->point, fig->cylinder.center);
+	reverse_normal = vect_simple_mult(fig->cylinder.normal, -1.0);
+	angle = rotate_reference_system(reverse_normal, NULL, &rotated_point);
+	if (is_base)
+	{
+		set_bump_map_normal_base(&rotated_point, &texture_normal, tx, fig->cylinder.radius, (-fig->cylinder.height / 2) * is_base);
+		if (is_base == 1)
+		{
+			axis = new_vect(0.0, 1.0, 0.0);
+			rotate_by_angle(&texture_normal, &axis, M_PI);
+		}
+	}
+	else
+		set_bump_map_normal_cylinder(&rotated_point, &texture_normal, tx, fig);
+	rotate_by_angle(&texture_normal, &reverse_normal, -angle);
+	return (texture_normal);
 }

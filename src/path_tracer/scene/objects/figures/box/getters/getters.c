@@ -3,13 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   getters.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/10 18:06:03 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 15:07:52 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/box/utils/utils.h"
+#include "src/error_management/error_management.h"
+#include <math.h>
 
 t_object	*get_box_face(t_hit_info *hit_info, int *face_index)
 {
@@ -31,6 +41,26 @@ t_object	*get_box_face(t_hit_info *hit_info, int *face_index)
 		face = face->next;
 	}
 	return (NULL);
+}
+
+t_vect	get_face_pattern(t_hit_info *hit_info, t_vect *dimensions, int face_index)
+{
+	t_pattern_vars	p_var;
+	t_vect			rotated_point;
+
+	rotated_point = get_rotated_point_quad(hit_info);
+	p_var.x_index_square = (int)(fabs(rotated_point.x) / hit_info->object->material.pattern_dim);
+	p_var.y_index_square = (int)(fabs(rotated_point.y) / hit_info->object->material.pattern_dim);
+	if (rotated_point.x < 0.0)
+		p_var.x_index_square++;
+	if (rotated_point.y < 0.0)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	p_var.pattern_index = correct_box_pattern_index(dimensions, face_index, p_var.pattern_index);
+	if (p_var.pattern_index == 0)
+		return(hit_info->object->material.color);
+	else
+		return(vect_simple_div(hit_info->object->material.color, 3.0));
 }
 
 t_vect	get_box_pattern(t_hit_info *hit_info)

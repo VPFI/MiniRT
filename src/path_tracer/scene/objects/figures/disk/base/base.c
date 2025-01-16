@@ -3,13 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   base.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:33:10 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:41:28 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:34:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
+
+t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color)
+{	
+	t_pattern_vars	p_var;
+	t_base_params	bp;
+	float			point_pattern_dim;
+
+	set_base_params(&bp, point, figure->disk.radius);
+	point_pattern_dim = bp.point_radius * (pattern_dim / figure->disk.radius);
+	p_var.x_index_square = (int)(fabs(bp.point_arc)/ point_pattern_dim);
+	p_var.y_index_square = (int)((fabs(bp.base_height) + figure->disk.center.y)  / pattern_dim);
+	if (point->x > 0.0)
+		p_var.x_index_square++;
+	if (point->z > 0.0 && fabs(point->z) > 0.0001)
+		p_var.y_index_square++;
+	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	if (p_var.pattern_index == 0)
+		return(*obj_color);
+	else
+		return(vect_simple_div(*obj_color, 3.0));
+}
 
 int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 {
@@ -33,7 +59,6 @@ int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 	else
 		return (-1);
 }
-
 
 void	set_base_params(t_base_params *params, t_vect *point, float radius)
 {

@@ -3,14 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   hit.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/24 23:47:08 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 17:41:33 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include <math.h>
 
 bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {

@@ -3,15 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   texture.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:25:50 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 17:31:28 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-void	remove_point_texture_offset_plane(t_vect *point, t_vect *texture_dims)
+static void	remove_point_texture_offset_plane(t_vect *point, t_vect *texture_dims)
 {
 	if (point->x < 0.0)
 		point->x = point->x + texture_dims->x
@@ -27,7 +34,7 @@ void	remove_point_texture_offset_plane(t_vect *point, t_vect *texture_dims)
 			+ (texture_dims->y * (int)(fabs(point->y) / texture_dims->y));
 }
 
-void	set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal)
+static void	set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal)
 {
 	t_texel		texel;
 	uint8_t		*pixel;
@@ -40,4 +47,17 @@ void	set_bump_map_normal_plane(t_vect *point, t_texture *tx, t_vect *normal)
 	texel.y = f_clamp(fabs(point->y) * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
+}
+
+t_vect	get_plane_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
+{
+	float	angle;
+	t_vect	texture_normal;
+	t_vect	rotated_point;
+
+	rotated_point = vect_subtract(hit_info->point, fig->plane.center);
+	angle = rotate_reference_system(fig->plane.normal, NULL, &rotated_point);
+	set_bump_map_normal_plane(&rotated_point, tx, &texture_normal);
+	rotate_by_angle(&texture_normal, &fig->plane.normal, -angle);
+	return (texture_normal);
 }

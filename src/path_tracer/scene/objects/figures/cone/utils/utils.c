@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:48:26 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:37:59 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 15:44:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include <math.h>
 
-
-t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
+static t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
 {
 	float		angle;
 	t_vect		res;

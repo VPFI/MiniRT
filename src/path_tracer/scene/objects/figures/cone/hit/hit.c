@@ -3,17 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   hit.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:38:43 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:13:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/ray/ray.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/disk/hit/hit.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include <math.h>
 
-bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+static bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
 {
-	float		hr_ratio;
+	float	hr_ratio;
 
 	hr_ratio = fig.cone.height / fig.cone.radius;
 	params->a = ((hr_ratio * hr_ratio) * ((ref_sys->ray.dir.x * ref_sys->ray.dir.x)
@@ -37,7 +46,7 @@ bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_par
 	return (true);
 }
 
-bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
 {
 	t_eq_params			params;
 	t_vect				point;
@@ -66,7 +75,7 @@ bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *intern
 	return (true);
 }
 
-bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
 {
 	t_figure		disk_figure;
 	t_vect			base_center;

@@ -3,15 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   texture.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/24 23:51:48 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 17:44:22 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/scene/objects/figures/sphere/utils/utils.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-void	remove_point_texture_offset_sphere(t_vect *point, float *polar_coords, t_vect *texture_dims)
+static void	remove_point_texture_offset_sphere(t_vect *point, float *polar_coords, t_vect *texture_dims)
 {
 	if (point->x < 0.0)
 		polar_coords[LATITUDE] = -polar_coords[LATITUDE] + texture_dims->x
@@ -27,7 +34,7 @@ void	remove_point_texture_offset_sphere(t_vect *point, float *polar_coords, t_ve
 			- (texture_dims->y * (int)(polar_coords[LONGITUDE] / texture_dims->y));
 }
 
-void	rotate_texture_normal_sphere(t_vect *point, t_vect *normal)
+static void	rotate_texture_normal_sphere(t_vect *point, t_vect *normal)
 {
 	t_vect	point_normal;
 
@@ -35,7 +42,7 @@ void	rotate_texture_normal_sphere(t_vect *point, t_vect *normal)
 	rotate_texture_normal(&point_normal, normal);
 }
 
-void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *tx, t_vect *normal)
+static void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *tx, t_vect *normal)
 {
 	t_texel	texel;
 	uint8_t	*pixel;
@@ -53,4 +60,14 @@ void	set_bump_map_normal_sphere(t_hit_info *hit_info, t_vect *point, t_texture *
 	pixel = tx->texture->pixels	+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 	rotate_texture_normal_sphere(point, normal);
+}
+
+t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
+{
+	t_vect	texture_normal;
+	t_vect	translated_point;
+
+	translated_point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
+	set_bump_map_normal_sphere(hit_info, &translated_point, texture, &texture_normal);
+	return (texture_normal);
 }

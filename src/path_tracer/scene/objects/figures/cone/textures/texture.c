@@ -3,15 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   texture.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:34:48 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:16:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/utils/math/math_utils.h"
+#include <math.h>
 
-void	rotate_texture_normal_cone(t_vect *point, t_vect *normal, t_figure *fig)
+static void	rotate_texture_normal_cone(t_vect *point, t_vect *normal, t_figure *fig)
 {
 	t_vect	axis;
 	float	angle;
@@ -27,7 +35,7 @@ void	rotate_texture_normal_cone(t_vect *point, t_vect *normal, t_figure *fig)
 	rotate_texture_normal(&point_normal, normal);
 }
 
-void	remove_point_texture_offset_cone(t_vect *point, float *arc, t_vect *texture_dims)
+static void	remove_point_texture_offset_cone(t_vect *point, float *arc, t_vect *texture_dims)
 {
 	if (point->x < 0.0)
 		*arc = -*arc + texture_dims->x + (texture_dims->x * (int)(*arc / texture_dims->x));
@@ -39,7 +47,7 @@ void	remove_point_texture_offset_cone(t_vect *point, float *arc, t_vect *texture
 		point->z = point->z	- (texture_dims->y * (int)(point->z / texture_dims->y));
 }
 
-void	set_bump_map_normal_cone(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
+static void	set_bump_map_normal_cone(t_vect *point, t_vect *normal, t_texture *tx, t_figure *fig)
 {
 	float	arc;
 	t_texel	texel;
@@ -59,3 +67,18 @@ void	set_bump_map_normal_cone(t_vect *point, t_vect *normal, t_texture *tx, t_fi
 	rotate_texture_normal_cone(point, normal, fig);
 }
 
+t_vect	get_cone_texture(t_hit_info *ht, t_texture *tx, t_figure *fig, int is_base)
+{
+	float	angle;
+	t_vect	rotated_point;
+	t_vect	texture_normal;
+
+	rotated_point = vect_subtract(ht->point, fig->cone.center);
+	angle = rotate_reference_system(fig->cone.normal, NULL, &rotated_point);
+	if (is_base)
+		set_bump_map_normal_base(&rotated_point, &texture_normal, tx, fig->cone.radius, fig->cone.height);
+	else
+		set_bump_map_normal_cone(&rotated_point, &texture_normal, tx, fig);
+	rotate_by_angle(&texture_normal, &fig->cone.normal, -angle);
+	return (texture_normal);
+}

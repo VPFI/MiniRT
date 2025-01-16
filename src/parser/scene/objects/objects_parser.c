@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   objects_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/10 17:58:21 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libraries/libft/libft.h"
 #include "src/parser/scene/objects/objects_parser.h"
 #include "src/path_tracer/scene/objects/material/material.h"
-#include "src/path_tracer/scene/objects/texture/texture.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
 #include "src/error_management/error_management.h"
 
 void	parse_extra_object_components(t_material *mat, t_texture **tx, char **components, int i)

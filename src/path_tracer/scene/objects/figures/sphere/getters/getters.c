@@ -3,24 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   getters.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/24 23:51:24 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 17:40:27 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-
-t_vect	get_sphere_texture(t_hit_info *hit_info, t_texture *texture)
-{
-	t_vect	texture_normal;
-	t_vect	translated_point;
-
-	translated_point = vect_subtract(hit_info->point, hit_info->object->figure.sphere.center);
-	set_bump_map_normal_sphere(hit_info, &translated_point, texture, &texture_normal);
-	return (texture_normal);
-}
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/sphere/utils/utils.h"
+#include "src/path_tracer/scene/objects/figures/sphere/textures/texture.h"
+#include <math.h>
 
 t_vect	get_sphere_pattern(t_hit_info *hit_info)
 {
@@ -49,7 +45,6 @@ t_vect	get_origin_sphere(t_object *object)
 {
 	return (object->figure.sphere.center);
 }
-
 
 t_vect	get_sphere_normal(t_hit_info *hit_info, t_figure *fig)
 {

@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   texture.h                                          :+:      :+:    :+:   */
+/*   texture_objects.h                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:13 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 00:09:06 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 15:39:27 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef TEXTURE_H
-# define TEXTURE_H
+#ifndef TEXTURE_OBJECTS_H
+# define TEXTURE_OBJECTS_H
 
 # include "libraries/mlx/MLX42/include/MLX42/MLX42.h"
 

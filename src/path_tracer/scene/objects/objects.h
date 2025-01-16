@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/15 18:29:01 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 15:39:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include "src/path_tracer/utils/vectors/vectors.h"
 # include "src/path_tracer/scene/objects/figures/figures.h"
 # include "src/path_tracer/scene/objects/material/material.h"
-# include "src/path_tracer/scene/objects/texture/texture.h"
+# include "src/path_tracer/scene/objects/texture/texture_objects.h"
 
 typedef struct s_object t_object;
 

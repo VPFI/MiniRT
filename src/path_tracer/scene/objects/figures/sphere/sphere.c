@@ -1,15 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   setters.c                                          :+:      :+:    :+:   */
+/*   sphere.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/09 14:30:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/16 17:53:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libraries/libft/libft.h"
+#include "src/path_tracer/scene/scene.h"
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/material/material.h"
+#include "src/path_tracer/scene/objects/texture/texture_objects.h"
+#include "src/path_tracer/scene/objects/hooks/management/object_management.h"
+#include "src/error_management/error_management.h"
+
+#include "src/path_tracer/scene/objects/figures/sphere/hit/hit.h"
+#include "src/path_tracer/scene/objects/figures/sphere/getters/getters.h"
+#include "src/path_tracer/scene/objects/figures/sphere/transformations/transformations.h"
 
 void	set_new_fig_sphere(t_scene *scene, t_vect *offset_origin)
 {

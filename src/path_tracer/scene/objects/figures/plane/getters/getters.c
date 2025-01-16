@@ -3,28 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   getters.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/15 01:12:10 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 17:40:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/plane/textures/texture.h"
+#include <math.h>
 
-t_vect	get_plane_texture(t_hit_info *hit_info, t_texture *tx, t_figure *fig)
-{
-	float	angle;
-	t_vect	texture_normal;
-	t_vect	rotated_point;
-
-	rotated_point = vect_subtract(hit_info->point, fig->plane.center);
-	angle = rotate_reference_system(fig->plane.normal, NULL, &rotated_point);
-	set_bump_map_normal_plane(&rotated_point, tx, &texture_normal);
-	rotate_by_angle(&texture_normal, &fig->plane.normal, -angle);
-	return (texture_normal);
-}
-
-t_vect	get_plane_pattern_color(t_vect *rotated_point, float pattern_dim, t_vect *material_color)
+static t_vect	get_plane_pattern_color(t_vect *rotated_point, float pattern_dim, t_vect *material_color)
 {
 	t_pattern_vars	p_var;
 

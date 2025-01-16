@@ -3,15 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   getters.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2024/12/30 18:36:17 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/16 16:00:25 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "src/path_tracer/utils/vectors/vectors.h"
+#include "src/path_tracer/scene/objects/objects.h"
+#include "src/path_tracer/scene/objects/figures/figures.h"
+#include "src/path_tracer/scene/objects/figures/shared.h"
+#include "src/path_tracer/scene/objects/figures/disk/base/base.h"
+#include "src/path_tracer/scene/objects/figures/cone/textures/texture.h"
+#include "src/path_tracer/scene/objects/figures/cone/utils/utils.h"
+#include "src/path_tracer/utils/rotations/rotations.h"
+#include <math.h>
 
-t_vect	get_cone_body_pattern(t_hit_info *hit_info)
+static t_vect	get_cone_body_pattern(t_hit_info *hit_info)
 {
 	t_vect			rotated_point;
 	float			point_radius;
@@ -53,26 +62,9 @@ t_vect	get_cone_pattern(t_hit_info *ht)
 		return (get_cone_body_pattern(ht));
 }
 
-
 t_vect	get_origin_cone(t_object *object)
 {
 	return (object->figure.cone.center);
-}
-
-t_vect	get_cone_texture(t_hit_info *ht, t_texture *tx, t_figure *fig, int is_base)
-{
-	float	angle;
-	t_vect	rotated_point;
-	t_vect	texture_normal;
-
-	rotated_point = vect_subtract(ht->point, fig->cone.center);
-	angle = rotate_reference_system(fig->cone.normal, NULL, &rotated_point);
-	if (is_base)
-		set_bump_map_normal_base(&rotated_point, &texture_normal, tx, fig->cone.radius, fig->cone.height);
-	else
-		set_bump_map_normal_cone(&rotated_point, &texture_normal, tx, fig);
-	rotate_by_angle(&texture_normal, &fig->cone.normal, -angle);
-	return (texture_normal);
 }
 
 t_vect	get_cone_normal(t_hit_info *hit_info, t_figure *fig)
