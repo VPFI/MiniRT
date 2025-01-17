@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:05:16 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 18:28:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@
 
 # define AMB		1
 
-# define AMB_LIGHT	0.7
+# define AMB_LIGHT	1
 # define AMB_COLOR	0xF1F1F1FF
 # define BG_COLOR	0x101010FF
 
@@ -54,7 +54,7 @@
 # define TRUE_BLACK	0x000000FF
 # define WHITE		0xF1F1F1FF
 
-# define STD_SKYSPHERE	"textures/sky_sphere/table_mountain_2_puresky_4k.png"
+# define STD_SKYSPHERE	"assets/textures/sky_sphere/table_mountain_2_puresky_4k.png"
 
 typedef struct s_scene
 {

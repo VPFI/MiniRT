@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:43:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:58:42 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:26:47 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
 
-//Euler-Rodrigues rotation formula  || https://en.wikipedia.org/wiki/Rodrigues_rotation_formula
+//Euler-Rodrigues rotation formula (wiki)
 void	rotate_vector(t_vect *vec, t_vect axis, float ang)
 {
 	t_vect		aux;
@@ -25,9 +25,10 @@ void	rotate_vector(t_vect *vec, t_vect axis, float ang)
 		return ;
 	aux = vect_cross(axis, *vec);
 	cos = cosf(ang);
-	*vec = vect_add(
-		vect_add(vect_simple_mult(*vec, cos), vect_simple_mult(aux, sinf(ang))),
-		vect_simple_mult(axis, vect_dot(*vec, axis) * (1 - cos)));
+	*vec = vect_add(vect_add(
+				vect_simple_mult(*vec, cos),
+				vect_simple_mult(aux, sinf(ang))),
+			vect_simple_mult(axis, vect_dot(*vec, axis) * (1 - cos)));
 }
 
 void	rotate_by_angle(t_vect *vect, t_vect *normal, float angle)
@@ -68,5 +69,5 @@ float	rotate_reference_system(t_vect normal, t_vect *vec, t_vect *point)
 		rotate_vector(vec, axis, angle);
 	if (point && !zero_vect(*point))
 		rotate_vector(point, axis, angle);
-	return (angle);	
+	return (angle);
 }

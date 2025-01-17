@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:28:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:19:02 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 20:57:04 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,32 +45,37 @@ void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
 	return ;
 }
 
-static void	load_map_scene(t_scene *scene)
+static int	load_map_scene(t_scene *scene, int *relevant_content)
 {
 	int		map;
 	char	*line;
 	char	**components;
+	int		ln;
 
+	ln = 0;
 	map = open(scene->path, O_RDONLY);
 	if (map < 0)	
-		return (exit_err(ERR_NOFILE_MSG, scene->path, 2));
+		return (exit_err(ERR_NOFILE_MSG, scene->path, 2), 0);
 	line = get_next_line(map);
 	while (line)	
 	{
+		ln++;
 		components = format_line(line);
 		if (components && components[0])
 		{
+			*relevant_content = 1;
+			printf("Line: %i\n", ln);
 			if (parse_components(scene, components))
-			{
-				free(line);
-				ft_free_arr(components);
-				return (exit_err(ERR_EMPTY_MSG, "while loading map", 2));
-			}
+				return (free(line), ft_free_arr(components),
+					exit_err(ERR_EMPTY_MSG, "while loading map", 2), 0);
 		}
 		free(line);
 		ft_free_arr(components);
 		line = get_next_line(map);		
 	}
+	if (!(*relevant_content))
+		return (0);
+	return (1);
 }
 
 static void	load_standard_scene(t_scene *scene)
@@ -84,17 +89,27 @@ static void	load_standard_scene(t_scene *scene)
 	init_sky_sphere(scene, STD_SKYSPHERE);
 }
 
-void	init_scene(t_scene *scene)
+void	init_scene(t_scene *sc)
 {
-	if (scene->path && (!ft_strcmp(".std", scene->path) || !ft_strcmp(".standard", scene->path)))
+	int	relevant_content;
+
+	relevant_content = 0;
+	if (sc->path && (!ft_strcmp(".std", sc->path)
+		|| !ft_strcmp(".standard", sc->path)))
 	{
-		load_standard_scene(scene);
+		load_standard_scene(sc);
 	}
-	else if (scene->path && scene->choose_file)
+	else if (sc->path && sc->choose_file)
 	{
-		load_map_scene(scene);
-		recalculate_view(&scene->camera, scene->width, scene->height);
-		scene->back_up_camera = scene->camera;
+		if (!load_map_scene(sc, &relevant_content))
+		{
+			printf("Possible empty map, opening standard scene...\n");
+			load_standard_scene(sc);
+			deselect_objects(sc->objects, sc->lights, &sc->object_selected);
+			return ;
+		}
+		recalculate_view(&sc->camera, sc->width, sc->height);
+		sc->back_up_camera = sc->camera;
 	}
-	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+	deselect_objects(sc->objects, sc->lights, &sc->object_selected);
 }

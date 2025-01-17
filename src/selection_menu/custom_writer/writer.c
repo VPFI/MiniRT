@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 13:41:44 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 15:33:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void	write_str(t_scene *scene, char *msg, int *xys, int color)
 	while (msg[param[3]])
 	{
 		path[0] = msg[param[3]];
-		temp_line = ft_strjoin("fonts/", path);
+		temp_line = ft_strjoin("assets/fonts/", path);
 		l_file = open(temp_line, O_RDONLY);
 		if (l_file < 0)
 			return (free(temp_line));

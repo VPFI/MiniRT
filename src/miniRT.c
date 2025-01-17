@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:18:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 20:39:45 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ int	main(int argc, char **argv)
 	mlx_resize_hook(scene.mlx, resize_handle, &scene);
 	mlx_loop(scene.mlx);
 	printf("END: %f\n", mlx_get_time() - scene.time);
-	wait_for_threads(scene.threads);
+	if (scene.choose_file)
+		wait_for_threads(scene.threads);
 	clean_memory(&scene);
 	return (0);
 }

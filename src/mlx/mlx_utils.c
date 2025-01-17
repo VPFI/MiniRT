@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:45:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:02:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:22:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 void	close_mlx(void *sc)
 {
-	t_scene *scene;
+	t_scene	*scene;
 
 	scene = sc;
 	set_stop_status(scene);
@@ -41,5 +41,6 @@ void	safe_pixel_put(t_scene *scene, uint32_t x, uint32_t y, t_color color)
 {
 	if ((x >= scene->width) || y >= scene->height)
 		return ;
-	mlx_put_pixel(scene->image, x, y, get_rgba((int)(color.x * 255.9), (int)(color.y * 255.9), (int)(color.z * 255.9), 255));
+	mlx_put_pixel(scene->image, x, y, get_rgba((int)(color.x * 255.9),
+			(int)(color.y * 255.9), (int)(color.z * 255.9), 255));
 }

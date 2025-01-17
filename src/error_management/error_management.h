@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:23:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/09 21:54:02 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 14:44:36 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./maps/scene_name.rt\"\n\nOpening file selector...\n"
+# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./assets/maps/scene_name.rt\"\n\nOpening file selector...\n"
 # define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
 # define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
 # define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."

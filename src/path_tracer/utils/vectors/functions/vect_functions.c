@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 15:09:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:00:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:24:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 t_vect	unit_vect(t_vect vect)
 {
-	t_vect 	res;
+	t_vect	res;
 	float	tot;
 
 	tot = sqrtf(vect_dot(vect, vect));
@@ -31,7 +31,8 @@ bool	zero_vect(t_vect vect)
 	float	threshold;
 
 	threshold = 1e-8;
-	return ((fabsf(vect.x) < threshold) && (fabsf(vect.y) < threshold) && (fabsf(vect.z) < threshold));
+	return ((fabsf(vect.x) < threshold)
+		&& (fabsf(vect.y) < threshold) && (fabsf(vect.z) < threshold));
 }
 
 float	vect_length(t_vect vec)

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:42:37 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:00:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:23:15 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 t_vect	vect_simple_div(t_vect vec, float num)
 {
-	t_vect res;
+	t_vect	res;
 
 	res.x = vec.x / num;
 	res.y = vec.y / num;
@@ -24,7 +24,7 @@ t_vect	vect_simple_div(t_vect vec, float num)
 
 t_vect	vect_simple_mult(t_vect vec, float num)
 {
-	t_vect res;
+	t_vect	res;
 
 	res.x = vec.x * num;
 	res.y = vec.y * num;
@@ -34,7 +34,7 @@ t_vect	vect_simple_mult(t_vect vec, float num)
 
 t_vect	vect_simple_subtract(t_vect vec, float num)
 {
-	t_vect res;
+	t_vect	res;
 
 	res.x = vec.x - num;
 	res.y = vec.y - num;
@@ -44,7 +44,7 @@ t_vect	vect_simple_subtract(t_vect vec, float num)
 
 t_vect	vect_simple_add(t_vect vec, float num)
 {
-	t_vect res;
+	t_vect	res;
 
 	res.x = vec.x + num;
 	res.y = vec.y + num;

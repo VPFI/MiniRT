@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:54:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:41:18 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		scene->do_backup = true;
 		scene->stop = false;
 		if (export_to_ppm(scene->image))
-			ft_printf(STDERR_FILENO, "Unexpected error exporting image |--> Resuming render\n");
+			ft_printf(2, "Unexpected error exporting img | Resuming render\n");
 		main_loop(scene);
 	}
 	else if (key_data.key == MLX_KEY_E && is_press_and_ctrl(key_data))
@@ -44,28 +44,32 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 		wait_for_threads(scene->threads);
 		scene->stop = false;
 		scene->edit_mode = true;
-		ft_memset(scene->cumulative_image, 0, sizeof(t_vect) * scene->height * scene->width);
+		ft_memset(scene->cumulative_image, 0,
+			sizeof(t_vect) * scene->height * scene->width);
 		main_loop(scene);
 	}
 }
 
-static void	progressive_render(t_thread *thread, uint32_t x, uint32_t y, t_color color)
+static void	progressive_render(t_thread *th, uint32_t x,
+	uint32_t y, t_color color)
 {
 	t_color		final_color;
 	t_vect		*prev_color_index;
 
-	if ((x >= thread->scene->width) || y >= thread->scene->height)
+	if ((x >= th->scene->width) || y >= th->scene->height)
 		return ;
-	prev_color_index = &thread->scene->cumulative_image[((y * thread->scene->image->width) + x)];
+	prev_color_index = &th->scene->cumulative_image
+	[((y * th->scene->image->width) + x)];
 	prev_color_index->x += color.x;
 	prev_color_index->y += color.y;
 	prev_color_index->z += color.z;
-	final_color = clamp_vect(vect_simple_mult(*prev_color_index, 1.0 / (float)thread->iterations), 0.0, 1.0);
-	mlx_put_pixel(thread->scene->image, x, y, get_rgba(
-		(int)(final_color.x * 255.9),
-		(int)(final_color.y * 255.9),
-		(int)(final_color.z * 255.9),
-		255));
+	final_color = clamp_vect(vect_simple_mult(*prev_color_index, 1.0
+				/ (float)th->iterations), 0.0, 1.0);
+	mlx_put_pixel(th->scene->image, x, y, get_rgba(
+			(int)(final_color.x * 255.9),
+			(int)(final_color.y * 255.9),
+			(int)(final_color.z * 255.9),
+			255));
 }
 
 static t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
@@ -107,7 +111,7 @@ static t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
 	return (get_background_color(thread, &ray));
 }
 
-void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
+void	render_mode(t_thread *th, uint32_t x, uint32_t y)
 {
 	t_ray		ray;
 	t_color		color;
@@ -116,15 +120,16 @@ void	render_mode(t_thread *thread, uint32_t x, uint32_t y)
 
 	sample_count = 0;
 	color = new_color(0, 0, 0);
-	while(sample_count < thread->scene->samples)
+	while (sample_count < th->scene->samples)
 	{
-		ray.origin = defocus_sample(thread->scene->camera, thread->state);
-		pixel_offset = set_pixel_offset(thread->scene->camera, x, y, thread->state);
+		ray.origin = defocus_sample(th->scene->camera, th->state);
+		pixel_offset = set_pixel_offset(th->scene->camera, x, y, th->state);
 		ray.dir = unit_vect(vect_subtract(pixel_offset, ray.origin));
-		thread->sampled = false;
-		color = vect_add(color, calc_pixel_color(thread, ray, thread->scene->max_depth));
+		th->sampled = false;
+		color = vect_add(
+				color, calc_pixel_color(th, ray, th->scene->max_depth));
 		sample_count++;
 	}
 	color = vect_simple_mult(color, 1 / (float)sample_count);
-	progressive_render(thread, x, y, color);
+	progressive_render(th, x, y, color);
 }

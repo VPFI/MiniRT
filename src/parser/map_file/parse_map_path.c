@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 20:27:17 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 22:10:48 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 20:46:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,10 +78,7 @@ int	parse_map_path(t_scene *scene, int argc, char **argv)
 		if (check_file_validity(argv[1]))
 			return (throw_err(ERR_NOFILE_MSG, argv[1], 12));
 	}
-	else
-	{
-		scene->choose_file = 1;
-		scene->path = ft_strdup(argv[1]);
-	}
+	scene->choose_file = 1;
+	scene->path = ft_strdup(argv[1]);
 	return (0);
 }

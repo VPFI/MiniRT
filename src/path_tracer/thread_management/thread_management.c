@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:21:25 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 19:20:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	wait_for_threads(t_thread *threads)
 	{
 		if (pthread_join(threads[i].self, NULL))
 		{
-			return (exit_err(ERR_MEM_MSG, "(malloc)", 2));
+			return (exit_err(ERR_MEM_MSG, "(joining threads)", 2));
 		}
 		i++;
 	}

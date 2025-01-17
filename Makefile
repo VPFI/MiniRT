@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2025/01/16 19:13:28 by vperez-f         ###   ########.fr        #
+#    Updated: 2025/01/17 20:57:29 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -165,7 +165,7 @@ BUILD_DIR_MLX = libraries/mlx/MLX42/build/
 
 PATH_MLX = $(BUILD_DIR_MLX)libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -O3 -g -fsanitize=address -fsanitize=leak #-fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -O3 #-g -fsanitize=address -fsanitize=leak #-fsanitize=thread
 
 MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
 
@@ -191,11 +191,11 @@ extra_make: $(PATH_MLX)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c Makefile
 	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) $(INCLUDES) -MMD -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -MMD -c $< -o $@
 
 $(DIR_MLX)MLX42:
 	@printf "Downloading MLX...\n"
-	@curl -sOL $(MLX_URL) || { echo "Failed to download MLX."; exit 1; }
+	@curl -sOL $(MLX_URL) || { echo "Failed to download MLX"; exit 1; }
 	@tar -xpf v$(MLX_VERSION).tar.gz
 	@rm -rf v$(MLX_VERSION).tar.gz
 	@mkdir -p $(DIR_MLX)

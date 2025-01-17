@@ -7,18 +7,18 @@ A    0.9    255,255,255
 C    -4,1,3  0.55,-0.125,-0.8    40      cam:3:0
 
 
-S        depth:8  spp:1    skysphere:./textures/sky_sphere/autumn_field_puresky_4k.png
+S        depth:8  spp:1    skysphere:./assets/textures/sky_sphere/autumn_field_puresky_4k.png
 
 
-#sp   0,1,-1    1    255,255,255   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2           texture:./textures/bump_maps/pillow.png:1
-#       
-#       cy   -1,0,-2  0,1,1   2   2    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:0:1.2 
-#
-#    co   1,0,-3       1,0,1 	2   2               200,100,100  mat:plastic:0.25:0.1:2.5:5                       pattern:1:1.2 
+sp   0,1,-1    1    255,255,255   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2           texture:./assets/textures/bump_maps/pillow.png:1
+       
+       cy   -1,0,-2  0,1,1   2   2    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:0:1.2 
+
+    co   1,0,-3       1,0,1 	2   2               200,100,100  mat:plastic:0.25:0.1:2.5:5                       pattern:1:1.2 
 
 
-#pl   0,0,-7  0,0,1                        200,100,100    mat:plastic:0.25:0.1:2.5:5                         pattern:true:1.2 
+pl   0,0,-7  0,0,1                        200,100,100    mat:plastic:0.25:0.1:2.5:5                         pattern:true:1.2 
 
 bx   0,0,-3  1,0.25,0   -0.25,1,0    1,1,1     255,255,255    mat:diffuse:0.25:0.1:2.5:5                         pattern:true:1
 
-#l       0,5,-1                       1    230,230,230       5
+l       0,5,-1                       1    230,230,230       5

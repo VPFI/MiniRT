@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:42:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:12:53 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 18:27:07 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ int	count_maps(void)
 	struct dirent	*dir;
 
 	i = 0;
-	d = opendir("./assets/maps");
+	d = opendir("./assets/maps/");
 	if (d)
 	{
 		while ((dir = readdir(d)) != NULL)

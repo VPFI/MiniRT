@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:54:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/17 20:14:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 #include "path_tracer/scene/scene.h"
 #include "path_tracer/scene/ray/ray.h"
 #include "path_tracer/scene/objects/objects.h"
-#include "path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "path_tracer/scene/objects/hooks\
+/transformations/object_transformations.h"
 #include "path_tracer/scene/camera/utils/camera_utils.h"
 #include "path_tracer/utils/color/color_utils.h"
 #include "path_tracer/thread_management/thread_management.h"
@@ -68,7 +69,7 @@ void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 	}
 }
 
-static t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray ray)
+static t_color	calc_pixel_color_normal(t_thread *th, t_scene *scene, t_ray ray)
 {
 	t_color		color;
 	t_hit_info	hit_info;
@@ -88,7 +89,7 @@ static t_color	calc_pixel_color_normal(t_thread *thread, t_scene *scene, t_ray r
 	else
 	{
 		if (scene->sky_sphere)
-			color = get_background_color(thread, &ray);
+			color = get_background_color(th, &ray);
 		else
 			color = vect_simple_mult(hexa_to_vect(SILVER), scene->amb_light);
 	}
