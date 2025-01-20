@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:28:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:42:34 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,6 @@
 # include "path_tracer/scene/objects/material/material.h"
 # include "path_tracer/thread_management/thread_management.h"
 
-t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter_type);
+t_color	light_sampling(t_thread *thread, t_hit_info ht, t_mat_type scatter);
 
 #endif

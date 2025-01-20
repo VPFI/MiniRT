@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:33:10 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:34:47 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:43:55 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,25 +27,32 @@ void	set_base_params(t_base_params *params, t_vect *point, float radius)
 	params->base_height = radius - params->point_radius;
 }
 
-t_vect	get_base_pattern(t_vect *point, t_figure *figure, float pattern_dim, t_color *obj_color)
-{	
+t_vect	get_base_pattern(t_vect *point, t_figure *figure,
+	float pattern_dim, t_color *obj_color)
+{
 	t_pattern_vars	p_var;
 	t_base_params	bp;
 	float			point_pattern_dim;
 
 	set_base_params(&bp, point, figure->disk.radius);
 	point_pattern_dim = bp.point_radius * (pattern_dim / figure->disk.radius);
-	p_var.x_index_square = (int)(fabs(bp.point_arc)/ point_pattern_dim);
-	p_var.y_index_square = (int)((fabs(bp.base_height) + figure->disk.center.y)  / pattern_dim);
+	p_var.x_index_square = (int)(fabs(bp.point_arc) / point_pattern_dim);
+	p_var.y_index_square = (int)((fabs(bp.base_height)
+			+ figure->disk.center.y) / pattern_dim);
 	if (point->x > 0.0)
+	{
 		p_var.x_index_square++;
+	}
 	if (point->z > 0.0 && fabs(point->z) > 0.0001)
+	{
 		p_var.y_index_square++;
-	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	}
+	p_var.pattern_index = ((p_var.x_index_square % 2)
+			+ (p_var.y_index_square % 2)) % 2;
 	if (p_var.pattern_index == 0)
-		return(*obj_color);
+		return (*obj_color);
 	else
-		return(vect_simple_div(*obj_color, 3.0));
+		return (vect_simple_div(*obj_color, 3.0));
 }
 
 int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
@@ -71,7 +78,8 @@ int	belongs_to_base(t_vect point, t_vect center, t_vect normal, float height)
 		return (-1);
 }
 
-void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims, t_base_params *bp, float base_distance)
+void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims,
+	t_base_params *bp, float base_distance)
 {
 	if (point->x < 0.0)
 		bp->point_arc = -bp->point_arc + texture_dims->x

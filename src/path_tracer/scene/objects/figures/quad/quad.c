@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:39:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:23:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,34 +21,35 @@
 
 #include "path_tracer/scene/objects/figures/quad/hit/hit.h"
 #include "path_tracer/scene/objects/figures/quad/getters/getters.h"
-#include "path_tracer/scene/objects/figures/quad/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/quad\
+/transformations/transformations.h"
 
-int	init_quad(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
+int	init_quad(t_scene *scene, t_figure f, t_material mat, t_texture *tx)
 {
-	t_object 	*new_obj;
+	t_object	*n;
 
-	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
-	if (!new_obj)
+	n = (t_object *)ft_calloc(1, sizeof(t_object));
+	if (!n)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2), 2);
-	new_obj->material = mat;
+	n->material = mat;
 	deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-	new_obj->selected = true;
+	n->selected = true;
 	scene->object_selected = true;
-	new_obj->type = QUAD;
-	new_obj->figure.quad.center = fig.quad.center;
-	new_obj->figure.quad.u_vect = fig.quad.u_vect;
-	new_obj->figure.quad.v_vect = fig.quad.v_vect;
-	new_obj->figure.quad.normal = unit_vect(vect_cross(fig.quad.u_vect, fig.quad.v_vect));
-	new_obj->texture = tx;
-	new_obj->hit_func = hit_quad;
-	new_obj->edit_origin = translate_quad;
-	new_obj->edit_orientation = rotate_quad;
-	new_obj->get_origin = get_origin_quad;
-	new_obj->edit_dimensions = resize_quad;
-	new_obj->get_visual = get_quad_pattern;
-	new_obj->get_normal = get_quad_normal;
-	new_obj->next = NULL;
-	add_object(&scene->objects, new_obj);
+	n->type = QUAD;
+	n->figure.quad.center = f.quad.center;
+	n->figure.quad.u_vect = f.quad.u_vect;
+	n->figure.quad.v_vect = f.quad.v_vect;
+	n->figure.quad.normal = unit_vect(vect_cross(f.quad.u_vect, f.quad.v_vect));
+	n->texture = tx;
+	n->hit_func = hit_quad;
+	n->edit_origin = translate_quad;
+	n->edit_orientation = rotate_quad;
+	n->get_origin = get_origin_quad;
+	n->edit_dimensions = resize_quad;
+	n->get_visual = get_quad_pattern;
+	n->get_normal = get_quad_normal;
+	n->next = NULL;
+	add_object(&scene->objects, n);
 	return (0);
 }
 

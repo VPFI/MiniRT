@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:48:26 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:00:59 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@
 #include "path_tracer/scene/objects/figures/figures.h"
 #include <math.h>
 
-static t_vect	calculate_ideal_normal(t_vect point, t_figure fig, float *refsys_angle)
+static t_vect	calculate_ideal_normal(t_vect point,
+	t_figure fig, float *refsys_angle)
 {
 	float		angle;
 	t_vect		res;

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:08:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 19:18:32 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:55:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct s_thread_backup
 }					t_thread_backup;
 
 void	wait_for_threads(t_thread *threads);
+void	stop_and_wait_threads(struct s_scene *scene);
 void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup);
 
 #endif

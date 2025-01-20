@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:42:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:55:16 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,31 +17,31 @@
 #include "path_tracer/utils/print/print_utils.h"
 #include <stdio.h>
 
-int	check_object_aspect(t_object *target_object, mlx_key_data_t key_data)
+int	check_object_aspect(t_object *tar_obj, mlx_key_data_t key_data)
 {
 	if (is_rgb_key_down(key_data))
 	{
 		if (key_data.modifier == MLX_CONTROL)
-			decrement_color(&target_object->material, key_data);
+			decrement_color(&tar_obj->material, key_data);
 		else
-			increment_color(&target_object->material, key_data);
-		print_vec_s(target_object->material.color, "NEW COLOR:");
+			increment_color(&tar_obj->material, key_data);
+		print_vec_s(tar_obj->material.color, "NEW COLOR:");
 		return (1);
 	}
 	else if (is_material_key_down(key_data))
 	{
 		if (key_data.modifier == MLX_CONTROL)
-			decrement_material_component(&target_object->material, key_data);
+			decrement_material_component(&tar_obj->material, key_data);
 		else
-			increment_material_component(&target_object->material, key_data);
-		printf("Material components:\n Specular: %f Roughness: %f Refraction index: %f Light intensity: %f\n\n",
-			target_object->material.specular, target_object->material.metal_roughness,
-			target_object->material.refraction_index, target_object->material.emission_intensity);
-		return (1);		
+			increment_material_component(&tar_obj->material, key_data);
+		printf(ASPECT_CHANGE_MSG,
+			tar_obj->material.specular,
+			tar_obj->material.metal_roughness,
+			tar_obj->material.refraction_index,
+			tar_obj->material.emission_intensity);
+		return (1);
 	}
 	else if (key_data.key == MLX_KEY_TAB)
-	{
-		cicle_material_type(&target_object->material);
-	}
+		cicle_material_type(&tar_obj->material);
 	return (0);
 }

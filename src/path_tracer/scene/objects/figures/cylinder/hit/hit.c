@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:31:45 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 #include "path_tracer/scene/objects/figures/cylinder/utils/utils.h"
 #include <math.h>
 
-static bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig,
+	t_hit_info *internal_hit_info, float *bounds)
 {
 	t_figure		disk_figure;
 	t_vect			base_center;
@@ -38,7 +39,8 @@ static bool	hit_cylinder_base(t_reference_system *ref_sys, t_figure fig, t_hit_i
 	return (true);
 }
 
-static bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+static bool	cylinder_body_intersections(t_reference_system *ref_sys,
+	t_figure fig, t_eq_params *params)
 {
 	t_vect		ray_to_cyl;
 
@@ -50,14 +52,15 @@ static bool	cylinder_body_intersections(t_reference_system *ref_sys, t_figure fi
 			+ (ref_sys->ray.dir.y * ray_to_cyl.y));
 	params->c = (ray_to_cyl.x * ray_to_cyl.x)
 		+ (ray_to_cyl.y * ray_to_cyl.y) - (pow(fig.cylinder.radius, 2));
-	params->discr = (params->b * params->b)	- (4.0 * params->a * params->c);
+	params->discr = (params->b * params->b) - (4.0 * params->a * params->c);
 	if (params->discr < 0.0)
 		return (false);
 	params->root = (-params->b - sqrtf(params->discr)) / (2.0 * params->a);
 	return (true);
 }
 
-static bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig,
+	t_hit_info *internal_hit_info, float *bounds)
 {
 	t_eq_params			params;
 	t_vect				point;
@@ -86,30 +89,30 @@ static bool	hit_cylinder_body(t_reference_system *ref_sys, t_figure fig, t_hit_i
 	return (true);
 }
 
-bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
+bool	hit_cylinder(t_ray ray, t_figure fig, t_hit_info *ht, float *bounds)
 {
 	bool				hit;
-	t_reference_system 	ref_sys;
-	t_hit_info 			internal_hit_info;
-	float 				internal_bounds[2];
+	t_reference_system	ref;
+	t_hit_info			internal_hit_info;
+	float				internal_bounds[2];
 
 	hit = false;
 	internal_bounds[MIN] = bounds[MIN];
-	internal_bounds[MAX] = bounds[MAX];	
+	internal_bounds[MAX] = bounds[MAX];
 	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
 	internal_hit_info.normal = new_vect(1.0, 0.0, 0.0);
-	ref_sys.ray.origin = vect_subtract(ray.origin, fig.cylinder.center);
-	ref_sys.ray.dir = ray.dir;
-	ref_sys.center = new_vect(0.0, 0.0, 0.0);
-	rotate_reference_system(fig.cylinder.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
-	hit = hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
-	hit |= hit_cylinder_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
-	fig.cylinder.height *= -1.0; // change this || figure pointer
-	hit |= hit_cylinder_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	ref.ray.origin = vect_subtract(ray.origin, fig.cylinder.center);
+	ref.ray.dir = ray.dir;
+	ref.center = new_vect(0.0, 0.0, 0.0);
+	rotate_reference_system(fig.cylinder.normal, &ref.ray.dir, &ref.ray.origin);
+	hit = hit_cylinder_base(&ref, fig, &internal_hit_info, internal_bounds);
+	hit |= hit_cylinder_body(&ref, fig, &internal_hit_info, internal_bounds);
+	fig.cylinder.height *= -1.0;
+	hit |= hit_cylinder_base(&ref, fig, &internal_hit_info, internal_bounds);
 	fig.cylinder.height *= -1.0;
 	if (hit)
 	{
-		hit_info->t = internal_hit_info.t;
+		ht->t = internal_hit_info.t;
 	}
 	return (hit);
 }

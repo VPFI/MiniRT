@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 19:41:18 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:18:43 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,19 +30,15 @@ void	render_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_X && is_press_and_ctrl(key_data))
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
+		stop_and_wait_threads(scene);
 		scene->do_backup = true;
-		scene->stop = false;
 		if (export_to_ppm(scene->image))
 			ft_printf(2, "Unexpected error exporting img | Resuming render\n");
 		main_loop(scene);
 	}
 	else if (key_data.key == MLX_KEY_E && is_press_and_ctrl(key_data))
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
-		scene->stop = false;
+		stop_and_wait_threads(scene);
 		scene->edit_mode = true;
 		ft_memset(scene->cumulative_image, 0,
 			sizeof(t_vect) * scene->height * scene->width);
@@ -72,43 +68,40 @@ static void	progressive_render(t_thread *th, uint32_t x,
 			255));
 }
 
-static t_color	calc_pixel_color(t_thread *thread, t_ray ray, int depth)
+static int	check_depth_and_rr(t_thread *thread, int depth, float *rr_coef)
 {
-	t_color		emittance;
-	float		time_aux;
-	t_hit_info	hit_info;
-	t_ray		bounce_ray;
-
-	float		rr_coef_test;
-
 	if (depth <= (thread->scene->max_depth / 2))
-		rr_coef_test = 0.8;
+		*rr_coef = 0.8;
 	else
-		rr_coef_test = 1.0;
-	if (depth < 1 || (rr_coef_test != 1.0 && fast_rand(thread->state) > rr_coef_test))
+		*rr_coef = 1.0;
+	if (depth < 1 || (*rr_coef != 1.0 && fast_rand(thread->state) > *rr_coef))
+		return (1);
+	return (0);
+}
+
+static t_color	calc_pixel_color(t_thread *th, t_ray ray, int depth)
+{
+	t_hit_info	ht;
+	t_color		emit;
+	t_ray		b_ray;
+	float		rr_coef;
+
+	if (check_depth_and_rr(th, depth, &rr_coef))
 		return (new_color(0, 0, 0));
-	ft_bzero(&hit_info, sizeof(hit_info));
-	emittance = new_color(0, 0, 0);
-	time_aux = mlx_get_time();
-	if (ray_hit(thread->scene->objects, ray, &hit_info, thread->scene->sky_sphere))
+	ft_bzero(&ht, sizeof(ht));
+	emit = new_color(0, 0, 0);
+	if (ray_hit(th->scene->objects, ray, &ht, th->scene->sky_sphere))
 	{
-		hit_info.point = ray_at(ray, hit_info.t);
-		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
-		thread->time_hit += mlx_get_time() - time_aux;
-		if (hit_info.object->material.type == EMISSIVE)
-		{
-			emittance = vect_simple_mult(get_obj_color(&hit_info), hit_info.object->material.emission_intensity);
-			return (emittance);
-		}
-		if (!scatter_ray(thread, hit_info, &bounce_ray, ray, &emittance))
-		{
-			return (emittance);
-		}
-		emittance = vect_mult(emittance, get_obj_color(&hit_info));
-		return (vect_simple_mult(vect_add(vect_mult(calc_pixel_color(thread, bounce_ray, depth - 1), get_obj_color(&hit_info)), emittance), 1 / rr_coef_test));
+		ht.point = ray_at(ray, ht.t);
+		ht.normal = ht.object->get_normal(&ht, &ht.object->figure);
+		if (!scatter_ray(th, ht, &b_ray, ray, &emit))
+			return (emit);
+		emit = vect_mult(emit, get_obj_color(&ht));
+		return (vect_simple_mult(vect_add(vect_mult(
+						calc_pixel_color(th, b_ray, depth - 1),
+						get_obj_color(&ht)), emit), 1 / rr_coef));
 	}
-	thread->time_hit += mlx_get_time() - time_aux;
-	return (get_background_color(thread, &ray));
+	return (get_background_color(th, &ray));
 }
 
 void	render_mode(t_thread *th, uint32_t x, uint32_t y)

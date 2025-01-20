@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:29:46 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:14:45 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,13 @@
 
 bool	hit_box(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	t_hit_info	internal_hit_info;
+	t_hit_info	internal_ht;
 
-	if (ray_hit(fig.box.faces, ray, &internal_hit_info, NULL))
+	if (ray_hit(fig.box.faces, ray, &internal_ht, NULL))
 	{
-		if (internal_hit_info.t <= bounds[MIN] || bounds[MAX] <= internal_hit_info.t)
+		if (internal_ht.t <= bounds[MIN] || bounds[MAX] <= internal_ht.t)
 			return (false);
-		hit_info->t = internal_hit_info.t;
+		hit_info->t = internal_ht.t;
 		return (true);
 	}
 	return (false);

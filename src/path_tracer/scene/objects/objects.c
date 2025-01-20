@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:22:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ t_object	*last_object(t_object *objects)
 
 int	add_object(t_object **objects, t_object *new)
 {
-	t_object 	*last_obj;
+	t_object	*last_obj;
 
 	if (objects)
 	{

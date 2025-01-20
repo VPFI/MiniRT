@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:38:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:42:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,12 @@
 
 #include "path_tracer/scene/objects/figures/p_light/getters/getters.h"
 #include "path_tracer/scene/objects/figures/p_light/hit/hit.h"
-#include "path_tracer/scene/objects/figures/p_light/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/p_light\
+/transformations/transformations.h"
 
 int	init_p_light(t_scene *scene, t_figure fig, t_material mat)
 {
-	t_object 	*new_obj;
+	t_object	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 20:14:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:29:08 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,65 +26,63 @@
 #include "window_management/key_identifiers/key_identifiers.h"
 #include <math.h>
 
-void	edit_mode_hooks(t_scene *scene, mlx_key_data_t key_data)
+static void	manage_movement(t_scene *sc, mlx_key_data_t key)
 {
-	if (key_data.key == MLX_KEY_R && is_press_and_ctrl(key_data))
+	if (sc->object_selected)
+		transform_object(sc->objects, sc->lights, sc, key);
+	else
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
-		scene->stop = false;
-		scene->edit_mode = false;
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-		main_loop(scene);
+		move_camera(&sc->camera, &sc->back_up_camera, sc->sky_sphere, key);
+		recalculate_view(&sc->camera, sc->width, sc->height);
 	}
-	else if (is_num_key_down(key_data) || is_copy_delete_key_down(key_data))
+}
+
+void	edit_mode_hooks(t_scene *sc, mlx_key_data_t key)
+{
+	if (key.key == MLX_KEY_R && is_press_and_ctrl(key))
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
-		scene->stop = false;
-		manage_world_objects(scene, key_data);
-		main_loop(scene);
+		stop_and_wait_threads(sc);
+		sc->edit_mode = false;
+		deselect_objects(sc->objects, sc->lights, &sc->object_selected);
+		main_loop(sc);
 	}
-	else if (is_camera_key_down(key_data))
+	else if (is_num_key_down(key) || is_copy_delete_key_down(key))
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
-		scene->stop = false;
-		if (scene->object_selected)
-			transform_object(scene->objects, scene->lights, scene, key_data);
-		else
-		{
-			move_camera(&scene->camera, &scene->back_up_camera, scene->sky_sphere, key_data);
-			recalculate_view(&scene->camera, scene->width, scene->height);
-		}
-		main_loop(scene);
+		stop_and_wait_threads(sc);
+		manage_world_objects(sc, key);
+		main_loop(sc);
 	}
-	else if (is_scene_settings_key_down(key_data))
+	else if (is_camera_key_down(key))
 	{
-		set_stop_status(scene);
-		wait_for_threads(scene->threads);
-		scene->stop = false;
-		change_scene_settings(scene, key_data);
-		main_loop(scene);
+		stop_and_wait_threads(sc);
+		manage_movement(sc, key);
+		main_loop(sc);
+	}
+	else if (is_scene_settings_key_down(key))
+	{
+		stop_and_wait_threads(sc);
+		change_scene_settings(sc, key);
+		main_loop(sc);
 	}
 }
 
 static t_color	calc_pixel_color_normal(t_thread *th, t_scene *scene, t_ray ray)
 {
 	t_color		color;
-	t_hit_info	hit_info;
+	t_hit_info	ht;
 
-	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &hit_info))
+	if (ray_hit_plus_lights(scene->objects, scene->lights, ray, &ht))
 	{
-		hit_info.point = ray_at(ray, hit_info.t);
-		hit_info.normal = hit_info.object->get_normal(&hit_info, &hit_info.object->figure);
-		if (hit_info.object->type == LIGHT)
-			color = hit_info.object->material.color;
+		ht.point = ray_at(ray, ht.t);
+		ht.normal = ht.object->get_normal(&ht, &ht.object->figure);
+		if (ht.object->type == LIGHT)
+			color = ht.object->material.color;
 		else
-			color = new_color(((hit_info.normal.x + 1) * 0.5), ((hit_info.normal.y + 1) * 0.5), ((hit_info.normal.z + 1) * 0.5));
-		if (hit_info.object->selected)
+			color = new_color(((ht.normal.x + 1) * 0.5),
+					((ht.normal.y + 1) * 0.5), ((ht.normal.z + 1) * 0.5));
+		if (ht.object->selected)
 			color = vect_simple_mult(color, 1.5);
-		color = vect_simple_div(color, fmaxf((log(hit_info.t) / log(3)), 1.0));
+		color = vect_simple_div(color, fmaxf((log(ht.t) / log(3)), 1.0));
 	}
 	else
 	{

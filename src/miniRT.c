@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 13:48:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 20:39:45 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:39:54 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,33 +23,33 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static void	init_minirt(t_scene *scene)
+static void	init_minirt(t_scene *sc)
 {
-	ft_bzero(scene, sizeof(t_scene));
-	scene->width = WINW;
-	scene->height = WINH;
-	scene->amb_color = AMB_COLOR;
-	scene->amb_light = -1;
-	scene->aspect_ratio = scene->width / (float)scene->height;
-	scene->choose_file = 0;
-	scene->current_file = 0;
-	scene->mlx = mlx_init(scene->width, scene->height, "miniRT", true);
-	scene->image = mlx_new_image(scene->mlx, scene->width, scene->height);
-	if (!scene->image)
+	ft_bzero(sc, sizeof(t_scene));
+	sc->width = WINW;
+	sc->height = WINH;
+	sc->amb_color = AMB_COLOR;
+	sc->amb_light = -1;
+	sc->aspect_ratio = sc->width / (float)sc->height;
+	sc->choose_file = 0;
+	sc->current_file = 0;
+	sc->mlx = mlx_init(sc->width, sc->height, "miniRT", true);
+	sc->image = mlx_new_image(sc->mlx, sc->width, sc->height);
+	if (!sc->image)
 		return (exit_err(ERR_MEM_MSG, "while loading mlx image", 2));
-	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
-	if (!scene->cumulative_image)
+	sc->cumulative_image = ft_calloc((sc->height * sc->width), sizeof(t_vect));
+	if (!sc->cumulative_image)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
-	scene->state = (uint32_t)(scene->height * scene->width * mlx_get_time());
-	ft_memset(scene->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
-	pthread_mutex_init(&scene->stop_mutex, NULL);
-	scene->stop = false;
-	scene->edit_mode = false;
-	scene->do_backup = false;
-	scene->object_selected = false;
-	scene->path = NULL;
-	scene->menu_tx = get_texture("./assets/textures/menu/Sad_face1.png", 1);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	sc->state = (uint32_t)(sc->height * sc->width * mlx_get_time());
+	ft_memset(sc->threads_backup, 0, sizeof(t_thread_backup) * THREADS);
+	pthread_mutex_init(&sc->stop_mutex, NULL);
+	sc->stop = false;
+	sc->edit_mode = false;
+	sc->do_backup = false;
+	sc->object_selected = false;
+	sc->path = NULL;
+	sc->menu_tx = get_texture("./assets/textures/menu/Sad_face1.png", 1);
+	mlx_image_to_window(sc->mlx, sc->image, 0, 0);
 }
 
 int	main(int argc, char **argv)

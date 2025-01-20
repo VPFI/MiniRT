@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:16:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:40:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:58:32 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,8 @@ t_ray	refract(t_hit_info hit_info, t_vect udir, float index, float cos)
 	return (res);
 }
 
-t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_color *emittance, t_thread *thread)
+t_ray	dielectric_scatter(t_hit_info hit_info, t_ray inc_ray, t_color *emittance, t_thread *thread)
 {
-	//check face vect_dot etc...
 	t_ray		bounce_ray;
 	bool		front_face;
 	t_vect		udir;
@@ -51,16 +50,16 @@ t_ray	dielectric_scatter(uint32_t *state, t_hit_info hit_info, t_ray inc_ray, t_
 	if (front_face)
 		index = AIR_REF_INDEX / index;
 	else
-		adj_hit.normal = vect_simple_mult(hit_info.normal, -1); //if not inverted + normal in point inception material
+		adj_hit.normal = vect_simple_mult(hit_info.normal, -1);
 	cos = vect_dot(vect_simple_mult(udir, -1.0), adj_hit.normal);
 	sin = sqrtf(1.0 - (cos * cos));
-	if (((index * sin) > 1.0 || reflectance(index, cos) > fast_rand(state)) && front_face)
-		bounce_ray = metal_scatter(state, adj_hit, inc_ray, emittance, thread);
+	if (((index * sin) > 1.0 || reflectance(index, cos) > fast_rand(thread->state)) && front_face)
+		bounce_ray = metal_scatter(adj_hit, inc_ray, emittance, thread);
 	else
 	{
 		bounce_ray = refract(adj_hit, udir, index, cos);
 		if (hit_info.object->material.metal_roughness)
-			bounce_ray.dir = vect_add(unit_vect(bounce_ray.dir), vect_simple_mult(get_random_uvect(state), powf(hit_info.object->material.metal_roughness, 2)));
+			bounce_ray.dir = vect_add(unit_vect(bounce_ray.dir), vect_simple_mult(get_random_uvect(thread->state), powf(hit_info.object->material.metal_roughness, 2)));
 	}
 	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	return (bounce_ray);

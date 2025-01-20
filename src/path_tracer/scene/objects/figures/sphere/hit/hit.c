@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:35:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	params.discr = (params.b * params.b) - (params.a * params.c);
 	if (params.discr < 0)
 		return (false);
-	sqrt_disc = sqrtf(params.discr); 
+	sqrt_disc = sqrtf(params.discr);
 	params.root = (params.b - sqrt_disc) / params.a;
 	if (params.root <= bounds[MIN] || bounds[MAX] <= params.root)
 	{
@@ -39,5 +39,5 @@ bool	hit_sphere(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 			return (false);
 	}
 	hit_info->t = params.root;
-	return (true);	
+	return (true);
 }

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:08 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:48:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:03:10 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,35 +26,34 @@ void	resize_cone(t_object *object, t_vect transformation)
 	return ;
 }
 
-void	rotate_cone(t_object *object, t_camera *camera, t_vect transformation)
+void	rotate_cone(t_object *obj, t_camera *cam, t_vect transf)
 {
-	(void)camera;
 	t_ray	cone_ray;
 
-	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
-	object->figure.cone.center = ray_at(cone_ray, (object->figure.cone.height / 2));
-	if (transformation.x)
+	cone_ray = new_ray(obj->figure.cone.normal, obj->figure.cone.center);
+	obj->figure.cone.center = ray_at(cone_ray, (obj->figure.cone.height / 2));
+	if (transf.x)
 	{
-		rotate_vector(&object->figure.cone.normal, camera->u, transformation.x);
+		rotate_vector(&obj->figure.cone.normal, cam->u, transf.x);
 	}
-	else if (transformation.y)
+	else if (transf.y)
 	{
-		rotate_vector(&object->figure.cone.normal, camera->v, transformation.y);
+		rotate_vector(&obj->figure.cone.normal, cam->v, transf.y);
 	}
-	else if (transformation.z)
+	else if (transf.z)
 	{
-		rotate_vector(&object->figure.cone.normal, camera->orientation, transformation.z);
+		rotate_vector(&obj->figure.cone.normal, cam->orientation, transf.z);
 	}
-	cone_ray = new_ray(object->figure.cone.normal, object->figure.cone.center);
-	object->figure.cone.center = ray_at(cone_ray, -(object->figure.cone.height / 2));
-	object->figure.cone.normal = unit_vect(object->figure.cone.normal);
-	print_vec_s(object->figure.cone.normal, "New Cone orientation: ");
+	cone_ray = new_ray(obj->figure.cone.normal, obj->figure.cone.center);
+	obj->figure.cone.center = ray_at(cone_ray, -(obj->figure.cone.height / 2));
+	obj->figure.cone.normal = unit_vect(obj->figure.cone.normal);
+	print_vec_s(obj->figure.cone.normal, "New Cone orientation: ");
 	return ;
 }
 
-void	translate_cone(t_object *object, t_vect transformation)
+void	translate_cone(t_object *object, t_vect transf)
 {
-	object->figure.cone.center = vect_add(object->figure.cone.center, transformation);
+	object->figure.cone.center = vect_add(object->figure.cone.center, transf);
 	print_vec_s(object->figure.cone.center, "New Cone center: ");
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:07:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,33 +20,35 @@
 #include "path_tracer/scene/objects/figures/shared.h"
 #include <math.h>
 
-static bool	cone_body_intersections(t_reference_system *ref_sys, t_figure fig, t_eq_params *params)
+static bool	cone_body_intersections(t_reference_system *ref,
+	t_figure fig, t_eq_params *prms)
 {
 	float	hr_ratio;
 
 	hr_ratio = fig.cone.height / fig.cone.radius;
-	params->a = ((hr_ratio * hr_ratio) * ((ref_sys->ray.dir.x * ref_sys->ray.dir.x)
-				+ (ref_sys->ray.dir.y * ref_sys->ray.dir.y)))
-		- (ref_sys->ray.dir.z * ref_sys->ray.dir.z);
-	params->b = 2.0 * (hr_ratio * ((hr_ratio * ref_sys->ray.origin.x * ref_sys->ray.dir.x)
-				+ (ref_sys->ray.dir.x * ref_sys->center.x)
-				+ (hr_ratio * ref_sys->ray.origin.y * ref_sys->ray.dir.y)
-				+ (ref_sys->ray.dir.y * ref_sys->center.y))
-			- (ref_sys->ray.origin.z * ref_sys->ray.dir.z)
-			- (ref_sys->ray.dir.z * ref_sys->center.z));
-	params->c = pow(ref_sys->center.x - (hr_ratio * ref_sys->ray.origin.x), 2)
-		+ pow(ref_sys->center.y - (hr_ratio * ref_sys->ray.origin.y), 2)
-		- pow(ref_sys->center.z - ref_sys->ray.origin.z, 2);
-	params->discr = (params->b * params->b)
-		- (4.0 * params->a * params->c);
-	if (params->discr < 0.0)
+	prms->a = ((hr_ratio * hr_ratio) * ((ref->ray.dir.x * ref->ray.dir.x)
+				+ (ref->ray.dir.y * ref->ray.dir.y)))
+		- (ref->ray.dir.z * ref->ray.dir.z);
+	prms->b = 2.0 * (hr_ratio * ((hr_ratio * ref->ray.origin.x * ref->ray.dir.x)
+				+ (ref->ray.dir.x * ref->center.x)
+				+ (hr_ratio * ref->ray.origin.y * ref->ray.dir.y)
+				+ (ref->ray.dir.y * ref->center.y))
+			- (ref->ray.origin.z * ref->ray.dir.z)
+			- (ref->ray.dir.z * ref->center.z));
+	prms->c = pow(ref->center.x - (hr_ratio * ref->ray.origin.x), 2)
+		+ pow(ref->center.y - (hr_ratio * ref->ray.origin.y), 2)
+		- pow(ref->center.z - ref->ray.origin.z, 2);
+	prms->discr = (prms->b * prms->b)
+		- (4.0 * prms->a * prms->c);
+	if (prms->discr < 0.0)
 		return (false);
-	params->root = (-params->b - sqrt(params->discr))
-		/ (2.0 * params->a);
+	prms->root = (-prms->b - sqrt(prms->discr))
+		/ (2.0 * prms->a);
 	return (true);
 }
 
-static bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig,
+	t_hit_info *internal_hit_info, float *bounds)
 {
 	t_eq_params			params;
 	t_vect				point;
@@ -75,7 +77,8 @@ static bool	hit_cone_body(t_reference_system *ref_sys, t_figure fig, t_hit_info 
 	return (true);
 }
 
-static bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info *internal_hit_info, float *bounds)
+static bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig,
+	t_hit_info *internal_hit_info, float *bounds)
 {
 	t_figure		disk_figure;
 	t_vect			base_center;
@@ -94,7 +97,7 @@ static bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig, t_hit_info 
 
 bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	t_reference_system 	ref_sys;
+	t_reference_system 	ref;
 	t_hit_info 			internal_hit_info;
 	float 				internal_bounds[2];
 	bool				hit;
@@ -104,12 +107,12 @@ bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 	internal_bounds[MAX] = bounds[MAX];	
 	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
 	internal_hit_info.normal = new_vect(1.0, 0.0, 0.0);
-	ref_sys.ray.origin = vect_subtract(ray.origin, fig.cone.center);
-	ref_sys.ray.dir = ray.dir;
-	ref_sys.center = new_vect(0.0, 0.0, 0.0);
-	rotate_reference_system(fig.cone.normal, &ref_sys.ray.dir, &ref_sys.ray.origin);
-	hit = hit_cone_base(&ref_sys, fig, &internal_hit_info, internal_bounds);
-	hit |= hit_cone_body(&ref_sys, fig, &internal_hit_info, internal_bounds);
+	ref.ray.origin = vect_subtract(ray.origin, fig.cone.center);
+	ref.ray.dir = ray.dir;
+	ref.center = new_vect(0.0, 0.0, 0.0);
+	rotate_reference_system(fig.cone.normal, &ref.ray.dir, &ref.ray.origin);
+	hit = hit_cone_base(&ref, fig, &internal_hit_info, internal_bounds);
+	hit |= hit_cone_body(&ref, fig, &internal_hit_info, internal_bounds);
 	if (hit)
 	{
 		hit_info->t = internal_hit_info.t;

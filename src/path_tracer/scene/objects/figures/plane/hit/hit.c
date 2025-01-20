@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:22:19 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,5 +32,5 @@ bool	hit_plane(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 		return (false);
 	}
 	hit_info->t = root;
-	return (true);	
+	return (true);
 }

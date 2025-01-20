@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:44:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:50:03 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,36 +20,35 @@
 
 static void	*set_rendering(void *args)
 {
-	t_thread 	*thread;
+	t_thread 	*th;
 
-	thread = args;
-	while (get_stop_status(thread->scene) == false)
+	th = args;
+	while (get_stop_status(th->scene) == false)
 	{
-		if (thread->current_y >= thread->y_end)
-			thread->current_y = thread->y_start;
-		while (get_stop_status(thread->scene) == false && thread->current_y < thread->y_end)
+		if (th->current_y >= th->y_end)
+			th->current_y = th->y_start;
+		while (get_stop_status(th->scene) == false && th->current_y < th->y_end)
 		{
-			thread->current_x = thread->x_start;
-			while (thread->current_x < thread->x_end)
+			th->current_x = th->x_start;
+			while (th->current_x < th->x_end)
 			{
-				if (thread->scene->edit_mode == true)
-					edit_mode(thread, thread->current_x, thread->current_y);
+				if (th->scene->edit_mode == true)
+					edit_mode(th, th->current_x, th->current_y);
 				else
-					render_mode(thread, thread->current_x, thread->current_y);
-				thread->pix_rendered++;
-				thread->current_x += thread->x_increment;
+					render_mode(th, th->current_x, th->current_y);
+				th->pix_rendered++;
+				th->current_x += th->x_increment;
 			}
-			thread->current_y++;
+			th->current_y++;
 		}
-		fprintf(stderr, "THREAD: %i || LAP: %i\r", thread->id, thread->iterations);
-		thread->iterations++;
+		fprintf(stderr, "THREAD: %i || LAP: %i\r", th->id, th->iterations);
+		th->iterations++;
 	}
-	free(thread->state);
-	//printf("THREAD: %i --- || %i || TIME: %f || TIME_HIT: %f\n", thread->id, thread->pix_rendered, mlx_get_time(), thread->time_hit);
-	if (get_stop_status(thread->scene)== true)
+	free(th->state);
+	if (get_stop_status(th->scene)== true)
 	{
-		thread->scene->threads_backup[thread->id].iterations = thread->iterations - 1;
-		thread->scene->threads_backup[thread->id].current_y = thread->current_y;
+		th->scene->threads_backup[th->id].iterations = th->iterations - 1;
+		th->scene->threads_backup[th->id].current_y = th->current_y;
 	}
 	return (NULL);
 }

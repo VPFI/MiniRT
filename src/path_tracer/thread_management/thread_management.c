@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 19:20:11 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:42:30 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 #include "path_tracer/scene/scene.h"
 #include "error_management/error_management.h"
 #include "path_tracer/thread_management/thread_management.h"
+
+void	stop_and_wait_threads(t_scene *scene)
+{
+	set_stop_status(scene);
+	wait_for_threads(scene->threads);
+	scene->stop = false;	
+}
 
 void	wait_for_threads(t_thread *threads)
 {

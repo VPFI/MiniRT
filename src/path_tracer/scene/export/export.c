@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:30:09 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 22:14:08 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:40:20 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-static void	write_ppm(mlx_image_t *image, int fd, char *filename)
+static void	write_ppm(mlx_image_t *img, int fd, char *filename)
 {
 	uint32_t	x;
 	uint32_t	y;
@@ -26,27 +26,25 @@ static void	write_ppm(mlx_image_t *image, int fd, char *filename)
 
 	y = 0;
 	pixel = NULL;
-	ft_printf(STDOUT_FILENO, "\n\nExporting %i x %i image\n", image->width, image->height);
-	ft_printf(fd, "P3\n");
-	ft_printf(fd, "%i %i\n", image->width, image->height);
-	ft_printf(fd, "255\n");
-	while (y < image->height)
+	ft_printf(1, "\n\nExporting %i x %i img\n", img->width, img->height);
+	ft_printf(fd, "P3\n%i %i\n255\n", img->width, img->height);
+	while (y < img->height)
 	{
 		x = 0;
-		pixel = &image->pixels[((y * image->width)) * sizeof(uint32_t)];
-		while (x < image->width)
+		pixel = &img->pixels[((y * img->width)) * sizeof(uint32_t)];
+		while (x < img->width)
 		{
 			ft_printf(fd, "%i %i %i", *(pixel), *(pixel + 1), *(pixel + 2));
 			x++;
 			pixel = pixel + sizeof(uint32_t);
-			if (x < image->width)
+			if (x < img->width)
 				ft_printf(fd, "  ");
 		}
 		ft_printf(fd, "\n");
 		y++;
-		ft_printf(STDERR_FILENO, "--| %i%% |--\r", (int)((y / (float)image->height) * 100));
+		ft_printf(2, "--| %i%% |--\r", (int)((y / (float)img->height) * 100));
 	}
-	ft_printf(STDOUT_FILENO, "Image exported succesfully to \"%s\"\n\n", filename);
+	ft_printf(1, "Img exported succesfully to \"%s\"\n\n", filename);
 }
 
 int	export_to_ppm(mlx_image_t *image)

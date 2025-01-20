@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:33:23 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:11:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,13 @@
 
 #include "path_tracer/scene/objects/figures/cone/getters/getters.h"
 #include "path_tracer/scene/objects/figures/cone/hit/hit.h"
-#include "path_tracer/scene/objects/figures/cone/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/cone\
+/transformations/transformations.h"
 #include "path_tracer/scene/objects/figures/cone/utils/utils.h"
 
 int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
-	t_object 	*new_obj;
+	t_object	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
@@ -39,7 +40,8 @@ int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->figure.cone.normal = unit_vect(fig.cone.normal);
 	new_obj->figure.cone.radius = fig.cone.radius;
 	new_obj->figure.cone.height = fig.cone.height;
-	new_obj->figure.cone.center = vect_add(fig.cone.center, vect_simple_mult(fig.cone.normal, -fig.cone.height / 2));
+	new_obj->figure.cone.center = vect_add(fig.cone.center,
+			vect_simple_mult(fig.cone.normal, -fig.cone.height / 2));
 	new_obj->texture = tx;
 	new_obj->hit_func = hit_cone;
 	new_obj->edit_origin = translate_cone;

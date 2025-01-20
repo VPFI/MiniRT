@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:36:21 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:37:48 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 14:38:40 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static float	p_light_specular(t_hit_info hit_info, t_ray inc_ray, t_vect cam_ori
 	return (test);
 }
 
-static t_vect	test_sample_area(uint32_t *state, t_object *light)
+static t_vect	sample_area(uint32_t *state, t_object *light)
 {
 	return (vect_add(light->get_origin(light), vect_simple_mult(get_random_uvect(state), light->figure.p_light.radius_shadow)));
 }
@@ -54,7 +54,7 @@ t_color	light_sampling(t_thread *thread, t_hit_info hit_info, t_mat_type scatter
 	{
 		shadow_ray.origin = hit_info.point;
 		bound_to_light = vect_subtract(temp->figure.p_light.location, hit_info.point);
-		shadow_ray.dir = vect_subtract(test_sample_area(thread->state, temp), hit_info.point);
+		shadow_ray.dir = vect_subtract(sample_area(thread->state, temp), hit_info.point);
 		if (!shadow_hit(thread->scene->objects, shadow_ray, &test_hit, vect_length(bound_to_light)))
 		{
 			mod2 = 1 / vect_length(bound_to_light);

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:45:46 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:38:18 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@
 #include "path_tracer/scene/objects/figures/quad/textures/texture.h"
 #include <math.h>
 
-static t_vect	get_quad_pattern_color(t_vect *rotated_point, float pattern_dim, t_vect *material_color)
+static t_vect	get_quad_pattern_color(t_vect *rotated_point,
+	float pattern_dim, t_vect *material_color)
 {
 	t_pattern_vars	p_var;
 
@@ -27,11 +28,12 @@ static t_vect	get_quad_pattern_color(t_vect *rotated_point, float pattern_dim, t
 		p_var.x_index_square++;
 	if (rotated_point->y < 0.0)
 		p_var.y_index_square++;
-	p_var.pattern_index = ((p_var.x_index_square % 2) + (p_var.y_index_square % 2)) % 2;
+	p_var.pattern_index = ((p_var.x_index_square % 2)
+			+ (p_var.y_index_square % 2)) % 2;
 	if (p_var.pattern_index == 0)
 		return (*material_color);
 	else
-		return (vect_simple_div(*material_color, 3.0));	
+		return (vect_simple_div(*material_color, 3.0));
 }
 
 t_vect	get_quad_pattern(t_hit_info *hit_info)
@@ -39,7 +41,9 @@ t_vect	get_quad_pattern(t_hit_info *hit_info)
 	t_vect	rotated_point;
 
 	rotated_point = get_rotated_point_quad(hit_info);
-	return (get_quad_pattern_color(&rotated_point, hit_info->object->material.pattern_dim, &hit_info->object->material.color));
+	return (get_quad_pattern_color(&rotated_point,
+			hit_info->object->material.pattern_dim,
+			&hit_info->object->material.color));
 }
 
 t_vect	get_origin_quad(t_object *object)

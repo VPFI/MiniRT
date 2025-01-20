@@ -6,6 +6,7 @@ prueba.c
 */*.o
 *.a
 */*.a
+obj/
 rt
 MLX42
 .vscode

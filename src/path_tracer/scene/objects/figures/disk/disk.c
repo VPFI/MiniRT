@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:38:09 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:51:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,12 @@
 #include "path_tracer/scene/objects/figures/disk/hit/hit.h"
 #include "path_tracer/scene/objects/figures/disk/getters/getters.h"
 #include "path_tracer/scene/objects/figures/disk/textures/texture.h"
-#include "path_tracer/scene/objects/figures/disk/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/disk\
+/transformations/transformations.h"
 
 int	init_disk(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
-	t_object 	*new_obj;
+	t_object	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)

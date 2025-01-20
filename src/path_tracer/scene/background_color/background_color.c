@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:02:34 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:44:48 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:37:21 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include "path_tracer/thread_management/thread_management.h"
 #include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
-	
+
 static void	set_sky_texture_color(t_vect *point, t_figure *fig,
 	t_texture *tx, t_color *color)
 {
@@ -50,28 +50,30 @@ static void	set_sky_texture_color(t_vect *point, t_figure *fig,
 	color->z = *(pixel + 2) / 255.0;
 }
 
-static t_color	get_skysphere_color(t_thread *thread, t_hit_info *ht)
+static t_color	get_skysphere_color(t_object *sky_sphere, t_hit_info *ht)
 {
 	t_color	scene_sky_color;
-	t_vect	translated_point;
+	t_vect	translated_pt;
 
-	translated_point = vect_subtract(ht->point, thread->scene->sky_sphere->figure.sphere.center);
-	set_sky_texture_color(&translated_point, &thread->scene->sky_sphere->figure, thread->scene->sky_sphere->texture, &scene_sky_color);
+	translated_pt = vect_subtract(ht->point, sky_sphere->figure.sphere.center);
+	set_sky_texture_color(&translated_pt, &sky_sphere->figure,
+		sky_sphere->texture, &scene_sky_color);
 	return (scene_sky_color);
 }
 
 t_color	get_background_color(t_thread *thread, t_ray *ray)
 {
-	float		mod;
+	float		li;
 	t_hit_info	hit_info;
 	t_vect		background;
 
 	ft_bzero(&hit_info, sizeof(hit_info));
 	background = new_color(0.0, 0.0, 0.0);
-	if (thread->scene->sky_sphere && ray_hit(thread->scene->sky_sphere, *ray, &hit_info, NULL))
+	if (thread->scene->sky_sphere
+		&& ray_hit(thread->scene->sky_sphere, *ray, &hit_info, NULL))
 	{
 		hit_info.point = ray_at(*ray, hit_info.t);
-		background = get_skysphere_color(thread, &hit_info);
+		background = get_skysphere_color(thread->scene->sky_sphere, &hit_info);
 	}
 	else
 	{
@@ -79,9 +81,9 @@ t_color	get_background_color(t_thread *thread, t_ray *ray)
 			background = hexa_to_vect(thread->scene->amb_color);
 		else
 		{
-			mod = 0.5 * (ray->dir.y + 1.0);
-			background = vect_add(vect_simple_mult(new_color(1, 1, 1),
-				(1.0 - mod)),vect_simple_mult(new_color(0.3, 0.7, 1), mod));
+			li = 0.5 * (ray->dir.y + 1.0);
+			background = vect_add(vect_simple_mult(new_color(1, 1, 1), 1 - li),
+					vect_simple_mult(new_color(0.3, 0.7, 1), li));
 		}
 	}
 	background = vect_simple_mult(background, thread->scene->amb_light);

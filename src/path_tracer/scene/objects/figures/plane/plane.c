@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:39:15 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:25:00 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,12 @@
 
 #include "path_tracer/scene/objects/figures/plane/hit/hit.h"
 #include "path_tracer/scene/objects/figures/plane/getters/getters.h"
-#include "path_tracer/scene/objects/figures/plane/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/plane\
+/transformations/transformations.h"
 
 int	init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
-	t_object 	*new_obj;
+	t_object	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)
@@ -49,6 +50,7 @@ int	init_plane(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	add_object(&scene->objects, new_obj);
 	return (0);
 }
+
 void	set_new_fig_plane(t_scene *scene, t_vect *offset_origin)
 {
 	t_figure	fig;

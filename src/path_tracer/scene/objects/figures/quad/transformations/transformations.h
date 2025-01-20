@@ -6,12 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:40:20 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 19:12:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef TRANSFORMATION_H
-# define TRANSFORMATION_H
+#ifndef TRANSFORMATIONS_H
+# define TRANSFORMATIONS_H
 
 # include "path_tracer/scene/camera/camera.h"
 # include "path_tracer/utils/vectors/vectors.h"

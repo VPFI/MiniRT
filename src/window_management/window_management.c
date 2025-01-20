@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 18:32:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,7 @@ static void	resize_file_selector(t_scene *scene)
 
 static void	resize_rendering(t_scene *scene)
 {
-	set_stop_status(scene);
-	wait_for_threads(scene->threads);
-	scene->stop = false;
+	stop_and_wait_threads(scene);
 	if (scene->cumulative_image)
 	{
 		free(scene->cumulative_image);
@@ -90,15 +88,19 @@ void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void
 		&& button == MLX_MOUSE_BUTTON_LEFT
 		&& action == MLX_PRESS)
 	{
+		stop_and_wait_threads(scene);
 		mlx_get_mouse_pos(scene->mlx, &x, &y);
 		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
 		select_object(scene, x, y);
+		main_loop(scene);
 	}
 	else if (scene->edit_mode == true
 		&& button == MLX_MOUSE_BUTTON_RIGHT
 		&& action == MLX_PRESS)
 	{
+		stop_and_wait_threads(scene);
 		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+		main_loop(scene);
 	}
 }
 

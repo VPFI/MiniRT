@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:37:25 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:20:13 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,17 @@
 #include "path_tracer/utils/math/math_utils.h"
 #include <math.h>
 
-t_vect	get_rotated_point_quad(t_hit_info *hit_info)
+t_vect	get_rotated_point_quad(t_hit_info *ht)
 {
 	t_vect	axis;
 	float	angle;
 	t_vect	rotated_point;
 	t_vect	u_vect_rotated;
 
-	u_vect_rotated = unit_vect(hit_info->object->figure.quad.u_vect);
-	rotated_point = vect_subtract(hit_info->point, hit_info->object->figure.quad.center);
-	rotate_reference_system(hit_info->object->figure.quad.normal, &u_vect_rotated, &rotated_point);
+	u_vect_rotated = unit_vect(ht->object->figure.quad.u_vect);
+	rotated_point = vect_subtract(ht->point, ht->object->figure.quad.center);
+	rotate_reference_system(ht->object->figure.quad.normal,
+			&u_vect_rotated, &rotated_point);
 	u_vect_rotated = clamp_vect(u_vect_rotated, -1.0, 1.0);
 	axis = new_vect(0.0, 0.0, 1.0);
 	angle = acos(-u_vect_rotated.x);

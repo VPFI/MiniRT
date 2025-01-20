@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:12:16 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 20:23:25 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@
 t_material	new_standard_material(void)
 {
 	t_material	mat;
-	uint32_t	state;
+	uint32_t	seed;
 
-	state = (uint32_t)(mlx_get_time() * 10000);
-	mat.color = new_color(fast_rand(&state), fast_rand(&state), fast_rand(&state));
+	seed = (uint32_t)(mlx_get_time() * 10000);
+	mat.color = new_color(fast_rand(&seed), fast_rand(&seed), fast_rand(&seed));
 	mat.albedo = mat.color;
 	mat.specular = 0.2;
 	mat.metal_roughness = 0.1;
@@ -41,7 +41,8 @@ t_material	new_standard_plight(void)
 	uint32_t	state;
 
 	state = (uint32_t)(mlx_get_time() * 10000);
-	mat.color = new_color((fast_rand(&state) + 1) / 2, (fast_rand(&state) + 1) / 2, (fast_rand(&state) + 1) / 2);
+	mat.color = new_color((fast_rand(&state) + 1) / 2,
+			(fast_rand(&state) + 1) / 2, (fast_rand(&state) + 1) / 2);
 	mat.albedo = mat.color;
 	mat.specular = 1;
 	mat.metal_roughness = 1;

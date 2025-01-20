@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:52:48 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:43:15 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/20 17:11:17 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@
 #include "path_tracer/scene/objects/figures/cone/cone.h"
 #include "path_tracer/scene/objects/figures/p_light/p_light.h"
 
-void	add_world_object(t_scene *scene, mlx_key_data_t key_data, t_vect *offset_origin)
+void	add_world_object(t_scene *scene,
+	mlx_key_data_t key_data, t_vect *offset_origin)
 {
 	if (key_data.key == MLX_KEY_1)
 		set_new_fig_sphere(scene, offset_origin);
