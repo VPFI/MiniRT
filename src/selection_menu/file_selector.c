@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/17 14:44:47 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:23:50 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	display_file_menu(t_scene *scene)
 	int				i;
 	int				xy[2];
 	size_t			aux;
-	DIR 			*d;
+	DIR				*d;
 	struct dirent	*dir;
 
 	i = 0;
@@ -77,7 +77,8 @@ void	display_file_menu(t_scene *scene)
 		draw_no_maps_found(scene);
 		return ;
 	}
-	scene->buttons = ft_calloc(((int)(scene->map_count / 20) * 20) + 20, sizeof(t_button));
+	scene->buttons = ft_calloc(((int)(scene->map_count / 20) * 20)
+		+ 20, sizeof(t_button));
 	if (!scene->buttons)
 		exit(1);
 	xy[0] = scene->width * 0.05;
@@ -85,7 +86,8 @@ void	display_file_menu(t_scene *scene)
 	d = opendir("./assets/maps");
 	if (d)
 	{
-		while ((dir = readdir(d)) != NULL)
+		dir = readdir(d);
+		while (dir != NULL)
 		{
 			if (dir->d_name[0] && dir->d_name[0] != '.'
 				&& ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
@@ -115,6 +117,7 @@ void	display_file_menu(t_scene *scene)
 				scene->buttons[i].f_pt.y = scene->buttons[i].i_pt.y + scene->height * 0.07;
 				i++;
 			}
+			dir = readdir(d);
 		}
 		closedir(d);
 	}

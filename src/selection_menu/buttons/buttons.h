@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:30:27 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:17:19 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:06:08 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ typedef struct s_button
 	t_coords	i_pt;
 	t_coords	f_pt;
 	char		*text;
-	int 		color;
+	int			color;
 }				t_button;
 
 void	free_buttons(t_button *buttons, int n);

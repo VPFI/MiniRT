@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:54:53 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:14:59 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:06:34 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,9 @@ typedef struct s_bresenham
 	int			max;
 	int			color;
 	float		fade_comp[4];
-}           	t_bresenham;
+}				t_bresenham;
 
-void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt, t_coords *f_pt, int color);
+void	init_bresenham_line_font(t_scene *scene, t_coords *i_pt,
+			t_coords *f_pt, int color);
 
 #endif

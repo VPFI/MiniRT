@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:01:53 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:05:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:15:14 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 # define P_LIGHT_ID			"l"
 
 int		parse_objects(t_scene *scene, char **components, int amount);
-void	parse_extra_object_components(t_material *mat, t_texture **tx, char **components, int i);
+void	parse_extra_object_components(t_material *mat,
+			t_texture **tx, char **components, int i);
 
 #endif

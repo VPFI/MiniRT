@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:08:14 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 15:55:51 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:10:24 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 typedef struct s_thread
 {
 	int				id;
-	int				pix_rendered;
 	int				iterations;
 	pthread_t		self;
 	float			time_hit;

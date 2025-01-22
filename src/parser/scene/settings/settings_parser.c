@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:54 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:24:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,14 @@ static void	parse_extra_settings(t_scene *scene, char **components, int i)
 		{
 			parse_depth(unit, scene);
 		}
-		else if (!ft_strcmp(unit[0], "skysphere") || !ft_strcmp(unit[0], "skybox"))
+		else if (!ft_strcmp(unit[0], "skysphere")
+			|| !ft_strcmp(unit[0], "skybox"))
 		{
 			parse_skysphere(unit, scene);
 		}
 		ft_free_arr(unit);
 		i++;
-	}	
+	}
 }
 
 void	load_settings(t_scene *scene, char **components, int amount)

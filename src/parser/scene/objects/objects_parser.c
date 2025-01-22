@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:56:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 20:56:26 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:24:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@
 #include "path_tracer/scene/objects/texture/texture_objects.h"
 #include "error_management/error_management.h"
 
-void	parse_extra_object_components(t_material *mat, t_texture **tx, char **components, int i)
+void	parse_extra_object_components(t_material *mat, t_texture **tx,
+	char **components, int i)
 {
 	char	**unit;
 
@@ -44,7 +45,7 @@ void	parse_extra_object_components(t_material *mat, t_texture **tx, char **compo
 			exit_err(ERR_ATTR_MSG, "Unknown extra attribute identifier\n", 2);
 		ft_free_arr(unit);
 		i++;
-	}	
+	}
 }
 
 int	parse_objects(t_scene *scene, char **components, int amount)

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 13:51:33 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 15:26:15 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:46:38 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,9 @@ static t_vect	get_random_disk_sample(uint32_t *state)
 	while (true)
 	{
 		res = new_vect(
-			(fast_rand(state) * 2.0) - 1.0,
-			(fast_rand(state) * 2.0) - 1.0,
-			0.0);
+				(fast_rand(state) * 2.0) - 1.0,
+				(fast_rand(state) * 2.0) - 1.0,
+				0.0);
 		if (vect_length(res) < 1.0)
 			return (res);
 	}

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:13:01 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 18:42:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:10:18 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@ void	stop_and_wait_threads(t_scene *scene)
 {
 	set_stop_status(scene);
 	wait_for_threads(scene->threads);
-	scene->stop = false;	
+	scene->stop = false;
 }
 
 void	wait_for_threads(t_thread *threads)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < THREADS)
@@ -57,7 +57,7 @@ void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup)
 	}
 	else
 	{
-		set_thread_default(thread);		
+		set_thread_default(thread);
 	}
 	thread->y_start = 0;
 	thread->y_end = thread->scene->height;
@@ -65,7 +65,6 @@ void	set_thread(t_thread *thread, t_thread_backup *back_up, bool do_backup)
 	thread->x_start = thread->id;
 	thread->x_end = thread->scene->width;
 	thread->x_increment = THREADS;
-	thread->pix_rendered = 0;
 	thread->time_hit = 0;
 	thread->state = malloc(sizeof(uint32_t));
 	if (!thread->state)

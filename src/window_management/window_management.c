@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:18:06 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 18:32:05 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:26:05 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,45 +23,45 @@
 #include "window_management/key_identifiers/key_identifiers.h"
 #include "error_management/error_management.h"
 
-static void	resize_file_selector(t_scene *scene)
+static void	resize_file_selector(t_scene *sc)
 {
-	if (scene->map_count)
+	if (sc->map_count)
 	{
-		free_buttons(scene->buttons, scene->map_count);
+		free_buttons(sc->buttons, sc->map_count);
 	}
-	if (scene->cumulative_image)
+	if (sc->cumulative_image)
 	{
-		free(scene->cumulative_image);
+		free(sc->cumulative_image);
 	}
-	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
-	if (!scene->cumulative_image)
+	sc->cumulative_image = ft_calloc((sc->height * sc->width), sizeof(t_vect));
+	if (!sc->cumulative_image)
 	{
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	}
-	display_file_menu(scene);
+	display_file_menu(sc);
 }
 
-static void	resize_rendering(t_scene *scene)
+static void	resize_rendering(t_scene *sc)
 {
-	stop_and_wait_threads(scene);
-	if (scene->cumulative_image)
+	stop_and_wait_threads(sc);
+	if (sc->cumulative_image)
 	{
-		free(scene->cumulative_image);
+		free(sc->cumulative_image);
 	}
-	recalculate_view(&scene->camera, scene->width, scene->height);
-	scene->cumulative_image = ft_calloc((scene->height * scene->width), sizeof(t_vect));
-	if (!scene->cumulative_image)
+	recalculate_view(&sc->camera, sc->width, sc->height);
+	sc->cumulative_image = ft_calloc((sc->height * sc->width), sizeof(t_vect));
+	if (!sc->cumulative_image)
 	{
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));
 	}
-	set_new_image(scene);
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
-	main_loop(scene);
+	set_new_image(sc);
+	mlx_image_to_window(sc->mlx, sc->image, 0, 0);
+	main_loop(sc);
 }
 
 void	resize_handle(int32_t width, int32_t height, void *sc)
 {
-	t_scene *scene;
+	t_scene	*scene;
 
 	scene = sc;
 	scene->height = height;
@@ -76,31 +76,32 @@ void	resize_handle(int32_t width, int32_t height, void *sc)
 	}
 }
 
-void	mouse_handle(mouse_key_t button, action_t action, modifier_key_t mods, void *sc)
+void	mouse_handle(mouse_key_t button, action_t action,
+			modifier_key_t mods, void *sc)
 {
 	int32_t	x;
 	int32_t	y;
-	t_scene *scene;
+	t_scene	*scen;
 
-	scene = sc;
+	scen = sc;
 	(void)mods;
-	if (scene->edit_mode == true
+	if (scen->edit_mode == true
 		&& button == MLX_MOUSE_BUTTON_LEFT
 		&& action == MLX_PRESS)
 	{
-		stop_and_wait_threads(scene);
-		mlx_get_mouse_pos(scene->mlx, &x, &y);
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-		select_object(scene, x, y);
-		main_loop(scene);
+		stop_and_wait_threads(scen);
+		mlx_get_mouse_pos(scen->mlx, &x, &y);
+		deselect_objects(scen->objects, scen->lights, &scen->object_selected);
+		select_object(scen, x, y);
+		main_loop(scen);
 	}
-	else if (scene->edit_mode == true
+	else if (scen->edit_mode == true
 		&& button == MLX_MOUSE_BUTTON_RIGHT
 		&& action == MLX_PRESS)
 	{
-		stop_and_wait_threads(scene);
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
-		main_loop(scene);
+		stop_and_wait_threads(scen);
+		deselect_objects(scen->objects, scen->lights, &scen->object_selected);
+		main_loop(scen);
 	}
 }
 

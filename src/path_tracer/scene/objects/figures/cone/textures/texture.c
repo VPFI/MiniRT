@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:05:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:27:44 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,14 @@ static void	remove_point_texture_offset_cone(t_vect *point,
 {
 	if (point->x < 0.0)
 		*arc = -*arc + text_dims->x
-				+ (text_dims->x * (int)(*arc / text_dims->x));
+			+ (text_dims->x * (int)(*arc / text_dims->x));
 	if (point->z < 0.0)
 		point->z = point->z + text_dims->y
-				+ (text_dims->y * (int)(fabs(point->z) / text_dims->y));
+			+ (text_dims->y * (int)(fabs(point->z) / text_dims->y));
 	if (*arc >= text_dims->x)
-		*arc = *arc	- (text_dims->x * (int)(*arc / text_dims->x));
+		*arc = *arc - (text_dims->x * (int)(*arc / text_dims->x));
 	if (point->z >= text_dims->y)
-		point->z = point->z	- (text_dims->y * (int)(point->z / text_dims->y));
+		point->z = point->z - (text_dims->y * (int)(point->z / text_dims->y));
 }
 
 static void	set_bump_map_normal_cone(t_vect *point, t_vect *normal,

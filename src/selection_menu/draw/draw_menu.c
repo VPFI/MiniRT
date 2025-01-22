@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:39:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 22:17:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:23:36 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ static void	draw_headers(t_scene *scene)
 	int		coords[3];
 	char	*pagination;
 
-	coords[0] = (scene->width / 2) - scene->width  * 0.08;
+	coords[0] = (scene->width / 2) - scene->width * 0.08;
 	coords[1] = scene->height * 0.05;
 	coords[2] = 6;
 	write_str(scene, "MiniRT", coords, DEF_COLOR);
@@ -64,7 +64,7 @@ static void	draw_headers(t_scene *scene)
 	pagination = ft_strappend(&pagination, "\\");
 	aux = ft_itoa((int)(scene->map_count / 20) + 1);
 	pagination = ft_strappend(&pagination, aux);
-	coords[0] = (scene->width / 2) - scene->width  * 0.0335;
+	coords[0] = (scene->width / 2) - scene->width * 0.0335;
 	coords[1] = scene->height * 0.975;
 	coords[2] = 8;
 	write_str(scene, pagination, coords, DEF_COLOR);
@@ -77,7 +77,6 @@ static void	draw_center_line(t_scene *scene)
 	int		x;
 	int		y;
 	int		aux;
-
 
 	aux = scene->width * 0.498;
 	x = aux;
@@ -99,7 +98,6 @@ static void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 	float	x;
 	float	y;
 
-	x = i_pt.x;
 	y = i_pt.y;
 	while (y < i_pt.y + 3)
 	{
@@ -112,7 +110,6 @@ static void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 		}
 		y++;
 	}
-	x = i_pt.x - 3;
 	y = i_pt.y;
 	while (y < f_pt.y)
 	{

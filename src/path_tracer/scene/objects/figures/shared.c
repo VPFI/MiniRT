@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:37:25 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:20:13 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:35:07 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ t_vect	get_rotated_point_quad(t_hit_info *ht)
 	u_vect_rotated = unit_vect(ht->object->figure.quad.u_vect);
 	rotated_point = vect_subtract(ht->point, ht->object->figure.quad.center);
 	rotate_reference_system(ht->object->figure.quad.normal,
-			&u_vect_rotated, &rotated_point);
+		&u_vect_rotated, &rotated_point);
 	u_vect_rotated = clamp_vect(u_vect_rotated, -1.0, 1.0);
 	axis = new_vect(0.0, 0.0, 1.0);
 	angle = acos(-u_vect_rotated.x);

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:02:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 20:57:04 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:09:36 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static float	sum_parts(int integer_part, float decimal_part, char *array)
 	else
 	{
 		return ((float)(integer_part - decimal_part));
-	}	
+	}
 }
 
 float	ft_atof(char *array, float min, float max)
@@ -57,7 +57,7 @@ float	ft_atof(char *array, float min, float max)
 		exit_err(ERR_EMPTY_MSG, "Maximum value threshold exceeded\n", 2);
 	}
 	while (array[i] && array[i] != '.')
-		i++;		
+		i++;
 	if (i != (int)ft_strlen(array) && array[i + 1])
 	{
 		aux = ft_substr(array, (i + 1), ft_strlen(array));

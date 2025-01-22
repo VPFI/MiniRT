@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:11:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:30:12 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ int	init_cone(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->get_visual = get_cone_pattern;
 	new_obj->get_normal = get_cone_normal;
 	new_obj->next = NULL;
-	add_object(&scene->objects, new_obj);
-	return (0);
+	return (add_object(&scene->objects, new_obj));
 }
 
 void	set_new_fig_cone(t_scene *scene, t_vect *offset_origin)

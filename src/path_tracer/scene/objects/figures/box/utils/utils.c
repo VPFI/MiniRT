@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:48:26 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:13:50 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:30:35 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	correct_box_pattern_index(t_vect *dimensions,
 		if (!((int)((dimensions->z - 0.0001) / 2) % 2))
 			pattern_index = !pattern_index;
 		if (((int)((dimensions->x - 0.0001) / 2) % 2))
-			pattern_index = !pattern_index;		
+			pattern_index = !pattern_index;
 	}
 	if ((face_index == 4 || face_index == 5))
 	{

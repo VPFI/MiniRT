@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:29:45 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:45:29 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 #include "path_tracer/utils/print/print_utils.h"
 #include "path_tracer/utils/vectors/vectors.h"
 #include "path_tracer/scene/objects/objects.h"
-#include "path_tracer/scene/objects/hooks/transformations/object_transformations.h"
+#include "path_tracer/scene/objects/hooks\
+/transformations/object_transformations.h"
 #include "mlx/MLX42/include/MLX42/MLX42.h"
 #include <stdio.h>
 
@@ -25,29 +26,17 @@ static t_vect	align_camera_to_axis(mlx_key_data_t key_data)
 
 	res = new_vect(0.0, 0.0, -1.0);
 	if (key_data.key == MLX_KEY_W)
-	{
 		res = new_vect(0.0, 1.0, 0.0);
-	}
 	else if (key_data.key == MLX_KEY_A)
-	{
 		res = new_vect(-1.0, 0.0, 0.0);
-	}
 	else if (key_data.key == MLX_KEY_S)
-	{
 		res = new_vect(0.0, -1.0, 0.0);
-	}
 	else if (key_data.key == MLX_KEY_D)
-	{
 		res = new_vect(1.0, 0.0, 0.0);
-	}
 	else if (key_data.key == MLX_KEY_Q)
-	{
 		res = new_vect(0.0, 0.0, 1.0);
-	}
 	else if (key_data.key == MLX_KEY_E)
-	{
 		res = new_vect(0.0, 0.0, -1.0);
-	}
 	return (res);
 }
 
@@ -77,17 +66,17 @@ int	check_rotations(t_camera *camera, mlx_key_data_t key_data)
 	return (1);
 }
 
-int	check_translations(t_camera *camera, t_object *skysphere, mlx_key_data_t key_data)
+int	check_translations(t_camera *camera, t_object *sky, mlx_key_data_t key_data)
 {
-	t_vect	transformation;
+	t_vect	change;
 
 	if (key_data.modifier == MLX_CONTROL)
-		transformation = absolute_translate(key_data);
+		change = absolute_translate(key_data);
 	else
-		transformation = relative_translate(camera, key_data);
-	if (skysphere)
-		skysphere->figure.sphere.center = vect_add(skysphere->figure.sphere.center, transformation);
-	camera->origin = vect_add(camera->origin, transformation);
+		change = relative_translate(camera, key_data);
+	if (sky)
+		sky->figure.sphere.center = vect_add(sky->figure.sphere.center, change);
+	camera->origin = vect_add(camera->origin, change);
 	print_vec_s(camera->origin, "New camera origin: ");
 	return (1);
 }
@@ -136,7 +125,6 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 
 int	check_reset(t_camera *camera, t_camera *backup, mlx_key_data_t key_data)
 {
-
 	if (key_data.key == MLX_KEY_O)
 	{
 		camera->origin = new_vect(0.0, 0.5, 1.0);

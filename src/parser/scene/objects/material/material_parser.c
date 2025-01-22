@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:11:15 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:10:20 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	parse_material(char **settings, t_material *mat)
 	amount = count_components(settings);
 	if (amount != 6)
 		exit_err(ERR_EMPTY_MSG, "Missing material components\n", 2);
-	mat->type = get_material_index(settings[1]);		
+	mat->type = get_material_index(settings[1]);
 	mat->specular = ft_atof(settings[2], 0, 1);
 	mat->metal_roughness = ft_atof(settings[3], 0, 1);
 	mat->refraction_index = ft_atof(settings[4], 0, 100);

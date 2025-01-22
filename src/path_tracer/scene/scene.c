@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:28:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 13:50:00 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:52:46 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,54 +26,50 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void	change_scene_settings(t_scene *scene, mlx_key_data_t key_data)
+void	change_scene_settings(t_scene *sc, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_COMMA)
 	{
-		scene->amb_light -= 0.05;
-		if (scene->amb_light < 0.0)
-			scene->amb_light = 0.0;
-		printf("Ambient light intensity: %f\n", scene->amb_light);
+		sc->amb_light -= 0.05;
+		if (sc->amb_light < 0.0)
+			sc->amb_light = 0.0;
+		printf("Ambient light intensity: %f\n", sc->amb_light);
 	}
 	else if (key_data.key == MLX_KEY_PERIOD)
 	{
-		scene->amb_light += 0.05;
-		printf("Ambient light intensity: %f\n", scene->amb_light);
+		sc->amb_light += 0.05;
+		printf("Ambient light intensity: %f\n", sc->amb_light);
 	}
 	else if (key_data.key == MLX_KEY_RIGHT_SHIFT)
-		deselect_objects(scene->objects, scene->lights, &scene->object_selected);
+		deselect_objects(sc->objects, sc->lights, &sc->object_selected);
 	return ;
 }
 
-static int	load_map_scene(t_scene *scene, int *relevant_content)
+static int	load_map_scene(t_scene *scene, int *content, int line_number)
 {
 	int		map;
 	char	*line;
 	char	**components;
-	int		ln;
 
-	ln = 0;
 	map = open(scene->path, O_RDONLY);
-	if (map < 0)	
+	if (map < 0)
 		return (exit_err(ERR_NOFILE_MSG, scene->path, 2), 0);
 	line = get_next_line(map);
-	while (line)	
+	while (line && ++line_number)
 	{
-		ln++;
 		components = format_line(line);
-		if (components && components[0])
+		if (components && components[0] && ++(*content))
 		{
-			*relevant_content = 1;
-			printf("Line: %i\n", ln);
+			printf("Line: %i\n", line_number);
 			if (parse_components(scene, components))
 				return (free(line), ft_free_arr(components),
 					exit_err(ERR_EMPTY_MSG, "while loading map", 2), 0);
 		}
 		free(line);
 		ft_free_arr(components);
-		line = get_next_line(map);		
+		line = get_next_line(map);
 	}
-	if (!(*relevant_content))
+	if (!(*content))
 		return (0);
 	return (1);
 }
@@ -91,17 +87,19 @@ static void	load_standard_scene(t_scene *scene)
 
 void	init_scene(t_scene *sc)
 {
+	int	line_number;
 	int	relevant_content;
 
+	line_number = 0;
 	relevant_content = 0;
 	if (sc->path && (!ft_strcmp(".std", sc->path)
-		|| !ft_strcmp(".standard", sc->path)))
+			|| !ft_strcmp(".standard", sc->path)))
 	{
 		load_standard_scene(sc);
 	}
 	else if (sc->path && sc->choose_file)
 	{
-		if (!load_map_scene(sc, &relevant_content))
+		if (!load_map_scene(sc, &relevant_content, line_number))
 		{
 			printf("Possible empty map, opening standard scene...\n");
 			load_standard_scene(sc);

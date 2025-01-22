@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:23:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/17 14:44:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:22:43 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,14 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# define ERR_ARGNUM_MSG		"\n\nToo many arguments received, can't specify scene.\nValid format for opening a specific scene directly:\n\n \"./miniRT ./assets/maps/scene_name.rt\"\n\nOpening file selector...\n"
+# define ERR_ARGNUM_MSG		"\n\nToo many arguments, can't specify scene.\n\
+Valid format for opening a specific scene directly:\n\n \"\
+./miniRT ./assets/maps/scene_name.rt\"\n\nOpening file selector...\n"
 # define ERR_HIDFILE_MSG	"Potentially hidden files not supported\n"
-# define ERR_INCEXT_MSG		"Invalid file extension || Only .rt files are allowed\n"
-# define ERR_INCMAP_MSG		"Incorrect argument scene [%s], opening file selector..."
+# define ERR_INCEXT_MSG		"Invalid file extension \
+|| Only .rt files are allowed\n"
+# define ERR_INCMAP_MSG		"Incorrect argument scene [%s], \
+opening file selector..."
 # define ERR_NOFILE_MSG		"No such file or dir: %s\n\n"
 # define ERR_PERM_MSG		"Permission denied\n"
 # define ERR_STD_MSG		"Unexpected error\n"

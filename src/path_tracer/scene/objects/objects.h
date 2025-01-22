@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 20:22:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:02:57 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,15 @@
 # include "path_tracer/scene/objects/material/material.h"
 # include "path_tracer/scene/objects/texture/texture_objects.h"
 
-typedef struct s_object t_object;
-typedef struct s_hit_info t_hit_info;
+typedef struct s_object	t_object;
 
 typedef struct s_hit_info
 {
-	t_vect		point;
-	t_vect		normal;
-	t_object	*object;
-	float		t;
-}				t_hit_info;
+	t_vect			point;
+	t_vect			normal;
+	struct s_object	*object;
+	float			t;
+}					t_hit_info;
 
 typedef struct s_object
 {
@@ -36,15 +35,15 @@ typedef struct s_object
 	t_material		material;
 	t_texture		*texture;
 	t_fig_type		type;
-	t_object		*next;
+	struct s_object	*next;
 	bool			selected;
-	bool			(*hit_func) (t_ray r, t_figure f, t_hit_info *ht, float *b);
-	t_vect			(*get_origin) (t_object *object);
-	t_vect			(*get_visual) (t_hit_info *hit_info);
-	t_vect			(*get_normal) (t_hit_info *hit_info, t_figure *fig);
-	void			(*edit_origin) (t_object *object, t_vect transformation);
-	void			(*edit_orientation) (t_object *obj, t_camera *c, t_vect t);
-	void			(*edit_dimensions) (t_object *obj, t_vect transformation);
+	bool			(*hit_func)(t_ray r, t_figure f, t_hit_info *ht, float *b);
+	t_vect			(*get_origin)(t_object *object);
+	t_vect			(*get_visual)(t_hit_info *hit_info);
+	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
+	void			(*edit_origin)(t_object *object, t_vect transformation);
+	void			(*edit_orientation)(t_object *obj, t_camera *c, t_vect t);
+	void			(*edit_dimensions)(t_object *obj, t_vect transformation);
 }					t_object;
 
 bool		is_2d(t_object *object);

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:43:01 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:07:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:28:39 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,14 +97,14 @@ static bool	hit_cone_base(t_reference_system *ref_sys, t_figure fig,
 
 bool	hit_cone(t_ray ray, t_figure fig, t_hit_info *hit_info, float *bounds)
 {
-	t_reference_system 	ref;
-	t_hit_info 			internal_hit_info;
-	float 				internal_bounds[2];
+	t_reference_system	ref;
+	t_hit_info			internal_hit_info;
+	float				internal_bounds[2];
 	bool				hit;
 
 	hit = false;
 	internal_bounds[MIN] = bounds[MIN];
-	internal_bounds[MAX] = bounds[MAX];	
+	internal_bounds[MAX] = bounds[MAX];
 	ft_bzero(&internal_hit_info, sizeof(t_hit_info));
 	internal_hit_info.normal = new_vect(1.0, 0.0, 0.0);
 	ref.ray.origin = vect_subtract(ray.origin, fig.cone.center);

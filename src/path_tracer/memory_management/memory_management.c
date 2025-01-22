@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:37:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 21:13:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:57:10 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	free_texture(t_texture **texture)
 
 void	free_objects(t_object **objects)
 {
-	t_object *temp;
+	t_object	*temp;
 
 	if (objects)
 	{
