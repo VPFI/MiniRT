@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:31:04 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 13:38:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:30:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CAMERA_HOOKS_H
 
 # include "path_tracer/scene/camera/camera.h"
+# include "path_tracer/scene/camera/hooks/settings/camera_settings.h"
 # include "path_tracer/scene/objects/objects.h"
 # include "mlx/MLX42/include/MLX42/MLX42.h"
 

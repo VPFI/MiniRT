@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:41:46 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 17:22:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:05:50 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ t_vect	absolute_translate(mlx_key_data_t key_data)
 	return (transformation);
 }
 
-int	check_object_translations(t_object *target_object,
+void	check_object_translations(t_object *target_object,
 	t_camera *camera, mlx_key_data_t key_data)
 {
 	t_vect	transformation;
@@ -71,7 +71,5 @@ int	check_object_translations(t_object *target_object,
 	if (!zero_vect(transformation))
 	{
 		target_object->edit_origin(target_object, transformation);
-		return (1);
 	}
-	return (0);
 }

@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2025/01/22 14:50:17 by vperez-f         ###   ########.fr        #
+#    Updated: 2025/01/22 21:36:18 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,6 +46,7 @@ CFILES = src/error_management/error_management.c \
 		src/path_tracer/thread_management/mutex_utils.c \
 		src/path_tracer/thread_management/thread_management.c \
 		src/path_tracer/scene/camera/utils/camera_utils.c \
+		src/path_tracer/scene/camera/hooks/settings/camera_settings.c \
 		src/path_tracer/scene/camera/hooks/camera_hooks.c \
 		src/path_tracer/scene/camera/camera.c \
 		src/path_tracer/scene/objects/figures/box/getters/getters.c \

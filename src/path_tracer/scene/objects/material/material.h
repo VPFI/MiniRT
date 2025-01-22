@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 17:42:51 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:07:38 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 # include "path_tracer/scene/objects/material/scatters/scatters.h"
 # include "path_tracer/scene/objects/material/modifiers/modifiers.h"
 
-# define ASPECT_CHANGE_MSG "Material components:\n Specular: %f Roughness: \
-%f Refraction index: %f Light intensity: %f\n\n"
+# define ASPECT_CHANGE_MSG "Material components:\n Specular: %f Roughness: %f \
+Refraction index: %f Light intensity: %f Pattern %i\n\n"
 
 typedef enum e_mat_type
 {

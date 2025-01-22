@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:32:51 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 17:45:54 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:40:43 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include "window_management/key_identifiers/key_identifiers.h"
 #include "mlx/MLX42/include/MLX42/MLX42.h"
 #include <math.h>
+#include <stdio.h>
 
 t_vect	clamp_object_coords(t_object *target_object)
 {
@@ -38,13 +39,17 @@ t_vect	clamp_object_coords(t_object *target_object)
 int	check_object_focus(t_object *obj, t_scene *scene, mlx_key_data_t key_data)
 {
 	t_vect	obj_origin;
+	float	distance;
 
+	distance = 0.0;
 	if (key_data.key == MLX_KEY_B)
 	{
 		obj_origin = obj->get_origin(obj);
 		scene->camera.orientation = unit_vect(vect_subtract(
 					obj_origin, scene->camera.origin));
 		recalculate_view(&scene->camera, scene->width, scene->height);
+		distance = vect_length(vect_subtract(obj_origin, scene->camera.origin));
+		printf("Distance between object and camera: %f\n", distance);
 		return (1);
 	}
 	return (0);

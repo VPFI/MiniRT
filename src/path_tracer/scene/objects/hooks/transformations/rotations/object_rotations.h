@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:43:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 17:22:52 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:08:11 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include "path_tracer/scene/objects/objects.h"
 # include "mlx/MLX42/include/MLX42/MLX42.h"
 
-int	check_object_rotations(t_object *target_object, t_camera *camera,
-		mlx_key_data_t key_data);
+void	check_object_rotations(t_object *target_object, t_camera *camera,
+			mlx_key_data_t key_data);
 
 #endif

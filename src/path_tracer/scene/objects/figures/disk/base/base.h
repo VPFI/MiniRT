@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:45:35 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 19:28:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:40:50 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int		belongs_to_base(t_vect point, t_vect center, t_vect norm, float height);
 t_vect	get_base_pattern(t_vect *point, t_figure *figure,
 			float pattern_dim, t_color *obj_color);
 void	set_bump_map_normal_base(t_vect *point, t_vect *normal,
-			t_texture *tx, float radius, float base_distance);
+			t_texture *tx, t_vect *params);
 void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims,
 			t_base_params *bp, float base_distance);
 

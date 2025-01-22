@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 20:29:39 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:41:02 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,19 +73,21 @@ static void	set_bump_map_normal_cylinder(t_vect *point,
 t_vect	get_cylinder_texture(t_hit_info *ht, t_texture *tx,
 	t_figure *fig, int is_base)
 {
-	float	angle;
 	t_vect	axis;
+	t_vect	params;
 	t_vect	rotated_point;
 	t_vect	reverse_normal;
 	t_vect	texture_normal;
 
 	rotated_point = vect_subtract(ht->point, fig->cylinder.center);
 	reverse_normal = vect_simple_mult(fig->cylinder.normal, -1.0);
-	angle = rotate_reference_system(reverse_normal, NULL, &rotated_point);
+	params.x = rotate_reference_system(reverse_normal, NULL, &rotated_point);
 	if (is_base)
 	{
-		set_bump_map_normal_base(&rotated_point, &texture_normal, tx,
-			fig->cylinder.radius, (-fig->cylinder.height / 2) * is_base);
+		params.y = fig->cylinder.radius;
+		params.z = (-fig->cylinder.height / 2) * is_base;
+		set_bump_map_normal_base(&rotated_point,
+			&texture_normal, tx, &params);
 		if (is_base == 1)
 		{
 			axis = new_vect(0.0, 1.0, 0.0);
@@ -94,6 +96,6 @@ t_vect	get_cylinder_texture(t_hit_info *ht, t_texture *tx,
 	}
 	else
 		set_bump_map_normal_cylinder(&rotated_point, &texture_normal, tx, fig);
-	rotate_by_angle(&texture_normal, &reverse_normal, -angle);
+	rotate_by_angle(&texture_normal, &reverse_normal, -params.x);
 	return (texture_normal);
 }

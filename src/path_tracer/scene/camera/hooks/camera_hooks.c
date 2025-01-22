@@ -6,11 +6,12 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:29:45 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 13:45:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:34:42 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "path_tracer/scene/camera/camera.h"
+#include "path_tracer/scene/camera/hooks/settings/camera_settings.h"
 #include "path_tracer/utils/rotations/rotations.h"
 #include "path_tracer/utils/print/print_utils.h"
 #include "path_tracer/utils/vectors/vectors.h"
@@ -85,39 +86,17 @@ int	check_settings(t_camera *camera, mlx_key_data_t key_data)
 {
 	if (key_data.key == MLX_KEY_F)
 	{
-		if (key_data.modifier == MLX_CONTROL)
-		{
-			if (camera->fov > 1)
-				camera->fov -= 1;
-		}
-		else
-			camera->fov += 1;
-		printf("FOV: %f\n", camera->fov);
+		modify_fov(camera, key_data);
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_G)
 	{
-		if (key_data.modifier == MLX_CONTROL)
-		{
-			camera->defocus_angle -= 0.25;
-			if (camera->defocus_angle < 0)
-				camera->defocus_angle = 0;
-		}
-		else
-			camera->defocus_angle += 0.25;
-		printf("DEFOCUS ANGLE: %f\n", camera->defocus_angle);
+		modify_defocus(camera, key_data);
 		return (1);
 	}
 	else if (key_data.key == MLX_KEY_V)
 	{
-		if (key_data.modifier == MLX_CONTROL)
-		{
-			if (camera->focus_dist > 1)
-				camera->focus_dist -= 0.5;
-		}
-		else
-			camera->focus_dist += 0.5;
-		printf("FOCUS DIST: %f\n", camera->focus_dist);
+		modify_focus_dist(camera, key_data);
 		return (1);
 	}
 	return (0);

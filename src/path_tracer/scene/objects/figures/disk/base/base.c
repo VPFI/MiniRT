@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 18:33:10 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/20 19:43:55 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 19:00:34 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,15 @@ void	set_base_params(t_base_params *params, t_vect *point, float radius)
 t_vect	get_base_pattern(t_vect *point, t_figure *figure,
 	float pattern_dim, t_color *obj_color)
 {
-	t_pattern_vars	p_var;
 	t_base_params	bp;
+	t_pattern_vars	p_var;
 	float			point_pattern_dim;
 
 	set_base_params(&bp, point, figure->disk.radius);
 	point_pattern_dim = bp.point_radius * (pattern_dim / figure->disk.radius);
 	p_var.x_index_square = (int)(fabs(bp.point_arc) / point_pattern_dim);
 	p_var.y_index_square = (int)((fabs(bp.base_height)
-			+ figure->disk.center.y) / pattern_dim);
+				+ figure->disk.center.y) / pattern_dim);
 	if (point->x > 0.0)
 	{
 		p_var.x_index_square++;
@@ -102,19 +102,24 @@ void	remove_point_texture_offset_base(t_vect *point,	t_vect *texture_dims,
 						+ bp->base_height) / texture_dims->y));
 }
 
-void	set_bump_map_normal_base(t_vect *point, t_vect *normal, t_texture *tx, float radius, float base_distance)
+void	set_bump_map_normal_base(t_vect *point, t_vect *normal,
+	t_texture *tx, t_vect *params)
 {
 	t_base_params	bp;
 	t_texel			texel;
 	uint8_t			*pixel;
 	t_vect			texture_dims;
 
-	set_base_params(&bp, point, radius);
-	texture_dims.x = tx->texture_dim * (bp.point_radius / radius);
-	texture_dims.y = tx->texture_dim * (tx->texture->height / (float) tx->texture->width);
-	remove_point_texture_offset_base(point, &texture_dims, &bp, base_distance);
-	texel.x = f_clamp(bp.point_arc * (tx->texture->width / texture_dims.x), 0.0, tx->texture->width - 1);
-	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y), 0.0, tx->texture->height - 1);
-	pixel = tx->texture->pixels + ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
+	set_base_params(&bp, point, params->y);
+	texture_dims.x = tx->texture_dim * (bp.point_radius / params->y);
+	texture_dims.y = tx->texture_dim
+		* (tx->texture->height / (float) tx->texture->width);
+	remove_point_texture_offset_base(point, &texture_dims, &bp, params->z);
+	texel.x = f_clamp(bp.point_arc * (tx->texture->width / texture_dims.x),
+			0.0, tx->texture->width - 1);
+	texel.y = f_clamp(point->z * (tx->texture->height / texture_dims.y),
+			0.0, tx->texture->height - 1);
+	pixel = tx->texture->pixels
+		+ ((4 * tx->texture->width) * texel.y) + (4 * texel.x);
 	*normal = translate_texture_to_normal(pixel);
 }

@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:51:13 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/22 13:27:44 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:43:01 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ t_vect	get_cone_texture(t_hit_info *ht, t_texture *tx,
 	t_figure *fig, int is_base)
 {
 	float	angle;
+	t_vect	params;
 	t_vect	rotated_point;
 	t_vect	texture_normal;
 
@@ -88,8 +89,11 @@ t_vect	get_cone_texture(t_hit_info *ht, t_texture *tx,
 	angle = rotate_reference_system(fig->cone.normal, NULL, &rotated_point);
 	if (is_base)
 	{
+		params.x = 0.0;
+		params.y = fig->cone.radius;
+		params.z = fig->cone.height;
 		set_bump_map_normal_base(&rotated_point, &texture_normal,
-			tx, fig->cone.radius, fig->cone.height);
+			tx, &params);
 	}
 	else
 	{
