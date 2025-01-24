@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   camera_parser.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:18 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:26:45 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 21:39:37 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,13 @@ static void	parse_extra_camera_components(t_scene *scene, char **comp, int i)
 
 void	load_camera(t_scene *sc, char **components, int amount)
 {
+	if (sc->camera_set)
+	{
+		exit_err(ERR_EMPTY_MSG, "Cannot define camera multiple times\n", 2);
+	}
 	if (amount < 4)
 	{
 		exit_err(ERR_ATTR_MSG, "camera | missing essential attributes\n", 2);
-	}
-	if (!zero_vect(sc->camera.orientation)
-		|| !zero_vect(sc->camera.origin)
-		|| sc->camera.fov)
-	{
-		exit_err(ERR_EMPTY_MSG, "Cannot define camera multiple times\n", 2);
 	}
 	sc->camera.origin = input_to_vect(components[1],
 			(float)INT_MIN, (float)INT_MAX);
@@ -70,4 +68,5 @@ void	load_camera(t_scene *sc, char **components, int amount)
 	sc->camera.focus_dist = FOCUS_DIST;
 	sc->camera.defocus_angle = DEFOCUS;
 	parse_extra_camera_components(sc, components, 4);
+	sc->camera_set = 1;
 }

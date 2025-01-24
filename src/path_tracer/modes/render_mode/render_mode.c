@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render_mode.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 17:34:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 15:18:43 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 01:01:40 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,11 @@ static int	check_depth_and_rr(t_thread *thread, int depth, float *rr_coef)
 
 static t_color	calc_pixel_color(t_thread *th, t_ray ray, int depth)
 {
-	t_hit_info	ht;
-	t_color		emit;
-	t_ray		b_ray;
-	float		rr_coef;
+	t_scatter_rays	r;
+	t_hit_info		ht;
+	t_color			emit;
+	t_color			obj_color;
+	float			rr_coef;
 
 	if (check_depth_and_rr(th, depth, &rr_coef))
 		return (new_color(0, 0, 0));
@@ -94,12 +95,14 @@ static t_color	calc_pixel_color(t_thread *th, t_ray ray, int depth)
 	{
 		ht.point = ray_at(ray, ht.t);
 		ht.normal = ht.object->get_normal(&ht, &ht.object->figure);
-		if (!scatter_ray(th, ht, &b_ray, ray, &emit))
+		r.inc_ray = ray;
+		if (!scatter_ray(th, ht, &r, &emit))
 			return (emit);
-		emit = vect_mult(emit, get_obj_color(&ht));
+		obj_color = get_obj_color(&ht);
+		emit = vect_mult(emit, obj_color);
 		return (vect_simple_mult(vect_add(vect_mult(
-						calc_pixel_color(th, b_ray, depth - 1),
-						get_obj_color(&ht)), emit), 1 / rr_coef));
+						calc_pixel_color(th, r.out_ray, depth - 1),
+						obj_color), emit), 1 / rr_coef));
 	}
 	return (get_background_color(th, &ray));
 }

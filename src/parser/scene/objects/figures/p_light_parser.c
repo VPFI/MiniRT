@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   p_light_parser.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:57:11 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:12:29 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:05:31 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,5 @@ void	load_p_light(t_scene *scene, char **comp, int amount)
 	f.p_light.radius_shadow = ft_atof(comp[2], 0, (float)INT_MAX);
 	mat.color = vect_simple_div(input_to_vect(comp[3], 0, 255), 255.0);
 	mat.emission_intensity = ft_atof(comp[4], 0, (float)INT_MAX);
-	mat.albedo = mat.color;
 	init_p_light(scene, f, mat);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cylinder_parser.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:51:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:26:58 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:05:19 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ void	load_cylinder(t_scene *scene, char **comp, int amount)
 	f.cylinder.radius = ft_atof(comp[3], 0, (float)INT_MAX);
 	f.cylinder.height = ft_atof(comp[4], 0, (float)INT_MAX);
 	mat.color = vect_simple_div(input_to_vect(comp[5], 0, 255), 255.0);
-	mat.albedo = mat.color;
 	parse_extra_object_components(&mat, &texture, comp, 6);
 	init_cylinder(scene, f, mat, texture);
 }

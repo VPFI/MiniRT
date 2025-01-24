@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   material.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:16:03 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 19:07:38 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:06:03 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ typedef enum e_mat_type
 typedef struct s_material
 {
 	t_color		color;
-	t_color		albedo;
 	t_mat_type	type;
 	float		specular;
 	float		metal_roughness;

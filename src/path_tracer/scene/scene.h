@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   scene.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:02:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 13:47:22 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 20:43:38 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,9 @@ typedef struct s_scene
 	int				map_count;
 	int				choose_file;
 	int				current_file;
+	bool			camera_set;
+	bool			ambient_set;
+	bool			settings_set;
 }					t_scene;
 
 void	init_scene(t_scene *scene);

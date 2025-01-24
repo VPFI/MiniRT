@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quad_parser.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:51:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:11:20 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:05:42 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ void	load_quad(t_scene *scene, char **comp, int amount)
 	if (zero_vect(normal))
 		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
 	mat.color = vect_simple_div(input_to_vect(comp[4], 0, 255), 255.0);
-	mat.albedo = mat.color;
 	parse_extra_object_components(&mat, &texture, comp, 5);
 	init_quad(scene, fig, mat, texture);
 }

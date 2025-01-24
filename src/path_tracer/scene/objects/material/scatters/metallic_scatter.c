@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   metallic_scatter.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:16:07 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 19:33:02 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 01:18:29 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ t_ray	metal_scatter(t_hit_info hit_info, t_ray inc_ray,
 					powf(hit_info.object->material.metal_roughness, 2)));
 	}
 	bounce_ray = new_ray(bounce_dir, hit_info.point);
-	hit_info.object->material.albedo = get_obj_color(&hit_info);
 	*emittance = light_sampling(thread, hit_info, METAL);
 	return (bounce_ray);
 }

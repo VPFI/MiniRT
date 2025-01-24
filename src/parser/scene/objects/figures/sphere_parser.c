@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sphere_parser.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:51:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:10:41 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:05:45 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ void	load_sphere(t_scene *scene, char **comp, int amount)
 	fig.sphere.center = input_to_vect(comp[1], (float)INT_MIN, (float)INT_MAX);
 	fig.sphere.radius = ft_atof(comp[2], 0, (float)INT_MAX);
 	mat.color = vect_simple_div(input_to_vect(comp[3], 0, 255), 255.0);
-	mat.albedo = mat.color;
 	parse_extra_object_components(&mat, &texture, comp, 4);
 	init_sphere(scene, fig, mat, texture);
 }

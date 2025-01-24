@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   box_parser.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:51:52 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:32:30 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 00:05:09 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ void	load_box(t_scene *scene, char **cmp, int amount)
 		exit_err(ERR_EMPTY_MSG, "Normal can not be zeroes\n", 2);
 	fig.box.dimensions = input_to_vect(cmp[4], (float)INT_MIN, (float)INT_MAX);
 	mat.color = vect_simple_div(input_to_vect(cmp[5], 0, 255), 255.0);
-	mat.albedo = mat.color;
 	parse_extra_object_components(&mat, &texture, cmp, 6);
 	init_box(scene, fig, mat, texture);
 }

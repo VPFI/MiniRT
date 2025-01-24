@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   draw_menu.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:39:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:23:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 18:33:49 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ void	draw_no_maps_found(t_scene *scene)
 	int			offset_x;
 	int			offset_y;
 
-	x = 0;
 	y = 0;
 	offset_x = 0;
 	offset_y = 0;
@@ -98,29 +97,27 @@ static void	draw_button_frame(t_scene *scene, t_coords i_pt, t_coords f_pt)
 	float	x;
 	float	y;
 
-	y = i_pt.y;
-	while (y < i_pt.y + 3)
+	y = i_pt.y - 1;
+	while (++y < i_pt.y + 3)
 	{
-		x = i_pt.x;
-		while (x < f_pt.x)
+		x = i_pt.x - 1;
+		while (++x < f_pt.x)
 		{
 			safe_pixel_put_bres(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put_bres(scene, (int)round(x), (int)round(y + (f_pt.y - i_pt.y - 3)), DEF_COLOR);
-			x++;
+			safe_pixel_put_bres(scene,
+				(int)round(x), (int)round(y + f_pt.y - i_pt.y - 3), DEF_COLOR);
 		}
-		y++;
 	}
-	y = i_pt.y;
-	while (y < f_pt.y)
+	y = i_pt.y - 1;
+	while (++y < f_pt.y)
 	{
-		x = i_pt.x - 3;
-		while (x < i_pt.x)
+		x = i_pt.x - 3 - 1;
+		while (++x < i_pt.x)
 		{
 			safe_pixel_put_bres(scene, (int)round(x), (int)round(y), DEF_COLOR);
-			safe_pixel_put_bres(scene, (int)round(x + (f_pt.x - i_pt.x)), (int)round(y), DEF_COLOR);
-			x++;
+			safe_pixel_put_bres(scene,
+				(int)round(x + (f_pt.x - i_pt.x)), (int)round(y), DEF_COLOR);
 		}
-		y++;
 	}
 }
 

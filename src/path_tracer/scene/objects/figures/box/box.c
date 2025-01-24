@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   box.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/16 21:31:13 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 21:57:57 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,47 +19,65 @@
 #include "error_management/error_management.h"
 #include "path_tracer/scene/objects/figures/box/getters/getters.h"
 #include "path_tracer/scene/objects/figures/box/hit/hit.h"
-#include "path_tracer/scene/objects/figures/box/transformations/transformations.h"
+#include "path_tracer/scene/objects/figures/box\
+/transformations/transformations.h"
 #include "path_tracer/scene/objects/figures/box/utils/utils.h"
 
-static void	init_faces(t_object *box, t_material mat, t_vect dimensions)
+static void	set_second_half_faces(t_object *box, t_material mat,
+	t_vect dims, t_vect normal)
 {
 	t_figure	fig;
-	t_vect		normal;
 	t_vect		anti_normal;
 
-	normal = unit_vect(vect_cross(box->figure.box.u_vect, box->figure.box.v_vect));
 	anti_normal = vect_simple_mult(normal, -1);
-
-	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(normal, dimensions.z * 0.5));
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dims.y);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(box->figure.box.u_vect, -1 * dims.x * 0.5));
 	add_box_face(box, fig, mat);
-
-	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(anti_normal, dimensions.z * 0.5));
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dims.x);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(box->figure.box.v_vect, dims.y * 0.5));
 	add_box_face(box, fig, mat);
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(box->figure.box.v_vect, -1 * dims.y * 0.5));
+	add_box_face(box, fig, mat);	
+}
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dimensions.y);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, dimensions.x * 0.5));
-	add_box_face(box, fig, mat);
+static void	set_first_half_faces(t_object *box, t_material mat,
+	t_vect dims, t_vect normal)
+{
+	t_figure	fig;
+	t_vect		anti_normal;
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x * 0.5));
+	anti_normal = vect_simple_mult(normal, -1);
+	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dims.y);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(normal, dims.z * 0.5));
 	add_box_face(box, fig, mat);
+	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dims.y);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(anti_normal, dims.z * 0.5));
+	add_box_face(box, fig, mat);
+	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
+	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dims.y);
+	fig.quad.center = vect_add(box->figure.box.center,
+		vect_simple_mult(box->figure.box.u_vect, dims.x * 0.5));
+	add_box_face(box, fig, mat);
+}
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dimensions.x);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, dimensions.y * 0.5));
-	add_box_face(box, fig, mat);
+static void	init_faces(t_object *o, t_material mat, t_vect dimensions)
+{
+	t_vect		normal;
 
-	fig.quad.u_vect = vect_simple_mult(anti_normal, dimensions.z);
-	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dimensions.x);
-	fig.quad.center = vect_add(box->figure.box.center, vect_simple_mult(box->figure.box.v_vect, -1 * dimensions.y * 0.5));
-	add_box_face(box, fig, mat);
+	normal = unit_vect(vect_cross(o->figure.box.u_vect, o->figure.box.v_vect));
+	set_first_half_faces(o, mat, dimensions, normal);
+	set_second_half_faces(o, mat, dimensions, normal);
 }
 
 int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
@@ -74,10 +92,7 @@ int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->selected = true;
 	scene->object_selected = true;
 	new_obj->type = BOX;
-	new_obj->figure.box.center = fig.box.center;
-	new_obj->figure.box.u_vect = fig.box.u_vect;
-	new_obj->figure.box.v_vect = fig.box.v_vect;
-	new_obj->figure.box.dimensions = fig.box.dimensions;
+	new_obj->figure.box = fig.box;
 	new_obj->figure.box.faces = NULL;
 	new_obj->texture = tx;
 	new_obj->hit_func = hit_box;
@@ -89,8 +104,7 @@ int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 	new_obj->get_normal = get_box_normal;
 	new_obj->next = NULL;
 	init_faces(new_obj, new_obj->material, new_obj->figure.box.dimensions);
-	add_object(&scene->objects, new_obj);
-	return (0);
+	return (add_object(&scene->objects, new_obj));
 }
 
 void	set_new_fig_box(t_scene *scene, t_vect *offset_origin)

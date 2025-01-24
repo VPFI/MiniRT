@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   object_copy.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:46:35 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/20 18:11:24 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/22 00:46:36 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,7 @@ void	copy_world_object(t_scene *scene,
 	mlx_key_data_t key_data, t_vect *offset_origin)
 {
 	t_object	*target_obj;
-	t_material	mat;
 
-	mat = new_standard_material();
 	target_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!target_obj)
 		return (exit_err(ERR_MEM_MSG, "(calloc)", 2));

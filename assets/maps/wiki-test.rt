@@ -1,0 +1,53 @@
+#    ID  COORDS    orientation   DIM         COLOR       [MAT    |  SPECULAR   ROUGHNESS  REFRACTION   EMISSION] [PATTERN | PATTERNDIM] [TEXTURE | TEXTUREDIM]
+#                     != 0     [R/H/...]     0-255       mat:x        0-1         0-1       0-10  0-INT_MAX  pattern:0/1   0-INT_MAX  tx:path      0-INT_MAX
+#    cy  0,0,0       1,1,0       2.5  1    200,80,40  mat:glossy      0.25        0.1       1.5           2         0            1     /textures/...     1
+
+A    0.1    255,255,255
+
+C    0.0,6.0,10  0,0.0,-1    70      cam:3:0
+
+
+S        depth:8            spp:1  
+
+
+pl   0,0,0  0,1,0   210,210,210    mat:diffuse:0.25:0.1:2.5:5 pattern:0:1.2 
+pl   0,0,-10  0,0,1   210,210,210    mat:diffuse:0.25:0.1:2.5:5 pattern:0:1.2 
+
+di   14.0,9.0,-7.0  -1.3,-1,1  2 210,210,210    mat:metallic:1:0.0:2.5:5 pattern:0:1.2 
+
+qu    -50,20.0,5   -20.0,0.0,-20.0   9.0,20.0,0.0  225,225,225 mat:emissive:0.2:0.1:1.5:8 
+
+sp   5,2,-4    1.5    225,225,225   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2
+sp   -5,2,-4    1.5    225,225,225   mat:glass:0.25:0.1:1.5:5 pattern:false:1.2
+
+sp   -10,1.5,-4    1.5    225,80,60   mat:plastic:0.25:0.1:2.5:5 pattern:false:1.2
+sp   0,0,-4    1.5    40,205,225   mat:metal:1:0.81:2.5:5 pattern:false:1.2
+sp   10,1.5,-4    1.5    80,225,60   mat:plastic:0.1:0.:2.5:5 pattern:false:1.2
+
+sp   7,11,-6    1.5    20,180,200   mat:glass:0.25:0.1:1.5:5 pattern:false:1.2
+sp   0,11,-6    1.5    190,80,40   mat:glass:0.25:0.1:1.5:5 pattern:false:1.2
+sp   -7,11,-6    1.5    225,200,20   mat:glass:0.25:0.1:1.5:5 pattern:false:1.2
+
+sp   7,3,-7    2.75    225,225,225   mat:metal:1:0.0:1.5:5 pattern:false:1.2
+sp   0,3,-7    2.75    225,225,225   mat:plastic:0.2:0.1:1.5:2 pattern:false:1.2
+sp   -7,3,-7    2.75    225,225,225   mat:lambertian:0.2:0.1:1.5:2 pattern:false:1.2
+
+sp   3,0.4,0    0.4    60,60,60   mat:diffuse:0.2:0.1:1.5:2 pattern:false:1.2
+sp   -3,0.4,1    0.4    60,60,60   mat:diffuse:0.2:0.1:1.5:2 pattern:false:1.2
+
+bx   5,0.25,-4  1,0,0   0,1,0    4,0.5,4     235,235,235    mat:plastic:0.4:0.2:1.5:2
+bx   -5,0.25,-4  1,0,0   0,1,0    4,0.5,4     235,235,235   mat:metallic:1:0.1:2.5:5  
+bx   -5.0,6,-9.5  1,0,0   0,1,0    4,12,1    235,235,235    mat:metallic:1:0.0:1.5:2 
+bx   5.0,6,-9.5  1,0,0   0,1,0    4,12,1     235,235,235    mat:metallic:1:0.0:1.5:2   
+
+
+#bx   0,0,-3  1,0.25,0   -0.25,1,0    1,1,1     255,255,255    mat:diffuse:0.25:0.1:2.5:5                         pattern:true:1
+#cy   -1,0,-2  0,1,1   2   2    200,100,100   mat:plastic:0.25:0.1:2.5:5 pattern:0:1.2 
+#co   1,0,-3       1,0,1 	1   2               200,100,100  mat:plastic:0.25:0.1:2.5:5                       pattern:1:1.2 
+
+
+#mat:diffuse:0.25:0.0.1:1.5:2
+#mat:plastic:0.2:0.1:1.5:2
+#mat:metallic:1:0.0:1.5:2 
+#mat:glass:0.25:0.1:1.5:2
+#mat:emissive:0.2:0.1:1.5:5

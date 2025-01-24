@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   file_selector.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/22 19:57:37 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 01:15:32 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,12 +61,10 @@ void	move_menu(t_scene *scene, keys_t key)
 	draw_buttons(scene->buttons, scene);
 }
 
-static void	set_buttons_params(t_scene *scene, struct dirent *dir, int *xy)
+static void	set_button_params(t_scene *scene, struct dirent *dir, int i, int *xy)
 {
-	int		i;
-	size_t aux;
+	size_t	aux;
 
-	i = 0;
 	aux = 0;
 	while (dir->d_name[aux] != '.')
 		aux++;
@@ -90,15 +88,16 @@ static void	set_buttons_params(t_scene *scene, struct dirent *dir, int *xy)
 	scene->buttons[i].i_pt.y = xy[1] + ((scene->height * 0.087) * (i % 10));
 	scene->buttons[i].f_pt.x = scene->buttons[i].i_pt.x + scene->width * 0.4;
 	scene->buttons[i].f_pt.y = scene->buttons[i].i_pt.y + scene->height * 0.07;
-	i++;	
 }
 
 static void	draw_available_maps(t_scene *scene)
 {
+	int				i;
 	DIR				*d;
 	struct dirent	*dir;
 	int				xy[2];
 
+	i = 0;
 	xy[0] = scene->width * 0.05;
 	xy[1] = scene->height * 0.08;
 	d = opendir("./assets/maps");
@@ -110,7 +109,8 @@ static void	draw_available_maps(t_scene *scene)
 			if (dir->d_name[0] && dir->d_name[0] != '.'
 				&& ft_strnstr(dir->d_name, ".rt", ft_strlen(dir->d_name)))
 			{
-				set_buttons_params();
+				set_button_params(scene, dir, i, xy);
+				i++;
 			}
 			dir = readdir(d);
 		}
@@ -130,7 +130,7 @@ void	display_file_menu(t_scene *scene)
 	else
 	{
 		scene->buttons = ft_calloc(((int)(scene->map_count / 20) * 20)
-		+ 20, sizeof(t_button));
+					+ 20, sizeof(t_button));
 		if (!scene->buttons)
 			exit_err(ERR_MEM_MSG, "(malloc) Buttons", 1);
 		draw_available_maps(scene);

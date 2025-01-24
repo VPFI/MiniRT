@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   settings_parser.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:54 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 18:07:32 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 20:52:30 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	parse_spp(char **settings, t_scene *scene)
 	amount = count_components(settings);
 	if (amount != 2)
 		exit_err(ERR_EMPTY_MSG, "Missing samples components\n", 2);
-	scene->samples = (int)ft_atof(settings[1], 0, (float)INT_MAX);
+	scene->samples = (int)ft_atof(settings[1], 1, (float)INT_MAX);
 }
 
 static void	parse_depth(char **settings, t_scene *scene)
@@ -35,7 +35,7 @@ static void	parse_depth(char **settings, t_scene *scene)
 	amount = count_components(settings);
 	if (amount != 2)
 		exit_err(ERR_EMPTY_MSG, "Missing depth components\n", 2);
-	scene->max_depth = (int)ft_atof(settings[1], 0, (float)INT_MAX);
+	scene->max_depth = (int)ft_atof(settings[1], 1, (float)INT_MAX);
 }
 
 static void	parse_skysphere(char **settings, t_scene *scene)
@@ -52,6 +52,10 @@ static void	parse_extra_settings(t_scene *scene, char **components, int i)
 {
 	char	**unit;
 
+	if (scene->settings_set)
+	{
+		exit_err(ERR_EMPTY_MSG, "Cannot define ambient multiple times\n", 2);
+	}
 	while (components[i])
 	{
 		unit = ft_split(components[i], ':');
@@ -73,11 +77,12 @@ static void	parse_extra_settings(t_scene *scene, char **components, int i)
 		ft_free_arr(unit);
 		i++;
 	}
+	scene->settings_set = 1;
 }
 
 void	load_settings(t_scene *scene, char **components, int amount)
 {
-	if (amount < 1)
+	if (amount < 2)
 	{
 		exit_err(ERR_ATTR_MSG, "scene | missing essential attributes\n", 2);
 	}

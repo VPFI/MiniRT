@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error_management.h                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 15:23:05 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:22:43 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 21:44:39 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ opening file selector..."
 # define ERR_MEM_MSG		"Memory allocation failed %s\n\n"
 # define ERR_ATTR_MSG		"Parsing: %s\n"
 # define ERR_VECT_MSG		"Parsing: %s to vector form\n"
+# define ERR_ATOF_MSG        "Atof: invalid data || Input: %s\n"
 # define ERR_NOID_MSG		"Invalid identifier %s\n"
 # define ERR_MAT_MSG		"Wrong material type: %s\n"
 

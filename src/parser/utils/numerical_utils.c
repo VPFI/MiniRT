@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   numerical_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 17:02:26 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:09:36 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/23 21:46:06 by vpf              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,32 @@ void	check_bounds(float num, float min, float max)
 	}
 }
 
+static void	check_characters_init_i(char *array, int *i)
+{
+	int	j;
+	int	digit;
+
+	*i = 0;
+	j = 0;
+	digit = 0;
+	if (!array)
+		exit_err(ERR_ATOF_MSG, NULL, 2);
+	while (array[j])
+	{
+		if (ft_isdigit(array[j]) || array[j] == '.'
+			|| array[j] == '+' || array[j] == '-')
+		{
+			if (ft_isdigit(array[j]))
+				digit = 1;
+			j++;
+		}
+		else
+			exit_err(ERR_ATOF_MSG, array, 2);
+	}
+	if (!digit)
+		exit_err(ERR_ATOF_MSG, array, 2);
+}
+
 static float	sum_parts(int integer_part, float decimal_part, char *array)
 {
 	if (integer_part >= 0 && array[0] != '-')
@@ -49,8 +75,8 @@ float	ft_atof(char *array, float min, float max)
 	char	*aux;
 	float	decimal_part;
 
-	i = 0;
 	decimal_part = 0;
+	check_characters_init_i(array, &i);
 	if (ft_strlen(array) > 10)
 	{
 		fprintf(stderr, "Input --> %s\n", array);
