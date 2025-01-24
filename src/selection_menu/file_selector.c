@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   file_selector.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 21:50:57 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/23 01:15:32 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 14:06:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	select_scene(t_scene *scene)
 	scene->choose_file = 1;
 	init_scene(scene);
 	set_new_image(scene);
-	mlx_image_to_window(scene->mlx, scene->image, 0 ,0);
+	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
 	main_loop(scene);
 }
 
@@ -43,7 +43,7 @@ void	move_menu(t_scene *scene, keys_t key)
 	}
 	else if (key == MLX_KEY_DOWN)
 	{
-		if (scene->current_file < scene->map_count - 1) 
+		if (scene->current_file < scene->map_count - 1)
 			scene->current_file++;
 	}
 	else if (key == MLX_KEY_LEFT)
@@ -61,7 +61,7 @@ void	move_menu(t_scene *scene, keys_t key)
 	draw_buttons(scene->buttons, scene);
 }
 
-static void	set_button_params(t_scene *scene, struct dirent *dir, int i, int *xy)
+static void	set_button_params(t_scene *sc, struct dirent *dir, int i, int *xy)
 {
 	size_t	aux;
 
@@ -72,22 +72,22 @@ static void	set_button_params(t_scene *scene, struct dirent *dir, int i, int *xy
 	{
 		if (aux > 11)
 		{
-			scene->buttons[i].text = ft_substr(dir->d_name, 0, 11);
-			scene->buttons[i].text = ft_strappend(&scene->buttons[i].text, "\\");
+			sc->buttons[i].text = ft_substr(dir->d_name, 0, 11);
+			sc->buttons[i].text = ft_strappend(&sc->buttons[i].text, "\\");
 		}
 		else
-			scene->buttons[i].text = ft_substr(dir->d_name, 0, aux);
+			sc->buttons[i].text = ft_substr(dir->d_name, 0, aux);
 	}
 	else
-		scene->buttons[i].text = ft_strdup(dir->d_name);
+		sc->buttons[i].text = ft_strdup(dir->d_name);
 	if ((i % 20) > 9)
-		xy[0] = scene->width * 0.55;
+		xy[0] = sc->width * 0.55;
 	else
-		xy[0] = scene->width * 0.05;
-	scene->buttons[i].i_pt.x = xy[0];
-	scene->buttons[i].i_pt.y = xy[1] + ((scene->height * 0.087) * (i % 10));
-	scene->buttons[i].f_pt.x = scene->buttons[i].i_pt.x + scene->width * 0.4;
-	scene->buttons[i].f_pt.y = scene->buttons[i].i_pt.y + scene->height * 0.07;
+		xy[0] = sc->width * 0.05;
+	sc->buttons[i].i_pt.x = xy[0];
+	sc->buttons[i].i_pt.y = xy[1] + ((sc->height * 0.087) * (i % 10));
+	sc->buttons[i].f_pt.x = sc->buttons[i].i_pt.x + sc->width * 0.4;
+	sc->buttons[i].f_pt.y = sc->buttons[i].i_pt.y + sc->height * 0.07;
 }
 
 static void	draw_available_maps(t_scene *scene)
@@ -130,7 +130,7 @@ void	display_file_menu(t_scene *scene)
 	else
 	{
 		scene->buttons = ft_calloc(((int)(scene->map_count / 20) * 20)
-					+ 20, sizeof(t_button));
+				+ 20, sizeof(t_button));
 		if (!scene->buttons)
 			exit_err(ERR_MEM_MSG, "(malloc) Buttons", 1);
 		draw_available_maps(scene);

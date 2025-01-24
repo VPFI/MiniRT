@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   draw_menu.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 18:39:50 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/23 18:33:49 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 15:40:23 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-void	draw_no_maps_found(t_scene *scene)
+void	draw_no_maps_found(t_scene *sc, mlx_image_t *img, mlx_texture_t *tx)
 {
 	uint32_t	x;	
 	uint32_t	y;
@@ -28,25 +28,25 @@ void	draw_no_maps_found(t_scene *scene)
 	int			offset_y;
 
 	y = 0;
-	offset_x = 0;
-	offset_y = 0;
-	set_new_image(scene);
-	while (y < scene->image->height)
+	set_new_image(sc);
+	while (y < img->height)
 	{
 		x = 0;
-		while (x < scene->image->width)
+		while (x < img->width)
 		{
-			offset_x = (scene->image->width / 2) - (scene->menu_tx->texture->width / 2);
-			offset_y = (scene->image->height / 2) - (scene->menu_tx->texture->height / 2);
-			if (((int)x > fmin(offset_x, 0)) && x < ((scene->image->width / 2) + scene->menu_tx->texture->width / 2)
-				&& ((int)y > fmin(offset_y, 0)) && y < ((scene->image->height / 2) + scene->menu_tx->texture->height / 2))
-				safe_pixel_put_bres(scene, (int)round(x), (int)round(y),
-					get_texture_color(scene->menu_tx, x - offset_x, y - offset_y));
+			offset_x = (img->width / 2) - (tx->width / 2);
+			offset_y = (img->height / 2) - (tx->height / 2);
+			if (((int)x > fmin(offset_x, 0))
+				&& x < ((img->width / 2) + tx->width / 2)
+				&& ((int)y > fmin(offset_y, 0))
+				&& y < ((img->height / 2) + tx->height / 2))
+				safe_pixel_put_bres(sc, (int)round(x), (int)round(y),
+					get_texture_color(sc->menu_tx, x - offset_x, y - offset_y));
 			x++;
 		}
 		y++;
 	}
-	mlx_image_to_window(scene->mlx, scene->image, 0, 0);
+	mlx_image_to_window(sc->mlx, sc->image, 0, 0);
 }
 
 static void	draw_headers(t_scene *scene)

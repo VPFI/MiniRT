@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   camera.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 23:41:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/23 23:44:44 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 14:04:40 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,16 @@
 
 static void	calculate_viewport(t_camera *cam, uint32_t width, uint32_t height)
 {
-	t_vect temp;
+	t_vect	temp;
 
-	temp = new_vect(0,0,0);
+	temp = new_vect(0, 0, 0);
 	cam->vp_edge_horizntl = vect_simple_mult(cam->u, cam->viewport_width);
 	cam->vp_edge_vert = vect_simple_mult(vect_simple_mult(cam->v, -1.0),
 			cam->viewport_height);
 	cam->pixel_delta_h = vect_simple_div(cam->vp_edge_horizntl, width);
 	cam->pixel_delta_v = vect_simple_div(cam->vp_edge_vert, height);
 	cam->viewport_origin.x = cam->origin.x + (cam->focus_dist * cam->w.x)
-		- (cam->vp_edge_horizntl.x / 2.0) - (cam->vp_edge_vert.x / 2.0);	
+		- (cam->vp_edge_horizntl.x / 2.0) - (cam->vp_edge_vert.x / 2.0);
 	cam->viewport_origin.y = cam->origin.y + (cam->focus_dist * cam->w.y)
 		- (cam->vp_edge_horizntl.y / 2.0) - (cam->vp_edge_vert.y / 2.0);
 	cam->viewport_origin.z = cam->origin.z + (cam->focus_dist * cam->w.z)
@@ -38,7 +38,7 @@ static void	calculate_viewport(t_camera *cam, uint32_t width, uint32_t height)
 
 void	recalculate_view(t_camera *cam, uint32_t width, uint32_t height)
 {
-	t_vect world_axis;
+	t_vect	world_axis;
 
 	world_axis = new_vect(0.0, 1.0, 0.0);
 	cam->orientation = unit_vect(cam->orientation);

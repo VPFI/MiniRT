@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   box.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 22:03:19 by vpf               #+#    #+#             */
-/*   Updated: 2025/01/23 21:57:57 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 14:03:48 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,18 @@ static void	set_second_half_faces(t_object *box, t_material mat,
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dims.y);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(box->figure.box.u_vect, -1 * dims.x * 0.5));
+			vect_simple_mult(box->figure.box.u_vect, -1 * dims.x * 0.5));
 	add_box_face(box, fig, mat);
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, -1 * dims.x);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(box->figure.box.v_vect, dims.y * 0.5));
+			vect_simple_mult(box->figure.box.v_vect, dims.y * 0.5));
 	add_box_face(box, fig, mat);
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(box->figure.box.v_vect, -1 * dims.y * 0.5));
-	add_box_face(box, fig, mat);	
+			vect_simple_mult(box->figure.box.v_vect, -1 * dims.y * 0.5));
+	add_box_face(box, fig, mat);
 }
 
 static void	set_first_half_faces(t_object *box, t_material mat,
@@ -57,17 +57,17 @@ static void	set_first_half_faces(t_object *box, t_material mat,
 	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dims.y);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(normal, dims.z * 0.5));
+			vect_simple_mult(normal, dims.z * 0.5));
 	add_box_face(box, fig, mat);
 	fig.quad.u_vect = vect_simple_mult(box->figure.box.u_vect, dims.x);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, -1 * dims.y);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(anti_normal, dims.z * 0.5));
+			vect_simple_mult(anti_normal, dims.z * 0.5));
 	add_box_face(box, fig, mat);
 	fig.quad.u_vect = vect_simple_mult(anti_normal, dims.z);
 	fig.quad.v_vect = vect_simple_mult(box->figure.box.v_vect, dims.y);
 	fig.quad.center = vect_add(box->figure.box.center,
-		vect_simple_mult(box->figure.box.u_vect, dims.x * 0.5));
+			vect_simple_mult(box->figure.box.u_vect, dims.x * 0.5));
 	add_box_face(box, fig, mat);
 }
 
@@ -82,7 +82,7 @@ static void	init_faces(t_object *o, t_material mat, t_vect dimensions)
 
 int	init_box(t_scene *scene, t_figure fig, t_material mat, t_texture *tx)
 {
-	t_object 	*new_obj;
+	t_object	*new_obj;
 
 	new_obj = (t_object *)ft_calloc(1, sizeof(t_object));
 	if (!new_obj)

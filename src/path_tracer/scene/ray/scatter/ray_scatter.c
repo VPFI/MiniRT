@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ray_scatter.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 14:06:47 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/24 01:03:00 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 13:58:36 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static int	reflect_check(t_thread *thread, t_hit_info ht, t_ray ray)
 	float	cos;
 
 	cos = vect_dot(vect_simple_mult(ray.dir, -1.0), ht.normal);
-	if (ht.object->material.specular > fast_rand(thread->state) 
+	if (ht.object->material.specular > fast_rand(thread->state)
 		|| (reflectance(1.5, cos) > fast_rand(thread->state)
 			&& ht.object->material.specular))
 	{
@@ -37,7 +37,7 @@ static void	check_2d(t_hit_info *hit_info, t_ray ray)
 	if (!hit_info->object->texture && is_2d(hit_info->object))
 	{
 		check_normal(&hit_info->normal, &ray.dir);
-	}	
+	}
 }
 
 static int	check_emissive(t_hit_info *ht, t_color *emittance)
@@ -45,7 +45,7 @@ static int	check_emissive(t_hit_info *ht, t_color *emittance)
 	if (ht->object->material.type == EMISSIVE)
 	{
 		*emittance = vect_simple_mult(get_obj_color(ht),
-			ht->object->material.emission_intensity);
+				ht->object->material.emission_intensity);
 		return (1);
 	}
 	else

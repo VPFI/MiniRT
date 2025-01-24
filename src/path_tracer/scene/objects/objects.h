@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 16:22:57 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/22 15:02:57 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/24 15:40:56 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ typedef struct s_object
 	t_fig_type		type;
 	struct s_object	*next;
 	bool			selected;
-	bool			(*hit_func)(t_ray r, t_figure f, t_hit_info *ht, float *b);
-	t_vect			(*get_origin)(t_object *object);
-	t_vect			(*get_visual)(t_hit_info *hit_info);
-	t_vect			(*get_normal)(t_hit_info *hit_info, t_figure *fig);
+	bool			(*hit_func)(t_ray r, t_figure f, t_hit_info * ht, float *b);
+	t_vect			(*get_origin)(t_object * object);
+	t_vect			(*get_visual)(t_hit_info * hit_info);
+	t_vect			(*get_normal)(t_hit_info * hit_info, t_figure * fig);
 	void			(*edit_origin)(t_object *object, t_vect transformation);
 	void			(*edit_orientation)(t_object *obj, t_camera *c, t_vect t);
 	void			(*edit_dimensions)(t_object *obj, t_vect transformation);

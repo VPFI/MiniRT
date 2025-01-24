@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   settings_parser.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vpf <vpf@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:44:54 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/23 20:52:30 by vpf              ###   ########.fr       */
+/*   Updated: 2025/01/24 14:08:51 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void	parse_skysphere(char **settings, t_scene *scene)
 
 static void	parse_extra_settings(t_scene *scene, char **components, int i)
 {
-	char	**unit;
+	char	**it;
 
 	if (scene->settings_set)
 	{
@@ -58,23 +58,16 @@ static void	parse_extra_settings(t_scene *scene, char **components, int i)
 	}
 	while (components[i])
 	{
-		unit = ft_split(components[i], ':');
-		if (!unit)
+		it = ft_split(components[i], ':');
+		if (!it)
 			exit_err(ERR_ATTR_MSG, "extra scene components\n", 2);
-		if (!ft_strcmp(unit[0], "spp"))
-		{
-			parse_spp(unit, scene);
-		}
-		else if (!ft_strcmp(unit[0], "depth"))
-		{
-			parse_depth(unit, scene);
-		}
-		else if (!ft_strcmp(unit[0], "skysphere")
-			|| !ft_strcmp(unit[0], "skybox"))
-		{
-			parse_skysphere(unit, scene);
-		}
-		ft_free_arr(unit);
+		if (!ft_strcmp(it[0], "spp"))
+			parse_spp(it, scene);
+		else if (!ft_strcmp(it[0], "depth"))
+			parse_depth(it, scene);
+		else if (!ft_strcmp(it[0], "skysphere") || !ft_strcmp(it[0], "skybox"))
+			parse_skysphere(it, scene);
+		ft_free_arr(it);
 		i++;
 	}
 	scene->settings_set = 1;
