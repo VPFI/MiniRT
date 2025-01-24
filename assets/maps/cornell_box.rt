@@ -1,0 +1,24 @@
+#    ID  COORDS    orientation   DIM         COLOR       [MAT    |  SPECULAR   ROUGHNESS  REFRACTION   EMISSION] [PATTERN | PATTERNDIM] [TEXTURE | TEXTUREDIM]
+#                     != 0     [R/H/...]     0-255       mat:x        0-1         0-1       0-10  0-INT_MAX  pattern:0/1   0-INT_MAX  tx:path      0-INT_MAX
+#    cy  0,0,0       1,1,0       2.5  1    200,80,40  mat:glossy      0.25        0.1       1.5           2         0            1     /textures/...     1
+
+A    0.6    255,255,255
+
+C    0.0,0.0,9  0,0.0,-1    70      cam:3:0
+
+S        depth:8            spp:1  
+
+
+qu    0,0,-5   10,0,0   0,10,0  225,225,225      mat:diffuse:0.25:0.0.1:1.5:2 
+qu    0,5,0   10,0,0   0,0,10  225,225,225       mat:diffuse:0.25:0.0.1:1.5:2 
+qu    0,-5,0   -10,0,0   0,0,10  225,225,225     mat:diffuse:0.25:0.0.1:1.5:2 
+qu    5,0,0   0,10,0   0,0,10  225,225,225       mat:diffuse:0.25:0.0.1:1.5:2 
+qu    -5,0,0   0,-10,0   0,0,10  225,225,225     mat:diffuse:0.25:0.0.1:1.5:2 
+
+bx   0,5.475,0  1,0,0   0,1,0    3,1,1     235,235,235    mat:emissive:0.4:0.2:1.5:5
+
+#mat:diffuse:0.25:0.0.1:1.5:2
+#mat:plastic:0.2:0.1:1.5:2
+#mat:metallic:1:0.0:1.5:2 
+#mat:glass:0.25:0.1:1.5:2
+#mat:emissive:0.2:0.1:1.5:5
