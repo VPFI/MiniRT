@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2025/01/24 15:41:28 by vperez-f         ###   ########.fr        #
+#    Updated: 2025/01/24 15:42:36 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -166,7 +166,7 @@ BUILD_DIR_MLX = libraries/mlx/MLX42/build/
 
 PATH_MLX = $(BUILD_DIR_MLX)libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -Ofast -g -fsanitize=address -fsanitize=leak #-fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -Ofast #-g -fsanitize=address -fsanitize=leak #-fsanitize=thread
 
 MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
 
