@@ -6,7 +6,7 @@
 #    By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 13:59:42 by vperez-f          #+#    #+#              #
-#    Updated: 2025/01/24 15:42:36 by vperez-f         ###   ########.fr        #
+#    Updated: 2025/01/27 15:49:48 by vperez-f         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -166,7 +166,7 @@ BUILD_DIR_MLX = libraries/mlx/MLX42/build/
 
 PATH_MLX = $(BUILD_DIR_MLX)libmlx42.a
 
-CFLAGS = -Wall -Wextra -Werror -Ofast #-g -fsanitize=address -fsanitize=leak #-fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -O3 #-g -fsanitize=address -fsanitize=leak #-fsanitize=thread
 
 MLXFLAGS = -L -lmlx42 -lXext -lX11 -lm -lglfw
 
@@ -212,12 +212,15 @@ clean:
 	@$(MAKE) -C $(DIR_LIBFT) clean  --no-print-directory
 	@$(MAKE) -C $(DIR_PTF) clean --no-print-directory
 	@$(RM) $(OBJ)
+	@$(RM) $(DEPS)
+	@rm -rf $(OBJ_DIR)
 	@printf "MiniRT: Object files removal successful!\n"
 
 fclean:
 	@$(MAKE) -C $(DIR_LIBFT) fclean --no-print-directory
 	@$(MAKE) -C $(DIR_PTF) fclean --no-print-directory
 	@$(RM) $(OBJ)
+	@$(RM) $(DEPS)
 	@$(RM) $(NAME)
 	@rm -rf $(OBJ_DIR)
 	@rm -rf $(BUILD_DIR_MLX)
@@ -235,5 +238,3 @@ re:	fclean all
 .PHONY: all clean fclean re
 
 -include $(DEPS)
--include $(MDEPS)
--include $(BDEPS)

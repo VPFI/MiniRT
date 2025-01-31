@@ -6,7 +6,7 @@
 /*   By: vperez-f <vperez-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:36:00 by vperez-f          #+#    #+#             */
-/*   Updated: 2025/01/16 19:15:21 by vperez-f         ###   ########.fr       */
+/*   Updated: 2025/01/31 17:31:40 by vperez-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,28 @@ int	count_components(char **components)
 	return (i);
 }
 
+static void	force_space_separator(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (ft_isspace(line[i]))
+		{
+			line[i] = ' ';
+		}
+		i++;
+	}
+}
+
 char	**format_line(char *line)
 {
 	char	**res;
 	char	*temp_line;
 
 	temp_line = ft_strtrim(line, "\n");
+	force_space_separator(temp_line);
 	res = ft_split(temp_line, ' ');
 	free(temp_line);
 	if (res && res[0] && !ft_strncmp(res[0], "#", 1))
